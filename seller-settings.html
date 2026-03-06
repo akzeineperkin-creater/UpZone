@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Настройки ИИ-ассистента</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#0f172a] text-white min-h-screen">
+
+    <nav class="border-b border-slate-800 p-5 flex justify-between items-center bg-slate-900">
+        <h1 class="text-xl font-bold text-blue-400">⚙️ Настройки ИИ-ассистента</h1>
+        <button onclick="location.href='market.html'" class="text-slate-400 hover:text-white transition">← Назад</button>
+    </nav>
+
+    <main class="max-w-2xl mx-auto p-6 space-y-6">
+        <div class="bg-slate-800/50 border border-slate-700 rounded-2xl p-6">
+            <h2 class="text-lg font-bold mb-1">🤖 Что знает ваш ИИ-ассистент</h2>
+            <p class="text-slate-400 text-sm mb-6">Заполните — ИИ будет отвечать клиентам на основе этих данных.</p>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="text-xs text-slate-400 uppercase font-bold mb-2 block">📦 Услуги</label>
+                    <textarea id="services" rows="3" placeholder="SMM-продвижение, создание контента, таргетированная реклама..."
+                        class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-blue-500 resize-none text-sm"></textarea>
+                </div>
+                <div>
+                    <label class="text-xs text-slate-400 uppercase font-bold mb-2 block">💰 Цены</label>
+                    <textarea id="prices" rows="3" placeholder="SMM от 15000 ⭐/мес, Дизайн поста от 500 ⭐..."
+                        class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-blue-500 resize-none text-sm"></textarea>
+                </div>
+                <div>
+                    <label class="text-xs text-slate-400 uppercase font-bold mb-2 block">🖼 Портфолио</label>
+                    <textarea id="portfolio" rows="3" placeholder="Вёл 20+ аккаунтов, +500% подписчиков за 3 месяца..."
+                        class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-blue-500 resize-none text-sm"></textarea>
+                </div>
+                <div>
+                    <label class="text-xs text-slate-400 uppercase font-bold mb-2 block">⏱ Время ответа</label>
+                    <select id="response_time" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-blue-500 text-sm">
+                        <option value="в течение 30 минут">в течение 30 минут</option>
+                        <option value="1-2 часа" selected>1-2 часа</option>
+                        <option value="в течение дня">в течение дня</option>
+                        <option value="1-2 дня">1-2 дня</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs text-slate-400 uppercase font-bold mb-2 block">💬 Приветствие ИИ</label>
+                    <textarea id="welcome_message" rows="2" placeholder="Привет! Я ИИ-ассистент продавца. Готов ответить на ваши вопросы!"
+                        class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-blue-500 resize-none text-sm"></textarea>
+                </div>
+            </div>
+
+            <button onclick="saveSettings()" id="saveBtn"
+                class="w-full mt-6 bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold text-lg transition">
+                💾 Сохранить
+            </button>
+        </div>
+
+        <!-- Превью -->
+        <div class="bg-slate-800/30 border border-slate-700 rounded-2xl p-6">
+            <h2 class="text-lg font-bold mb-4">👁 Как видит клиент</h2>
+            <div style="background:#2c2f33;border-radius:12px;padding:20px;">
+                <div style="background:#23272a;border-radius:8px;padding:12px 16px;margin-bottom:12px;">
+                    <div style="color:white;font-weight:bold;">🤖 ИИ-Ассистент</div>
+                    <div style="color:#72767d;font-size:12px;">Спрашивайте об услугах продавца</div>
+                </div>
+                <div id="preview-msg" style="background:#40444b;border-radius:15px 15px 15px 4px;padding:12px 16px;color:white;font-size:14px;line-height:1.5;white-space:pre-wrap;max-width:85%;">
+                    Заполните форму выше чтобы увидеть превью
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="toast" style="position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#43b581;color:white;padding:12px 24px;border-radius:12px;font-weight:bold;opacity:0;transition:opacity 0.3s;z-index:9999;pointer-events:none;"></div>
+
+    <script>
+        const SB_URL = 'https://dvwegmdyhjyihrxqvoiw.supabase.co';
+        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2d2VnbWR5aGp5aWhyeHF2b2l3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0MDYwOTAsImV4cCI6MjA4Mzk4MjA5MH0.HrG5GijHH4Lj7mO3SorbG0kKfnl5FLtSCWp6aONYxJ8';
+        const _supabase = supabase.createClient(SB_URL, SB_KEY);
+        let myId = null;
+
+        function showToast(msg, color = '#43b581') {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.style.background = color;
+            t.style.opacity = '1';
+            setTimeout(() => t.style.opacity = '0', 3000);
+        }
+
+        function updatePreview() {
+            const services = document.getElementById('services').value;
+            const prices = document.getElementById('prices').value;
+            const responseTime = document.getElementById('response_time').value;
+            const welcome = document.getElementById('welcome_message').value;
+
+            let preview = welcome || 'Привет! Я ИИ-ассистент продавца.';
+            if (services) preview += `\n\n📦 Услуги: ${services}`;
+            if (prices) preview += `\n💰 Цены: ${prices}`;
+            if (responseTime) preview += `\n⏱ Отвечу за: ${responseTime}`;
+            document.getElementById('preview-msg').textContent = preview;
+        }
+
+        ['services','prices','portfolio','response_time','welcome_message'].forEach(id => {
+            document.getElementById(id).addEventListener('input', updatePreview);
+            document.getElementById(id).addEventListener('change', updatePreview);
+        });
+
+        async function init() {
+            const { data: { user } } = await _supabase.auth.getUser();
+            if (!user) { window.location.href = 'login.html'; return; }
+            myId = user.id;
+
+            const { data } = await _supabase.from('seller_info').select('*').eq('user_id', myId).maybeSingle();
+            if (data) {
+                document.getElementById('services').value = data.services || '';
+                document.getElementById('prices').value = data.prices || '';
+                document.getElementById('portfolio').value = data.portfolio || '';
+                document.getElementById('response_time').value = data.response_time || '1-2 часа';
+                document.getElementById('welcome_message').value = data.welcome_message || '';
+                updatePreview();
+            }
+        }
+
+        async function saveSettings() {
+            if (!myId) return;
+            const btn = document.getElementById('saveBtn');
+            btn.textContent = 'Сохранение...';
+            btn.disabled = true;
+
+            const { error } = await _supabase.from('seller_info').upsert({
+                user_id: myId,
+                services: document.getElementById('services').value,
+                prices: document.getElementById('prices').value,
+                portfolio: document.getElementById('portfolio').value,
+                response_time: document.getElementById('response_time').value,
+                welcome_message: document.getElementById('welcome_message').value,
+                updated_at: new Date().toISOString()
+            });
+
+            btn.textContent = '💾 Сохранить';
+            btn.disabled = false;
+
+            if (error) showToast('Ошибка: ' + error.message, '#f04747');
+            else { showToast('✅ Сохранено!'); updatePreview(); }
+        }
+
+        init();
+    </script>
+</body>
+</html>

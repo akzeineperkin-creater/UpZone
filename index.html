@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Startup School | Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-100 font-sans flex min-h-screen">
+
+    <aside class="w-64 bg-slate-900 text-white flex flex-col fixed h-full">
+        <div class="p-6 text-2xl font-bold border-b border-slate-700">
+            🚀 Upzone <span class="text-blue-400">Hub</span>
+        </div>
+        <nav class="flex-1 p-4 space-y-2">
+            <button onclick="showSection('learning')" id="nav-learning" class="w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-slate-800 transition bg-slate-800">
+                <span>📚</span><span>Обучение</span>
+            </button>
+            <button onclick="showSection('profile')" id="nav-profile" class="w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-slate-800 transition">
+                <span>👤</span><span>Профиль</span>
+            </button>
+            <button onclick="window.location.href='chat.html'" class="w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-slate-800 transition">
+                <span>💬</span><span>Сообщество</span>
+            </button>
+        </nav>
+        <div class="p-4 border-t border-slate-700 text-xs text-slate-400">Статус: Активен</div>
+    </aside>
+
+    <div class="flex-1 ml-64 p-8">
+
+        <!-- Обучение -->
+        <section id="learning-section">
+            <header class="max-w-6xl mx-auto mb-10 flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800">Привет, <span id="userGreeting">Студент</span>!</h1>
+                    <p class="text-gray-500">Путь от идеи до первых продаж</p>
+                </div>
+                <div class="bg-white px-4 py-2 rounded-full shadow-sm border border-gray-200">
+                    <span class="text-sm font-medium text-gray-600">Прогресс: <span id="progressPercent" class="text-blue-600">0%</span></span>
+                </div>
+            </header>
+            <main class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-2xl shadow-lg border-t-4 border-blue-500 hover:-translate-y-1 transition">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="bg-blue-100 text-blue-600 text-xs font-bold px-2.5 py-1 rounded">ЭТАП 1</span>
+                        <span class="text-green-500 text-sm">🔓 Доступно</span>
+                    </div>
+                    <h2 class="text-xl font-bold mb-2 text-gray-800">Поиск и валидация идеи</h2>
+                    <p class="text-gray-600 mb-6 text-sm">Учимся находить боли клиентов и проверять их.</p>
+                    <a href="lesson.html" class="block text-center w-full bg-blue-600 text-white font-semibold py-2 rounded-xl hover:bg-blue-700 transition">Перейти к уроку</a>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-lg border-t-4 border-blue-500 hover:-translate-y-1 transition">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="bg-blue-100 text-blue-600 text-xs font-bold px-2.5 py-1 rounded">ЭТАП 2</span>
+                        <span class="text-green-500 text-sm">🔓 Доступно</span>
+                    </div>
+                    <h2 class="text-xl font-bold mb-2 text-gray-800">Сборка MVP на VS Code</h2>
+                    <p class="text-gray-600 mb-6 text-sm">Создаем работающий прототип продукта за 48 часов.</p>
+                    <a href="stage2.html" class="block text-center w-full bg-blue-600 text-white font-semibold py-2 rounded-xl hover:bg-blue-700 transition">Перейти к уроку</a>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-lg border-t-4 border-blue-500 hover:-translate-y-1 transition">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="bg-blue-100 text-blue-600 text-xs font-bold px-2.5 py-1 rounded">ЭТАП 3</span>
+                        <span class="text-green-500 text-sm">🔓 Доступно</span>
+                    </div>
+                    <h2 class="text-xl font-bold mb-2 text-gray-800">Первые продажи</h2>
+                    <p class="text-gray-600 mb-6 text-sm">Запускаем трафик и получаем первые деньги.</p>
+                    <a href="stage3.html" class="block text-center w-full bg-blue-600 text-white font-semibold py-2 rounded-xl hover:bg-blue-700 transition">Перейти к уроку</a>
+                </div>
+            </main>
+        </section>
+
+        <!-- Профиль -->
+        <section id="profile-section" class="hidden max-w-2xl mx-auto">
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl">
+
+                <!-- Шапка -->
+                <div class="flex justify-between items-center mb-8">
+                    <h2 class="text-2xl font-bold text-white">Мой профиль</h2>
+                    <div class="flex gap-3">
+                        <button onclick="toggleEditMode()" id="toggleBtn"
+                            class="text-blue-400 border border-blue-600 px-4 py-2 rounded-xl hover:bg-blue-600 hover:text-white transition text-sm font-bold">
+                            Редактировать
+                        </button>
+                        <button onclick="logout()"
+                            class="text-red-400 border border-red-600/40 px-4 py-2 rounded-xl hover:bg-red-600 hover:text-white transition text-sm font-bold">
+                            Выйти
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Аватар -->
+                <div class="flex flex-col items-center mb-8">
+                    <div class="relative mb-4">
+                        <div id="imagePreview"
+                            class="w-28 h-28 rounded-full bg-blue-600 flex items-center justify-center text-5xl border-4 border-slate-700 overflow-hidden"
+                            style="background-size:cover;background-position:center;">👤</div>
+                        <label for="imageUpload" id="plusLabel"
+                            class="hidden absolute bottom-1 right-1 bg-blue-500 w-8 h-8 rounded-full flex items-center justify-center cursor-pointer text-white text-lg hover:bg-blue-400 transition">+</label>
+                        <input type="file" id="imageUpload" accept=".png,.jpg,.jpeg" class="hidden" onchange="uploadAvatar(this)">
+                    </div>
+                    <h3 id="view-username" class="text-xl font-bold text-white">@username</h3>
+                    <p id="view-direction" class="text-slate-400 text-sm mt-1">Направление</p>
+                </div>
+
+    <div class="bg-gradient-to-br from-slate-800 to-slate-900 p-5 rounded-2xl border border-slate-700">
+        <p class="text-[10px] text-slate-500 uppercase font-bold mb-1">Баланс</p>
+        <p class="text-3xl font-black text-yellow-400 mb-4"><span id="side-balance">0</span> ⭐</p>
+        <a href="topup.html" class="flex items-center justify-center gap-2 w-full py-3 bg-gradient-to-r from-yellow-500 to-yellow-400 hover:from-yellow-400 hover:to-yellow-300 text-black font-black rounded-xl text-sm transition shadow-lg shadow-yellow-500/30 active:scale-95">
+            ⭐ Пополнить баланс
+        </a>
+    </div>
+</a>
+
+                <!-- Просмотр -->
+                <div id="profile-view-mode" class="space-y-4">
+                    <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
+                        <p class="text-xs text-slate-500 uppercase font-bold mb-1">Email</p>
+                        <p id="view-email" class="text-white">—</p>
+                    </div>
+                    <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
+                        <p class="text-xs text-slate-500 uppercase font-bold mb-1">Фамилия</p>
+                        <p id="view-lastName" class="text-white">—</p>
+                    </div>
+                    <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
+                        <p class="text-xs text-slate-500 uppercase font-bold mb-1">Instagram</p>
+                        <p id="view-insta" class="text-white">—</p>
+                    </div>
+                    <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
+                        <p class="text-xs text-slate-500 uppercase font-bold mb-1">О себе</p>
+                        <p id="view-bio" class="text-white">—</p>
+                    </div>
+                </div>
+
+                <!-- Форма редактирования -->
+                <form id="profile-edit-form" class="hidden space-y-4 mt-4">
+                    <div>
+                        <label class="text-xs font-bold text-slate-400 uppercase">Никнейм</label>
+                        <input type="text" id="edit-username" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-white outline-none focus:border-blue-500 mt-1">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-400 uppercase">Фамилия</label>
+                        <input type="text" id="edit-lastName" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-white outline-none focus:border-blue-500 mt-1">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-400 uppercase">Instagram</label>
+                        <input type="text" id="edit-insta" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-white outline-none focus:border-blue-500 mt-1">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-400 uppercase">Направление</label>
+                        <select id="edit-direction" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-white outline-none focus:border-blue-500 mt-1">
+                    
+    <option value="none">Выберите вариант</option>
+    <option value="hr">HRTech</option>
+    <option value="ai">AI & Data</option>
+    <option value="health">HealthTech</option>
+    <option value="ecommerce">🛒 E-commerce</option>
+    <option value="mobile">📱 Mobile Dev</option>
+    <option value="design">🎨 Design & Creative</option>
+    <option value="marketing">📈 Marketing & SMM</option>
+    <option value="fintech">💰 FinTech</option>
+    <option value="edtech">🎓 EdTech</option>
+    <option value="proptech">🏗 PropTech</option>
+    <option value="greentech">🌱 GreenTech</option>
+    <option value="gamedev">🎮 GameDev</option>
+    <option value="saas">🤝 B2B SaaS</option>
+    <option value="other">Другое</option>
+</select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-400 uppercase">О себе</label>
+                        <textarea id="edit-bio" rows="3" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-white outline-none focus:border-blue-500 mt-1"></textarea>
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-xl font-bold transition">
+                        💾 Сохранить
+                    </button>
+                </form>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+    const SUPABASE_URL = 'https://dvwegmdyhjyihrxqvoiw.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2d2VnbWR5aGp5aWhyeHF2b2l3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0MDYwOTAsImV4cCI6MjA4Mzk4MjA5MH0.HrG5GijHH4Lj7mO3SorbG0kKfnl5FLtSCWp6aONYxJ8';
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const directionNames = {
+        'none':       'Не выбрано',
+        'hr':         'HRTech',
+        'ai':         'AI & Data',
+        'health':     'HealthTech',
+        'ecommerce':  '🛒 E-commerce',
+        'mobile':     '📱 Mobile Dev',
+        'design':     '🎨 Design & Creative',
+        'marketing':  '📈 Marketing & SMM',
+        'fintech':    '💰 FinTech',
+        'edtech':     '🎓 EdTech',
+        'proptech':   '🏗 PropTech',
+        'greentech':  '🌱 GreenTech',
+        'gamedev':    '🎮 GameDev',
+        'saas':       '🤝 B2B SaaS',
+        'other':      'Другое'
+    };
+
+    function updateDisplay(data) {
+        if (!data) return;
+
+        document.getElementById('view-email').innerText     = data.email || '—';
+        document.getElementById('view-username').innerText = `@${data.username || '—'}`;
+        document.getElementById('view-lastName').innerText = data.lastName || '—';
+        document.getElementById('view-insta').innerText    = data.insta || '—';
+        document.getElementById('view-bio').innerText      = data.bio || '—';
+        document.getElementById('side-balance').innerText  = data.balance || 0;
+        document.getElementById('userGreeting').innerText  = data.username || 'Студент';
+
+        // Направление — самое надёжное отображение
+        const directionText = directionNames[data.direction] || data.direction || 'Не выбрано';
+        document.getElementById('view-direction').innerText = directionText;
+
+        if (data.avatar_url) {
+            const preview = document.getElementById('imagePreview');
+            preview.style.backgroundImage = `url('${data.avatar_url}')`;
+            preview.innerHTML = '';
+        } else {
+            const preview = document.getElementById('imagePreview');
+            preview.style.backgroundImage = '';
+            preview.innerHTML = '👤';
+        }
+    }
+
+    async function loadUserData() {
+    const { data: { user }, error: authError } = await _supabase.auth.getUser();
+    if (authError || !user) {
+        window.location.href = 'login.html';
+        return;
+    }
+
+    const { data: profile, error: profileError } = await _supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+    if (profileError && profileError.code !== 'PGRST116') {
+        console.error('Ошибка загрузки профиля:', profileError);
+    }
+
+    const usernameFromAuth = user.user_metadata?.username || user.email?.split('@')[0] || 'Студент';
+
+    updateDisplay({
+        email: user.email || '—',
+        username: profile?.username || usernameFromAuth,
+        lastName: profile?.last_name || '—',
+        insta: profile?.insta || '—',
+        direction: profile?.direction || 'none',
+        bio: profile?.bio || '—',
+        balance: profile?.wallet_balance || 0,
+        avatar_url: profile?.avatar_url || null
+    });
+
+    // ✅ Realtime — баланс обновляется мгновенно когда админ подтверждает
+    _supabase.channel('balance-dashboard')
+        .on('postgres_changes', {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'profiles',
+            filter: `id=eq.${user.id}`
+        }, (payload) => {
+            const newBalance = payload.new.wallet_balance || 0;
+            document.getElementById('side-balance').textContent = newBalance;
+        })
+        .subscribe();
+}
+
+    document.getElementById('profile-edit-form').onsubmit = async function(e) {
+        e.preventDefault();
+
+        const { data: { user } } = await _supabase.auth.getUser();
+        if (!user) {
+            alert("Вы не авторизованы!");
+            return;
+        }
+
+        const updatedData = {
+            id: user.id,
+            username: document.getElementById('edit-username').value.trim(),
+            last_name: document.getElementById('edit-lastName').value.trim(),
+            insta: document.getElementById('edit-insta').value.trim(),
+            direction: document.getElementById('edit-direction').value,
+            bio: document.getElementById('edit-bio').value.trim(),
+            updated_at: new Date().toISOString()
+        };
+
+        const { error } = await _supabase.from('profiles').upsert(updatedData);
+
+        if (error) {
+            alert('Ошибка сохранения: ' + error.message);
+            console.error(error);
+            return;
+        }
+
+        // Самый надёжный способ — перезагружаем данные с сервера
+        await loadUserData();
+        toggleEditMode();
+        alert('Профиль сохранён!');
+    };
+
+    function showSection(id) {
+        ['learning', 'profile'].forEach(s => {
+            const section = document.getElementById(s + '-section');
+            const nav = document.getElementById('nav-' + s);
+            if (section) section.classList.add('hidden');
+            if (nav) nav.classList.remove('bg-slate-800');
+        });
+
+        const targetSection = document.getElementById(id + '-section');
+        const targetNav = document.getElementById('nav-' + id);
+        if (targetSection) targetSection.classList.remove('hidden');
+        if (targetNav) targetNav.classList.add('bg-slate-800');
+    }
+
+    let isEditMode = false;
+    function toggleEditMode() {
+        isEditMode = !isEditMode;
+
+        document.getElementById('profile-view-mode').classList.toggle('hidden', isEditMode);
+        document.getElementById('profile-edit-form').classList.toggle('hidden', !isEditMode);
+
+        document.getElementById('toggleBtn').innerText = isEditMode ? 'Отмена' : 'Редактировать';
+        document.getElementById('plusLabel').classList.toggle('hidden', !isEditMode);
+
+        if (isEditMode) {
+            document.getElementById('edit-username').value   = document.getElementById('view-username').innerText.replace('@', '').trim();
+            document.getElementById('edit-lastName').value   = document.getElementById('view-lastName').innerText.trim();
+            document.getElementById('edit-insta').value      = document.getElementById('view-insta').innerText.trim();
+            document.getElementById('edit-direction').value  = directionNames[document.getElementById('view-direction').innerText] || 'none';
+            document.getElementById('edit-bio').value        = document.getElementById('view-bio').innerText.trim();
+        }
+    }
+
+    async function logout() {
+        if (!confirm('Выйти из аккаунта?')) return;
+        await _supabase.auth.signOut();
+        window.location.href = 'login.html';
+    }
+
+    async function uploadAvatar(input) {
+        const file = input.files[0];
+        if (!file) return;
+
+        const { data: { user } } = await _supabase.auth.getUser();
+        if (!user) return alert("Не удалось определить пользователя");
+
+        const ext = file.name.split('.').pop().toLowerCase();
+        const path = `avatars/${user.id}.${ext}`;
+
+        const { error: uploadError } = await _supabase.storage
+            .from('chat-media')
+            .upload(path, file, { upsert: true });
+
+        if (uploadError) {
+            alert('Ошибка загрузки аватара: ' + uploadError.message);
+            return;
+        }
+
+        const { data: urlData } = _supabase.storage.from('chat-media').getPublicUrl(path);
+        const avatarUrl = urlData.publicUrl + '?t=' + Date.now();
+
+        await _supabase.from('profiles').update({ avatar_url: avatarUrl }).eq('id', user.id);
+
+        const preview = document.getElementById('imagePreview');
+        preview.style.backgroundImage = `url('${avatarUrl}')`;
+        preview.innerHTML = '';
+    }
+
+    window.addEventListener('load', loadUserData);
+</script>
+</body>
+</html>

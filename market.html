@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stars Market | Главная</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-[#0f172a] text-white min-h-screen">
+
+    <nav class="border-b border-slate-800 p-5 flex justify-between items-center bg-slate-900 sticky top-0 z-50">
+        <h1 class="text-2xl font-bold text-blue-400">Stars Market</h1>
+        <div class="flex items-center gap-6">
+            <div onclick="toggleSidebar()" class="cursor-pointer flex items-center gap-3 bg-slate-800 px-4 py-2 rounded-2xl border border-slate-700 hover:border-blue-500 transition">
+                <div class="text-right">
+                    <p id="user-name-nav" class="text-xs font-bold">Загрузка...</p>
+                    <p class="text-sm text-yellow-400 font-extrabold"><span id="user-balance-nav">0</span> ⭐</p>
+                </div>
+                <i class="fas fa-user-circle text-2xl text-slate-400"></i>
+            </div>
+            <button onclick="checkAuthAndOpenModal()" class="bg-blue-600 hover:bg-blue-500 px-6 py-2 rounded-xl font-bold shadow-lg shadow-blue-500/20 transition">+ Создать</button>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto p-6">
+        <h2 class="text-3xl font-bold mb-8 text-center">Welcome to marketplace!</h2>
+        <div id="posts-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+    </main>
+
+    <!-- Модалка просмотра (без ошибочного рейтинга) -->
+    <div id="view-modal" class="hidden fixed inset-0 bg-black/95 backdrop-blur-md flex items-center justify-center p-4 z-[1000]">
+        <div class="bg-slate-900 border border-slate-800 rounded-[2.5rem] max-w-2xl w-full overflow-hidden shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div id="view-gallery" class="relative bg-slate-800">
+                <div id="gallery-slides" class="relative h-72 overflow-hidden"></div>
+                <button id="gallery-prev" onclick="changeSlide(-1)" class="absolute left-3 top-1/2 -translate-y-1/2 bg-black/60 w-9 h-9 rounded-full flex items-center justify-center text-white hidden z-10 text-xl">‹</button>
+                <button id="gallery-next" onclick="changeSlide(1)" class="absolute right-3 top-1/2 -translate-y-1/2 bg-black/60 w-9 h-9 rounded-full flex items-center justify-center text-white hidden z-10 text-xl">›</button>
+                <div id="gallery-dots" class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 z-10"></div>
+                <button onclick="closeViewModal()" class="absolute top-4 right-4 bg-black/50 w-10 h-10 rounded-full flex items-center justify-center text-xl z-10">&times;</button>
+            </div>
+            <div class="p-8">
+                <div class="flex justify-between items-start mb-4">
+                    <h2 id="view-title" class="text-3xl font-bold text-white"></h2>
+                    <span id="view-price" class="text-2xl font-black text-blue-400"></span>
+                </div>
+                <div class="mb-6">
+                    <p class="text-slate-500 text-[10px] uppercase font-bold mb-2">Описание услуги</p>
+                    <p id="view-desc" class="text-slate-300 leading-relaxed overflow-y-auto max-h-40"></p>
+                </div>
+                <div class="flex items-center gap-4 p-4 bg-slate-800/50 rounded-2xl mb-6">
+                    <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center font-bold" id="view-avatar-letter">?</div>
+                    <div>
+                        <p class="text-[10px] text-slate-500 uppercase">Исполнитель</p>
+                        <p id="view-author" class="font-bold"></p>
+                        <!-- Рейтинг добавим динамически в JS -->
+                        <div id="view-rating" class="mt-2 flex items-center gap-1.5 text-yellow-400 text-lg font-bold"></div>
+                    </div>
+                </div>
+                <a id="view-chat-btn" href="#" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-2xl font-bold text-center block transition shadow-lg shadow-blue-600/20">
+                    <i class="fas fa-comments mr-2"></i> Написать и заказать
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модалка создания -->
+    <div id="post-modal" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-[100]">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <h2 class="text-2xl font-bold mb-6">Новая услуга</h2>
+            <input type="text" id="p-title" placeholder="Название (например: Монтаж видео)" class="w-full mb-4 bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-blue-500">
+            <textarea id="p-desc" placeholder="Опишите детально: что входит в стоимость, сроки и т.д." class="w-full mb-4 bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 h-32 text-white outline-none focus:border-blue-500"></textarea>
+            <input type="number" id="p-price" placeholder="Цена в ⭐" class="w-full mb-4 bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none">
+
+            <div class="mb-6">
+                <p class="text-xs text-slate-400 uppercase font-bold mb-3">📸 Фото работ (до 5 штук)</p>
+                <div id="photo-preview" class="grid grid-cols-5 gap-2 mb-3"></div>
+                <label for="p-photos" id="photo-label" class="flex items-center gap-3 bg-slate-800 border border-dashed border-slate-600 hover:border-blue-500 rounded-xl px-4 py-3 cursor-pointer transition">
+                    <i class="fas fa-camera text-slate-400"></i>
+                    <span class="text-slate-400 text-sm">Добавить фото</span>
+                    <span id="photo-count" class="ml-auto text-xs text-slate-500">0/5</span>
+                </label>
+                <input type="file" id="p-photos" multiple accept="image/*" class="hidden" onchange="handlePhotoSelect(this)">
+            </div>
+
+            <div class="flex gap-4">
+                <button onclick="closePostModal()" class="flex-1 bg-slate-800 py-3 rounded-xl font-bold">Отмена</button>
+                <button onclick="publish()" id="pub-btn" class="flex-1 bg-blue-600 py-3 rounded-xl font-bold">Опубликовать</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Сайдбар -->
+    <div id="profile-sidebar" class="fixed top-0 right-0 h-full w-80 bg-slate-900 border-l border-slate-800 translate-x-full transition-transform duration-300 z-[200] p-6">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-xl font-bold">Профиль</h2>
+            <button onclick="toggleSidebar()" class="text-2xl">&times;</button>
+        </div>
+        <div class="space-y-4">
+            <div class="text-center">
+                <div class="w-20 h-20 bg-blue-600 rounded-full mx-auto mb-3 flex items-center justify-center text-3xl">👤</div>
+                <h3 id="side-username" class="font-bold">@username</h3>
+            </div>
+            <div class="bg-slate-800 p-4 rounded-2xl">
+                <p class="text-[10px] text-slate-500 uppercase">Баланс</p>
+                <p class="text-2xl font-black text-yellow-400"><span id="side-balance">0</span> ⭐</p>
+                <a href="topup.html" class="w-full py-3 bg-yellow-500 hover:bg-yellow-400 text-black font-black rounded-xl text-sm text-center block transition">⭐ Пополнить баланс</a>
+            </div>
+            <button onclick="location.href='index.html'" class="w-full py-3 border border-slate-700 rounded-xl text-sm">На главную</button>
+            <a href="seller-settings.html" class="w-full py-3 border border-blue-700 rounded-xl text-sm text-blue-400 text-center block">🤖 Настроить ИИ-ассистента</a>
+        </div>
+    </div>
+    <div id="sidebar-overlay" onclick="toggleSidebar()" class="hidden fixed inset-0 bg-black/60 z-[150]"></div>
+
+    <script>
+        const SB_URL = 'https://dvwegmdyhjyihrxqvoiw.supabase.co';
+        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2d2VnbWR5aGp5aWhyeHF2b2l3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0MDYwOTAsImV4cCI6MjA4Mzk4MjA5MH0.HrG5GijHH4Lj7mO3SorbG0kKfnl5FLtSCWp6aONYxJ8';
+        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+
+        let globalProfile = null;
+        let allPosts = [];
+        let selectedPhotos = [];
+        let currentSlide = 0;
+        let currentImages = [];
+
+        function toggleSidebar() {
+            document.getElementById('profile-sidebar').classList.toggle('translate-x-full');
+            document.getElementById('sidebar-overlay').classList.toggle('hidden');
+        }
+
+        function closePostModal() {
+            document.getElementById('post-modal').classList.add('hidden');
+            selectedPhotos = [];
+            document.getElementById('photo-preview').innerHTML = '';
+            document.getElementById('photo-count').textContent = '0/5';
+            document.getElementById('photo-label').style.display = 'flex';
+            document.getElementById('p-title').value = '';
+            document.getElementById('p-desc').value = '';
+            document.getElementById('p-price').value = '';
+        }
+
+        function handlePhotoSelect(input) {
+            const files = Array.from(input.files);
+            const remaining = 5 - selectedPhotos.length;
+            selectedPhotos = [...selectedPhotos, ...files.slice(0, remaining)];
+            updatePhotoPreview();
+            input.value = '';
+        }
+
+        function updatePhotoPreview() {
+            const preview = document.getElementById('photo-preview');
+            document.getElementById('photo-count').textContent = `${selectedPhotos.length}/5`;
+            preview.innerHTML = '';
+            selectedPhotos.forEach((file, i) => {
+                const url = URL.createObjectURL(file);
+                const div = document.createElement('div');
+                div.className = 'relative';
+                div.innerHTML = `
+                    <img src="${url}" class="w-full aspect-square object-cover rounded-lg">
+                    <button onclick="removePhoto(${i})" class="absolute -top-1 -right-1 bg-red-500 w-5 h-5 rounded-full text-xs flex items-center justify-center text-white">×</button>
+                `;
+                preview.appendChild(div);
+            });
+            document.getElementById('photo-label').style.display = selectedPhotos.length >= 5 ? 'none' : 'flex';
+        }
+
+        function removePhoto(index) {
+            selectedPhotos.splice(index, 1);
+            updatePhotoPreview();
+        }
+
+        function openGallery(images) {
+            currentImages = images || [];
+            currentSlide = 0;
+            const slides = document.getElementById('gallery-slides');
+            const dots = document.getElementById('gallery-dots');
+            slides.innerHTML = '';
+            dots.innerHTML = '';
+
+            if (currentImages.length === 0) {
+                slides.innerHTML = '<div class="h-full flex items-center justify-center text-slate-500 text-sm">Без фото</div>';
+                document.getElementById('gallery-prev').classList.add('hidden');
+                document.getElementById('gallery-next').classList.add('hidden');
+                return;
+            }
+
+            currentImages.forEach((url, i) => {
+                const slide = document.createElement('div');
+                slide.className = `absolute inset-0 transition-opacity duration-300 ${i === 0 ? 'opacity-100' : 'opacity-0'}`;
+                slide.innerHTML = `<img src="${url}" class="w-full h-full object-cover">`;
+                slides.appendChild(slide);
+
+                const dot = document.createElement('div');
+                dot.className = `w-2 h-2 rounded-full cursor-pointer transition ${i === 0 ? 'bg-white' : 'bg-white/40'}`;
+                dot.onclick = () => goToSlide(i);
+                dots.appendChild(dot);
+            });
+
+            const showNav = currentImages.length > 1;
+            document.getElementById('gallery-prev').classList.toggle('hidden', !showNav);
+            document.getElementById('gallery-next').classList.toggle('hidden', !showNav);
+        }
+
+        function changeSlide(dir) {
+            if (currentImages.length === 0) return;
+            goToSlide((currentSlide + dir + currentImages.length) % currentImages.length);
+        }
+
+        function goToSlide(index) {
+            const slides = document.getElementById('gallery-slides').children;
+            const dots = document.getElementById('gallery-dots').children;
+            if (!slides[currentSlide]) return;
+            slides[currentSlide].classList.replace('opacity-100', 'opacity-0');
+            if (dots[currentSlide]) dots[currentSlide].classList.replace('bg-white', 'bg-white/40');
+            currentSlide = index;
+            slides[currentSlide].classList.replace('opacity-0', 'opacity-100');
+            if (dots[currentSlide]) dots[currentSlide].classList.replace('bg-white/40', 'bg-white');
+        }
+
+        function openViewModal(postId) {
+            const post = allPosts.find(p => p.id === postId);
+            if (!post) return;
+
+            document.getElementById('view-title').innerText = post.title;
+            document.getElementById('view-desc').innerText = post.description || "Автор не оставил описания.";
+            document.getElementById('view-price').innerText = `${post.price} ⭐`;
+            document.getElementById('view-author').innerText = `@${post.author_name}`;
+            document.getElementById('view-avatar-letter').innerText = post.author_name[0].toUpperCase();
+
+            // Динамически добавляем рейтинг в модалку просмотра
+            const ratingDiv = document.getElementById('view-rating');
+            ratingDiv.innerHTML = post.rating > 0 
+                ? `<i class="fas fa-star"></i> ${post.rating.toFixed(1)} <span class="text-slate-400 text-sm">(${post.review_count || 0})</span>`
+                : '<span class="text-slate-500 text-sm">Новый пост</span>';
+
+            const images = post.images || (post.image_url ? [post.image_url] : []);
+            openGallery(images);
+
+            document.getElementById('view-chat-btn').href = `chat.html?user_id=${post.author_id}&name=${encodeURIComponent(post.author_name)}`;
+            document.getElementById('view-modal').classList.remove('hidden');
+        }
+
+        function closeViewModal() {
+            document.getElementById('view-modal').classList.add('hidden');
+        }
+
+        async function loadPosts() {
+            const { data: posts } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
+            allPosts = posts || [];
+            const container = document.getElementById('posts-list');
+
+            if (allPosts.length === 0) {
+                container.innerHTML = '<p class="col-span-full text-center text-slate-600 py-10">Объявлений пока нет.</p>';
+                return;
+            }
+
+            container.innerHTML = allPosts.map(post => {
+                const images = post.images || (post.image_url ? [post.image_url] : []);
+                const firstImg = images[0];
+                const extraCount = images.length > 1 ? images.length - 1 : 0;
+                return `
+                <div class="bg-slate-800/40 border border-slate-800 rounded-[2rem] overflow-hidden hover:border-blue-500/50 hover:-translate-y-1 transition-all duration-300">
+                    <div onclick="openViewModal('${post.id}')" class="h-52 bg-slate-700 relative overflow-hidden cursor-pointer">
+                        ${firstImg ? `<img src="${firstImg}" class="w-full h-full object-cover">` : '<div class="h-full flex items-center justify-center text-slate-500 text-xs italic">Без фото</div>'}
+                        ${extraCount > 0 ? `<div class="absolute top-3 right-3 bg-black/60 px-2 py-1 rounded-lg text-xs font-bold">+${extraCount} фото</div>` : ''}
+                    </div>
+                    <div class="p-4 cursor-pointer" onclick="openViewModal('${post.id}')">
+                        <h3 class="font-bold text-lg text-white mb-1 truncate">${post.title}</h3>
+                        <p class="text-slate-400 text-xs mb-3 line-clamp-2">${post.description || ''}</p>
+                        <div class="flex justify-between items-center">
+                            <p class="text-blue-400 font-black text-lg">${post.price} ⭐</p>
+                            <span class="text-slate-500 text-xs">@${post.author_name}</span>
+                        </div>
+                        <div class="mt-2 flex items-center gap-1.5 text-yellow-400 text-sm font-bold">
+                            ${post.rating > 0 
+                                ? `<i class="fas fa-star"></i> ${post.rating.toFixed(1)} <span class="text-slate-400 text-xs">(${post.review_count || 0})</span>`
+                                : '<span class="text-slate-500 text-xs italic">Новый</span>'}
+                        </div>
+                    </div>
+                    <div class="px-4 pb-4 flex gap-2">
+                        <a href="chat.html?user_id=${post.author_id}&name=${encodeURIComponent(post.author_name)}"
+                            onclick="event.stopPropagation()"
+                            class="flex-1 bg-blue-600/20 hover:bg-blue-600 border border-blue-600/40 text-blue-400 hover:text-white py-2 rounded-xl text-xs font-bold transition text-center">
+                            💬 Chat
+                        </a>
+                        ${post.author_id === globalProfile?.id ? `
+                        <button onclick="event.stopPropagation(); deletePost('${post.id}')"
+                            class="bg-red-600/20 hover:bg-red-600 border border-red-600/40 text-red-400 hover:text-white px-3 py-2 rounded-xl text-xs font-bold transition">
+                            🗑
+                        </button>` : ''}
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        async function deletePost(postId) {
+            if (!confirm('Удалить этот пост?')) return;
+            const { error } = await supabaseClient.from('posts').delete().eq('id', postId);
+            if (error) alert('Ошибка: ' + error.message);
+            else loadPosts();
+        }
+
+        async function init() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (user) {
+                const { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', user.id).single();
+                if (profile) {
+                    globalProfile = profile;
+                    document.getElementById('user-name-nav').innerText = profile.username || 'Гость';
+                    document.getElementById('user-balance-nav').innerText = profile.wallet_balance || 0;
+                    document.getElementById('side-username').innerText = `@${profile.username || 'Гость'}`;
+                    document.getElementById('side-balance').innerText = profile.wallet_balance || 0;
+                }
+            }
+            loadPosts();
+
+            // Realtime обновление постов
+            supabaseClient
+                .channel('posts-changes')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, () => {
+                    loadPosts();
+                })
+                .subscribe();
+
+            // Realtime обновление баланса (когда звёзды переводятся)
+            if (user) {
+                supabaseClient
+                    .channel('balance-market')
+                    .on('postgres_changes', {
+                        event: 'UPDATE', schema: 'public', table: 'profiles',
+                        filter: `id=eq.${user.id}`
+                    }, payload => {
+                        const newBalance = payload.new.wallet_balance || 0;
+                        document.getElementById('user-balance-nav').innerText = newBalance;
+                        document.getElementById('side-balance').innerText = newBalance;
+                        if (globalProfile) globalProfile.wallet_balance = newBalance;
+                    })
+                    .subscribe();
+            }
+        }
+
+        function checkAuthAndOpenModal() {
+            if (!globalProfile) return alert("Нужна авторизация!");
+            document.getElementById('post-modal').classList.remove('hidden');
+        }
+
+        async function publish() {
+            const title = document.getElementById('p-title').value.trim();
+            const desc = document.getElementById('p-desc').value.trim();
+            const price = document.getElementById('p-price').value;
+            const btn = document.getElementById('pub-btn');
+
+            if (!title || !price) return alert("Заполни название и цену!");
+
+            btn.innerText = "Публикация...";
+            btn.disabled = true;
+
+            let imageUrls = [];
+            for (const file of selectedPhotos) {
+                const ext = file.name.split('.').pop();
+                const path = `posts/${globalProfile.id}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+                const { error: upErr } = await supabaseClient.storage.from('chat-media').upload(path, file);
+                if (!upErr) {
+                    const { data: urlData } = supabaseClient.storage.from('chat-media').getPublicUrl(path);
+                    imageUrls.push(urlData.publicUrl);
+                }
+            }
+
+            const { error } = await supabaseClient.from('posts').insert([{
+                title, 
+                description: desc, 
+                price: parseInt(price),
+                author_id: globalProfile.id,
+                author_name: globalProfile.username,
+                images: imageUrls.length > 0 ? imageUrls : null,
+                image_url: imageUrls[0] || null,
+                rating: 0,
+                review_count: 0
+            }]);
+
+            btn.innerText = "Опубликовать";
+            btn.disabled = false;
+
+            if (error) alert(error.message);
+            else { 
+                closePostModal(); 
+                loadPosts(); 
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>

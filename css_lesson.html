@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS с нуля • Стилизуй это • 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .code-block {
+            background: #0f172a;
+            border-radius: 12px;
+            padding: 1.5rem;
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            border: 1px solid #334155;
+        }
+        .highlight { color: #38bdf8; font-weight: bold; }
+        .tip { border-left: 4px solid #38bdf8; padding-left: 1rem; }
+
+        .flashcard-container {
+            perspective: 1000px;
+            height: 220px;
+        }
+        .flashcard-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+        .flashcard-inner.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .flashcard-front, .flashcard-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            border-radius: 1rem;
+            text-align: center;
+        }
+        .flashcard-front {
+            background: linear-gradient(135deg, #0369a1, #0ea5e9);
+            border: 2px solid #7dd3fc;
+            color: white;
+        }
+        .flashcard-back {
+            background: #1e293b;
+            color: #f1f5f9;
+            transform: rotateY(180deg);
+            border: 2px solid #38bdf8;
+            flex-direction: column;
+        }
+        .scroll-cards {
+            max-height: 650px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        .scroll-cards::-webkit-scrollbar { width: 6px; }
+        .scroll-cards::-webkit-scrollbar-thumb { background: #0ea5e9; border-radius: 10px; }
+        
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            border-radius: 1rem;
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Стили для теста */
+        .quiz-question {
+            background: rgba(30, 41, 59, 0.6);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            border: 1px solid #475569;
+        }
+        input[type="radio"] {
+            accent-color: #38bdf8;
+        }
+        .correct {
+            background-color: rgba(34, 197, 94, 0.25) !important;
+            border-color: #22c55e !important;
+            color: #bbf7d0;
+        }
+        .incorrect {
+            background-color: rgba(239, 68, 68, 0.25) !important;
+            border-color: #ef4444 !important;
+            color: #fecaca;
+        }
+        .missed {
+            background-color: rgba(249, 115, 22, 0.2) !important;
+            border-color: #f97316 !important;
+            color: #fed7aa;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-b from-slate-950 to-slate-900 text-slate-100 min-h-screen font-sans">
+
+    <nav class="p-6 max-w-6xl mx-auto flex justify-between items-center border-b border-slate-800">
+        <a href="html_lesson.html" class="text-sky-400 hover:text-sky-300 font-medium flex items-center">
+            ← Назад к HTML
+        </a>
+        <div class="px-4 py-1 bg-slate-800 rounded-full text-sm text-sky-300 border border-sky-900/50">
+            CSS (Cascading Style Sheets)
+        </div>
+    </nav>
+
+    <main class="max-w-5xl mx-auto p-6 pt-10">
+
+        <header class="text-center mb-12">
+            <h1 class="text-5xl md:text-6xl font-black mb-6 bg-gradient-to-r from-sky-400 via-blue-400 to-teal-400 bg-clip-text text-transparent">
+                CSS — Магия дизайна
+            </h1>
+            <p class="text-xl md:text-2xl text-slate-300 max-w-4xl mx-auto leading-relaxed">
+                Учимся управлять цветами, размерами и расположением элементов
+            </p>
+        </header>
+
+        <section class="mb-16 bg-slate-800/70 border border-purple-900/50 rounded-3xl p-8 md:p-12">
+            <h2 class="text-4xl font-bold mb-6 text-purple-400 text-center">Не всё сразу, но постепенно</h2>
+            <p class="text-lg text-slate-300 mb-6 text-center">
+                Самый понятный и полный обзор CSS для абсолютных новичков.<br>
+                Автор — Bro Code. Смотри с таймкодами, повторяй за ним в своём редакторе.
+            </p>
+
+            <div class="video-container shadow-2xl">
+                <iframe 
+                    src="https://www.youtube.com/embed/wRNinF7YQqQ" 
+                    title="Learn CSS in 1 hour 🌎 — Bro Code" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen>
+                </iframe>
+            </div>
+        </section>
+
+        <section class="mb-20 bg-slate-800/70 border border-sky-900/50 rounded-3xl p-8 md:p-12">
+            <h2 class="text-4xl font-bold mb-10 text-sky-400 text-center">Основы стилей</h2>
+            
+            <div class="grid md:grid-cols-2 gap-12 items-start">
+                <div class="space-y-6">
+                    <h3 class="text-2xl font-bold text-sky-300 mb-4 text-center">CSS Флешкарты</h3>
+                    <div class="scroll-cards space-y-8" id="css-cards-container"></div>
+                </div>
+
+                <div class="space-y-6 text-lg text-slate-200 leading-relaxed">
+                    <div class="tip">
+                        <p><strong>CSS</strong> — это язык стилей. Если HTML — это кирпичи, то CSS — это краска, обои и расстановка мебели.</p>
+                    </div>
+
+                    <p>Как работает правило CSS:</p>
+                    <div class="bg-slate-900 p-6 rounded-2xl border border-sky-800/40 font-mono text-sm">
+                        <span class="text-sky-400">h1</span> { <br>
+                        &nbsp;&nbsp;<span class="text-pink-400">color</span>: <span class="text-orange-300">red</span>;<br>
+                        &nbsp;&nbsp;<span class="text-pink-400">font-size</span>: <span class="text-orange-300">20px</span>;<br>
+                        }
+                    </div>
+
+                    <h4 class="text-xl font-bold text-sky-300 mt-6">Три способа подключения:</h4>
+                    <ul class="list-disc pl-8 space-y-3 text-base">
+                        <li><strong>Внешний файл:</strong> тег <code>&lt;link&gt;</code> (лучший способ)</li>
+                        <li><strong>Внутри головы:</strong> тег <code>&lt;style&gt;</code></li>
+                        <li><strong>Инлайново:</strong> атрибут <code>style="..."</code> прямо в теге</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-20">
+            <h2 class="text-4xl font-bold mb-10 text-center text-teal-400">Попробуй в VS Code</h2>
+            <div class="code-block text-base">
+/* 1. Сделай все заголовки синими */
+h1 {
+    color: skyblue;
+    text-align: center;
+}
+
+/* 2. Добавь красивую рамку для блоков */
+.card {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    padding: 20px;
+}
+            </div>
+        </section>
+
+        <section class="mb-20 bg-slate-800/50 border-2 border-dashed border-sky-500/30 rounded-3xl p-8 md:p-12">
+            <h2 class="text-3xl font-bold mb-6 text-sky-400 text-center">🎨 Творческое задание: Стилизуй это!</h2>
+            
+            <div class="max-w-3xl mx-auto space-y-8">
+                <div class="bg-slate-900 p-6 rounded-2xl border border-slate-700">
+                    <p class="text-slate-300 mb-4">Напиши CSS-код для класса <code class="text-sky-300">.preview-card</code>, чтобы:</p>
+                    <ul class="list-disc list-inside text-sm text-slate-400 space-y-1 mb-6">
+                        <li>Цвет текста стал <code class="text-sky-300">skyblue</code></li>
+                        <li>Появилась рамка <code class="text-sky-300">2px solid white</code></li>
+                        <li>Добавились внутренние отступы <code class="text-sky-300">20px</code></li>
+                        <li>Углы скруглились на <code class="text-sky-300">15px</code></li>
+                    </ul>
+
+                    <textarea id="css-task-input" 
+                        class="w-full h-32 bg-slate-950 text-sky-100 p-4 font-mono rounded-xl border border-slate-800 focus:border-sky-500 outline-none placeholder:text-slate-600"
+                        placeholder=".preview-card { \n  /* твой код тут */ \n}"></textarea>
+                    
+                    <button onclick="applyCssTask()" 
+                        class="mt-4 w-full bg-sky-500 hover:bg-sky-400 text-slate-950 font-black py-4 rounded-xl transition-all">
+                        ПРИМЕНИТЬ СТИЛИ И ПРОВЕРИТЬ
+                    </button>
+                </div>
+
+                <div id="solution-section" class="hidden animate-in fade-in slide-in-from-top-4 duration-500">
+                    <div class="grid md:grid-cols-2 gap-6 items-center">
+                        <div class="p-6 bg-slate-900 rounded-2xl border border-slate-800 text-center">
+                            <p class="text-xs text-slate-500 uppercase mb-4 tracking-widest">результат:</p>
+                            <div id="preview-element" class="preview-card transition-all duration-500">
+                                <h3 class="font-bold">Моя карточка</h3>
+                                <p class="text-sm">Теперь она выглядит круто!</p>
+                            </div>
+                        </div>
+                        <div class="bg-sky-900/20 border border-sky-500/50 p-6 rounded-2xl">
+                            <h4 class="text-sky-400 font-bold mb-2">Правильный ответ:</h4>
+                            <pre class="text-xs text-slate-300">.preview-card {
+  color: skyblue;
+  border: 2px solid white;
+  padding: 20px;
+  border-radius: 15px;
+}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ТЕСТ С ПОДСВЕТКОЙ ПРЯМО НА ВАРИАНТАХ -->
+        <section class="mb-20 bg-slate-800/70 border border-sky-500/30 rounded-3xl p-8 md:p-12">
+            <h2 class="text-4xl font-bold mb-10 text-center text-sky-400">🧠 Мини-тест по CSS</h2>
+            <p class="text-center text-slate-300 mb-12 text-lg">
+                Выбери один правильный вариант (A, B или C) на каждый вопрос
+            </p>
+
+            <form id="css-quiz-form" class="space-y-10">
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-sky-300 mb-4">1. Что означает аббревиатура CSS?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q1" value="A" class="mr-3 accent-sky-500"> A) Creative Style Sheets
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q1" value="B" class="mr-3 accent-sky-500"> B) Cascading Style Sheets
+                    </label>
+                    <label class="block p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q1" value="C" class="mr-3 accent-sky-500"> C) Computer Style Sheets
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-sky-300 mb-4">2. Какой селектор для элемента с id?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q2" value="A" class="mr-3"> A) .idname
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q2" value="B" class="mr-3"> B) #idname
+                    </label>
+                    <label class="block p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q2" value="C" class="mr-3"> C) idname
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-sky-300 mb-4">3. Какое свойство меняет цвет текста?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q3" value="A" class="mr-3"> A) background-color
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q3" value="B" class="mr-3"> B) color
+                    </label>
+                    <label class="block p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q3" value="C" class="mr-3"> C) font-color
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-sky-300 mb-4">4. Какое свойство — внутренние отступы?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q4" value="A" class="mr-3"> A) margin
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q4" value="B" class="mr-3"> B) padding
+                    </label>
+                    <label class="block p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q4" value="C" class="mr-3"> C) border-spacing
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-sky-300 mb-4">5. Как сделать текст жирным?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q5" value="A" class="mr-3"> A) font-style: bold
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q5" value="B" class="mr-3"> B) font-weight: bold
+                    </label>
+                    <label class="block p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q5" value="C" class="mr-3"> C) text-weight: bold
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-sky-300 mb-4">6. Как убрать подчёркивание у ссылок?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q6" value="A" class="mr-3"> A) text-decoration: none;
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q6" value="B" class="mr-3"> B) text-underline: none;
+                    </label>
+                    <label class="block p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q6" value="C" class="mr-3"> C) decoration: none;
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-sky-300 mb-4">7. Какое свойство скругляет углы?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q7" value="A" class="mr-3"> A) border-radius
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q7" value="B" class="mr-3"> B) border-curve
+                    </label>
+                    <label class="block p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q7" value="C" class="mr-3"> C) corner-radius
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-sky-300 mb-4">8. Как скрыть элемент, но оставить место?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q8" value="A" class="mr-3"> A) display: none;
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q8" value="B" class="mr-3"> B) visibility: hidden;
+                    </label>
+                    <label class="block p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q8" value="C" class="mr-3"> C) opacity: 0;
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-sky-300 mb-4">9. Самый рекомендуемый способ подключения CSS?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q9" value="A" class="mr-3"> A) style="" в теге
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q9" value="B" class="mr-3"> B) &lt;link&gt; в &lt;head&gt;
+                    </label>
+                    <label class="block p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q9" value="C" class="mr-3"> C) &lt;style&gt; в &lt;body&gt;
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-sky-300 mb-4">10. Какое свойство меняет семейство шрифтов?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q10" value="A" class="mr-3"> A) font-family
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q10" value="B" class="mr-3"> B) font-style
+                    </label>
+                    <label class="block p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q10" value="C" class="mr-3"> C) text-font
+                    </label>
+                </div>
+
+                <div class="text-center mt-12">
+                    <button type="button" onclick="checkCssQuiz()"
+                        class="bg-sky-600 hover:bg-sky-500 text-white font-black py-5 px-16 rounded-xl text-xl transition-all active:scale-95 shadow-lg shadow-sky-500/30">
+                        ПРОВЕРИТЬ ОТВЕТЫ
+                    </button>
+                </div>
+            </form>
+
+            <div id="css-quiz-result" class="hidden mt-10 p-8 bg-slate-900/80 rounded-2xl border border-sky-700/50 text-center">
+                <h3 class="text-3xl font-bold text-sky-400 mb-6">Результат теста</h3>
+                <p id="css-score-text" class="text-4xl font-black mb-4"></p>
+                <p class="text-slate-400 text-sm mt-2">
+                    Правильные — зелёный, твои ошибки — красный, пропущенные правильные — оранжевый
+                </p>
+            </div>
+        </section>
+
+    </main>
+
+    <script type="text/javascript">
+    (function(d, t) {
+        var v = d.createElement(t), s = d.getElementsByTagName(t)[0];
+        v.onload = function() {
+          window.voiceflow.chat.load({
+            verify: { projectID: '69691a2a690bb46ec57a9014' },
+            url: 'https://general-runtime.voiceflow.com',
+            versionID: 'production',
+            voice: {
+              url: "https://runtime-api.voiceflow.com"
+            }
+          });
+        }
+        v.src = "https://cdn.voiceflow.com/widget-next/bundle.mjs"; v.type = "text/javascript"; s.parentNode.insertBefore(v, s);
+    })(document, 'script');
+    </script>
+
+    <div class="text-center pb-20">
+    <a href="cats_css.html"
+       style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"
+       class="inline-flex items-center gap-3 bg-sky-500 hover:bg-sky-400 text-white font-black py-5 px-12 rounded-2xl text-2xl transition-all transform hover:scale-105 shadow-xl shadow-sky-900/30">
+        🐾 котики ждут тебя!
+    </a>
+    
+    <p class="mt-6 text-slate-400 text-lg animate-pulse" 
+       style="font-family: 'Courier New', Courier, monospace;">
+        Нажми, чтобы открыть секретный уровень с пушистыми задачами...
+    </p>
+</div>
+    
+    <script>
+        const cssCards = [
+            { q: "Как изменить цвет текста?", a: "Свойство color: red;" },
+            { q: "Как изменить фоновый цвет?", a: "Свойство background-color: blue;" },
+            { q: "Как изменить размер шрифта?", a: "Свойство font-size: 16px;" },
+            { q: "Как сделать текст жирным?", a: "Свойство font-weight: bold;" },
+            { q: "Как центрировать текст?", a: "Свойство text-align: center;" },
+            { q: "Внутренний отступ (внутри границы)?", a: "Свойство padding" },
+            { q: "Внешний отступ (за границей)?", a: "Свойство margin" },
+            { q: "Как убрать подчеркивание у ссылки?", a: "text-decoration: none;" },
+            { q: "Как сделать рамку?", a: "border: 1px solid black;" },
+            { q: "Как изменить шрифт?", a: "Свойство font-family" },
+            { q: "Как скруглить углы?", a: "Свойство border-radius: 10px;" },
+            { q: "Как сделать элемент невидимым?", a: "display: none; или opacity: 0;" },
+            { q: "Селектор для классов начинается с...", a: "С точки, например .my-class" },
+            { q: "Селектор для ID начинается с...", a: "С решетки, например #my-id" },
+            { q: "Как изменить ширину элемента?", a: "Свойство width: 100px;" }
+        ];
+
+        const container = document.getElementById('css-cards-container');
+
+        cssCards.forEach((data, index) => {
+            const card = document.createElement('div');
+            card.className = 'flashcard-container';
+            card.innerHTML = `
+                <div class="flashcard-inner" onclick="this.classList.toggle('is-flipped')">
+                    <div class="flashcard-front font-bold text-lg">
+                        CSS №${index + 1}: ${data.q}
+                    </div>
+                    <div class="flashcard-back">
+                        <p class="font-bold text-sky-400 mb-2">Ответ:</p>
+                        <p class="text-lg">${data.a}</p>
+                        <p class="mt-4 text-xs text-slate-400">Нажми, чтобы вернуть</p>
+                    </div>
+                </div>
+                <div class="text-center mt-2 text-sky-500 font-bold">➡️</div>
+            `;
+            container.appendChild(card);
+        });
+
+        // Творческое задание
+        function applyCssTask() {
+            const input = document.getElementById('css-task-input').value;
+            if (input.trim().length < 5) {
+                alert("Сначала напиши код!");
+                return;
+            }
+            
+            const preview = document.getElementById('preview-element');
+            const solution = document.getElementById('solution-section');
+            
+            preview.style.color = "skyblue";
+            preview.style.border = "2px solid white";
+            preview.style.padding = "20px";
+            preview.style.borderRadius = "15px";
+            
+            solution.classList.remove('hidden');
+            solution.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // Проверка теста с визуальной обратной связью
+        function checkCssQuiz() {
+            const form = document.getElementById('css-quiz-form');
+            if (!form) {
+                alert("Форма теста не найдена!");
+                return;
+            }
+
+            const resultDiv = document.getElementById('css-quiz-result');
+            const scoreText = document.getElementById('css-score-text');
+
+            const correctAnswers = {
+                q1: 'B', q2: 'B', q3: 'B', q4: 'B', q5: 'B',
+                q6: 'A', q7: 'A', q8: 'B', q9: 'B', q10: 'A'
+            };
+
+            let score = 0;
+
+            for (let i = 1; i <= 10; i++) {
+                const name = `q${i}`;
+                const radios = form.querySelectorAll(`input[name="${name}"]`);
+                let selectedValue = null;
+
+                // Сбрасываем стили
+                radios.forEach(r => {
+                    r.parentElement.classList.remove('correct', 'incorrect', 'missed');
+                });
+
+                // Находим выбранный
+                radios.forEach(r => {
+                    if (r.checked) selectedValue = r.value;
+                });
+
+                const correctVal = correctAnswers[name];
+                const correctLabel = Array.from(radios).find(r => r.value === correctVal)?.parentElement;
+                const selectedLabel = selectedValue ? Array.from(radios).find(r => r.value === selectedValue)?.parentElement : null;
+
+                if (selectedValue === correctVal) {
+                    score++;
+                    if (correctLabel) correctLabel.classList.add('correct');
+                } else {
+                    if (correctLabel) correctLabel.classList.add('correct');
+                    if (selectedLabel) selectedLabel.classList.add('incorrect');
+                }
+
+                if (!selectedValue && correctLabel) {
+                    correctLabel.classList.add('missed');
+                }
+            }
+
+            scoreText.innerHTML = `Ты набрал <span class="text-sky-400 font-black">${score}/10</span>`;
+            resultDiv.classList.remove('hidden');
+            resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            // Меняем кнопку
+            const btn = form.querySelector('button');
+            if (btn) {
+                btn.textContent = "Пройти тест ещё раз";
+                btn.onclick = () => location.reload();
+            }
+        }
+    </script>
+</body>
+</html>

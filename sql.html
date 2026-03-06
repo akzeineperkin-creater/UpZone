@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL с нуля • Запросы и данные • 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .code-block {
+            background: #0f172a;
+            border-radius: 12px;
+            padding: 1.5rem;
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            border: 1px solid #334155;
+        }
+        .highlight { color: #fbbf24; font-weight: bold; }
+        .tip { border-left: 4px solid #fbbf24; padding-left: 1rem; }
+
+        .flashcard-container {
+            perspective: 1000px;
+            height: 220px;
+        }
+        .flashcard-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+        .flashcard-inner.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .flashcard-front, .flashcard-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            border-radius: 1rem;
+            text-align: center;
+        }
+        .flashcard-front {
+            background: linear-gradient(135deg, #b45309, #d97706);
+            border: 2px solid #fbbf24;
+            color: white;
+        }
+        .flashcard-back {
+            background: #1e293b;
+            color: #f1f5f9;
+            transform: rotateY(180deg);
+            border: 2px solid #fbbf24;
+            flex-direction: column;
+        }
+        .scroll-cards {
+            max-height: 650px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        .scroll-cards::-webkit-scrollbar { width: 6px; }
+        .scroll-cards::-webkit-scrollbar-thumb { background: #fbbf24; border-radius: 10px; }
+        
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            border-radius: 1rem;
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Стили для теста */
+        .quiz-question {
+            background: rgba(30, 41, 59, 0.6);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            border: 1px solid #475569;
+        }
+        input[type="radio"] {
+            accent-color: #fbbf24;
+        }
+        .correct {
+            background-color: rgba(34, 197, 94, 0.25) !important;
+            border-color: #22c55e !important;
+            color: #bbf7d0;
+        }
+        .incorrect {
+            background-color: rgba(239, 68, 68, 0.25) !important;
+            border-color: #ef4444 !important;
+            color: #fecaca;
+        }
+        .missed {
+            background-color: rgba(249, 115, 22, 0.2) !important;
+            border-color: #f97316 !important;
+            color: #fed7aa;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-b from-slate-950 to-slate-900 text-slate-100 min-h-screen font-sans">
+
+    <nav class="p-6 max-w-6xl mx-auto flex justify-between items-center border-b border-slate-800">
+        <a href="index.html" class="text-amber-400 hover:text-amber-300 font-medium flex items-center">
+            ← Назад к курсам
+        </a>
+        <div class="px-4 py-1 bg-slate-800 rounded-full text-sm text-amber-300 border border-amber-900/50">
+            SQL (Structured Query Language)
+        </div>
+    </nav>
+
+    <main class="max-w-5xl mx-auto p-6 pt-10">
+
+        <header class="text-center mb-12">
+            <h1 class="text-5xl md:text-6xl font-black mb-6 bg-gradient-to-r from-amber-400 via-orange-400 to-yellow-500 bg-clip-text text-transparent">
+                SQL — Повелитель Данных
+            </h1>
+            <p class="text-xl md:text-2xl text-slate-300 max-w-4xl mx-auto leading-relaxed">
+                Учимся общаться с базами данных, извлекать и фильтровать информацию
+            </p>
+        </header>
+
+        <section class="mb-16 bg-slate-800/70 border border-amber-900/50 rounded-3xl p-8 md:p-12">
+            <h2 class="text-4xl font-bold mb-6 text-amber-400 text-center">Основы за час</h2>
+            <p class="text-lg text-slate-300 mb-6 text-center">
+                Лучший старт для понимания реляционных баз данных.<br>
+                Автор — Bro Code. Все основные команды в одном видео.
+            </p>
+
+            <div class="video-container shadow-2xl">
+                <iframe 
+                    src="https://www.youtube.com/embed/HXV3zeQKqGY" 
+                    title="MySQL Full Course for free 🌎 — Bro Code" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen>
+                </iframe>
+            </div>
+        </section>
+
+        <section class="mb-20 bg-slate-800/70 border border-amber-900/50 rounded-3xl p-8 md:p-12">
+            <h2 class="text-4xl font-bold mb-10 text-amber-400 text-center">Базовые Команды</h2>
+            
+            <div class="grid md:grid-cols-2 gap-12 items-start">
+                <div class="space-y-6">
+                    <h3 class="text-2xl font-bold text-amber-300 mb-4 text-center">SQL Флешкарты</h3>
+                    <div class="scroll-cards space-y-8" id="sql-cards-container"></div>
+                </div>
+
+                <div class="space-y-6 text-lg text-slate-200 leading-relaxed">
+                    <div class="tip">
+                        <p><strong>SQL</strong> — это язык запросов. Если база данных — это огромный склад, то SQL — это кладовщик, который находит нужный товар по вашему списку.</p>
+                    </div>
+
+                    <p>Как выглядит простой запрос:</p>
+                    <div class="bg-slate-900 p-6 rounded-2xl border border-amber-800/40 font-mono text-sm">
+                        <span class="text-amber-400">SELECT</span> name, age <br>
+                        <span class="text-amber-400">FROM</span> users <br>
+                        <span class="text-amber-400">WHERE</span> age > <span class="text-orange-300">18</span>;
+                    </div>
+
+                    <h4 class="text-xl font-bold text-amber-300 mt-6">Типы команд (языки):</h4>
+                    <ul class="list-disc pl-8 space-y-3 text-base">
+                        <li><strong>DQL:</strong> получение данных (<code>SELECT</code>)</li>
+                        <li><strong>DML:</strong> изменение данных (<code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code>)</li>
+                        <li><strong>DDL:</strong> структура таблиц (<code>CREATE</code>, <code>DROP</code>, <code>ALTER</code>)</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-20">
+            <h2 class="text-4xl font-bold mb-10 text-center text-orange-400">Примеры запросов</h2>
+            <div class="code-block text-base">
+/* 1. Выбрать всех сотрудников из отдела 'IT' */
+SELECT * FROM employees
+WHERE department = 'IT';
+
+/* 2. Добавить нового пользователя в таблицу */
+INSERT INTO users (name, email)
+VALUES ('Ivan', 'ivan@example.com');
+            </div>
+        </section>
+
+        <section class="mb-20 bg-slate-800/50 border-2 border-dashed border-amber-500/30 rounded-3xl p-8 md:p-12">
+            <h2 class="text-3xl font-bold mb-6 text-amber-400 text-center">💎 Творческое задание: Напиши запрос!</h2>
+            
+            <div class="max-w-3xl mx-auto space-y-8">
+                <div class="bg-slate-900 p-6 rounded-2xl border border-slate-700">
+                    <p class="text-slate-300 mb-4">Напиши SQL-код для таблицы <code class="text-amber-300">products</code>, чтобы:</p>
+                    <ul class="list-disc list-inside text-sm text-slate-400 space-y-1 mb-6">
+                        <li>Выбрать колонки <code class="text-amber-300">title</code> и <code class="text-amber-300">price</code></li>
+                        <li>Оставить только товары, где цена больше <code class="text-amber-300">500</code></li>
+                        <li>Отсортировать результат по <code class="text-amber-300">price</code></li>
+                    </ul>
+
+                    <textarea id="sql-task-input" 
+                        class="w-full h-32 bg-slate-950 text-amber-100 p-4 font-mono rounded-xl border border-slate-800 focus:border-amber-500 outline-none placeholder:text-slate-600"
+                        placeholder="SELECT ... FROM ..."></textarea>
+                    
+                    <button onclick="applySqlTask()" 
+                        class="mt-4 w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-4 rounded-xl transition-all">
+                        ПРОВЕРИТЬ ЛОГИКУ ЗАПРОСА
+                    </button>
+                </div>
+
+                <div id="solution-section" class="hidden animate-in fade-in slide-in-from-top-4 duration-500">
+                    <div class="p-6 bg-amber-900/20 border border-amber-500/50 rounded-2xl">
+                        <h4 class="text-amber-400 font-bold mb-2 text-center">Эталонный запрос:</h4>
+                        <pre class="text-center text-slate-300 font-mono">SELECT title, price 
+FROM products 
+WHERE price > 500 
+ORDER BY price;</pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-20 bg-slate-800/70 border border-amber-500/30 rounded-3xl p-8 md:p-12">
+            <h2 class="text-4xl font-bold mb-10 text-center text-amber-400">🧠 Мини-тест по SQL</h2>
+            
+            <form id="sql-quiz-form" class="space-y-10">
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-amber-300 mb-4">1. Что означает аббревиатура SQL?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q1" value="A" class="mr-3"> A) Simple Query Language
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q1" value="B" class="mr-3"> B) Structured Query Language
+                    </label>
+                    <label class="block p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q1" value="C" class="mr-3"> C) Standard Query Logic
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-amber-300 mb-4">2. Какая команда используется для извлечения данных?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q2" value="A" class="mr-3"> A) EXTRACT
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q2" value="B" class="mr-3"> B) SELECT
+                    </label>
+                    <label class="block p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q2" value="C" class="mr-3"> C) GET
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-amber-300 mb-4">3. Какое ключевое слово фильтрует строки?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q3" value="A" class="mr-3"> A) WHERE
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q3" value="B" class="mr-3"> B) IF
+                    </label>
+                    <label class="block p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q3" value="C" class="mr-3"> C) FILTER
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-amber-300 mb-4">4. Как обновить данные в таблице?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q4" value="A" class="mr-3"> A) CHANGE
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q4" value="B" class="mr-3"> B) UPDATE
+                    </label>
+                    <label class="block p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q4" value="C" class="mr-3"> C) SET
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-amber-300 mb-4">5. Как удалить таблицу (вместе со структурой)?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q5" value="A" class="mr-3"> A) DELETE
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q5" value="B" class="mr-3"> B) DROP
+                    </label>
+                    <label class="block p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q5" value="C" class="mr-3"> C) REMOVE
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-amber-300 mb-4">6. Как добавить новую запись?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q6" value="A" class="mr-3"> A) INSERT INTO
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q6" value="B" class="mr-3"> B) ADD NEW
+                    </label>
+                    <label class="block p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q6" value="C" class="mr-3"> C) PUSH
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-amber-300 mb-4">7. Какое значение означает «пусто» (нет данных)?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q7" value="A" class="mr-3"> A) NULL
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q7" value="B" class="mr-3"> B) EMPTY
+                    </label>
+                    <label class="block p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q7" value="C" class="mr-3"> C) VOID
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-amber-300 mb-4">8. Как отсортировать данные?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q8" value="A" class="mr-3"> A) SORT BY
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q8" value="B" class="mr-3"> B) ORDER BY
+                    </label>
+                    <label class="block p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q8" value="C" class="mr-3"> C) GROUP BY
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-amber-300 mb-4">9. Какая функция считает количество строк?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q9" value="A" class="mr-3"> A) SUM()
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q9" value="B" class="mr-3"> B) COUNT()
+                    </label>
+                    <label class="block p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q9" value="C" class="mr-3"> C) TOTAL()
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-amber-300 mb-4">10. Как выбрать все уникальные значения?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q10" value="A" class="mr-3"> A) DISTINCT
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q10" value="B" class="mr-3"> B) UNIQUE
+                    </label>
+                    <label class="block p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q10" value="C" class="mr-3"> C) ONLY ONE
+                    </label>
+                </div>
+
+                <div class="text-center mt-12">
+                    <button type="button" onclick="checkSqlQuiz()"
+                        class="bg-amber-600 hover:bg-amber-500 text-white font-black py-5 px-16 rounded-xl text-xl transition-all active:scale-95 shadow-lg shadow-amber-500/30">
+                        ПРОВЕРИТЬ ОТВЕТЫ
+                    </button>
+                </div>
+            </form>
+
+            <div id="sql-quiz-result" class="hidden mt-10 p-8 bg-slate-900/80 rounded-2xl border border-amber-700/50 text-center">
+                <h3 class="text-3xl font-bold text-amber-400 mb-6">Результат теста</h3>
+                <p id="sql-score-text" class="text-4xl font-black mb-4"></p>
+                <p class="text-slate-400 text-sm mt-2">
+                    Правильные — зелёный, твои ошибки — красный, пропущенные правильные — оранжевый
+                </p>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // Флешкарты SQL
+        const sqlCards = [
+            { q: "Как выбрать все колонки?", a: "SELECT * FROM table_name;" },
+            { q: "Как переименовать колонку в результате?", a: "Использовать алиас: SELECT name AS fio" },
+            { q: "Как ограничить количество строк?", a: "Команда LIMIT 10;" },
+            { q: "Как искать по шаблону (например, начало слова)?", a: "WHERE name LIKE 'A%';" },
+            { q: "Как объединить результаты двух запросов?", a: "Оператор UNION" },
+            { q: "Как сгруппировать данные?", a: "GROUP BY column_name" },
+            { q: "Функция для среднего значения?", a: "AVG(column_name)" },
+            { q: "Как удалить все строки, сохранив таблицу?", a: "TRUNCATE TABLE name;" },
+            { q: "Как соединить две таблицы?", a: "Операторы JOIN (INNER, LEFT, RIGHT)" },
+            { q: "Условие для фильтрации групп?", a: "Ключевое слово HAVING" },
+            { q: "Как выбрать значения в диапазоне?", a: "WHERE column BETWEEN 10 AND 20;" },
+            { q: "Как проверить на пустоту (NULL)?", a: "IS NULL или IS NOT NULL" },
+            { q: "Сортировка от большего к меньшему?", a: "ORDER BY column DESC;" },
+            { q: "Как изменить структуру таблицы?", a: "ALTER TABLE name ADD column..." },
+            { q: "Как выбрать данные из списка?", a: "WHERE column IN (1, 2, 3);" }
+        ];
+
+        const container = document.getElementById('sql-cards-container');
+
+        sqlCards.forEach((data, index) => {
+            const card = document.createElement('div');
+            card.className = 'flashcard-container';
+            card.innerHTML = `
+                <div class="flashcard-inner" onclick="this.classList.toggle('is-flipped')">
+                    <div class="flashcard-front font-bold text-lg">
+                        SQL №${index + 1}: ${data.q}
+                    </div>
+                    <div class="flashcard-back">
+                        <p class="font-bold text-amber-400 mb-2">Ответ:</p>
+                        <p class="text-lg font-mono">${data.a}</p>
+                        <p class="mt-4 text-xs text-slate-400">Нажми, чтобы вернуть</p>
+                    </div>
+                </div>
+                <div class="text-center mt-2 text-amber-500 font-bold">➡️</div>
+            `;
+            container.appendChild(card);
+        });
+
+        // Задание
+        function applySqlTask() {
+            const input = document.getElementById('sql-task-input').value;
+            if (input.trim().length < 5) {
+                alert("Сначала напиши SQL-запрос!");
+                return;
+            }
+            
+            const solution = document.getElementById('solution-section');
+            solution.classList.remove('hidden');
+            solution.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // Проверка теста
+        function checkSqlQuiz() {
+            const form = document.getElementById('sql-quiz-form');
+            const resultDiv = document.getElementById('sql-quiz-result');
+            const scoreText = document.getElementById('sql-score-text');
+
+            const correctAnswers = {
+                q1: 'B', q2: 'B', q3: 'A', q4: 'B', q5: 'B',
+                q6: 'A', q7: 'A', q8: 'B', q9: 'B', q10: 'A'
+            };
+
+            let score = 0;
+
+            for (let i = 1; i <= 10; i++) {
+                const name = `q${i}`;
+                const radios = form.querySelectorAll(`input[name="${name}"]`);
+                let selectedValue = null;
+
+                radios.forEach(r => r.parentElement.classList.remove('correct', 'incorrect', 'missed'));
+
+                radios.forEach(r => {
+                    if (r.checked) selectedValue = r.value;
+                });
+
+                const correctVal = correctAnswers[name];
+                const correctLabel = Array.from(radios).find(r => r.value === correctVal)?.parentElement;
+                const selectedLabel = selectedValue ? Array.from(radios).find(r => r.value === selectedValue)?.parentElement : null;
+
+                if (selectedValue === correctVal) {
+                    score++;
+                    if (correctLabel) correctLabel.classList.add('correct');
+                } else {
+                    if (correctLabel) correctLabel.classList.add('correct');
+                    if (selectedLabel) selectedLabel.classList.add('incorrect');
+                }
+
+                if (!selectedValue && correctLabel) {
+                    correctLabel.classList.add('missed');
+                }
+            }
+
+            scoreText.innerHTML = `Ты набрал <span class="text-amber-400 font-black">${score}/10</span>`;
+            resultDiv.classList.remove('hidden');
+            resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            const btn = form.querySelector('button');
+            if (btn) {
+                btn.textContent = "Пройти тест ещё раз";
+                btn.onclick = () => location.reload();
+            }
+        }
+    </script>
+</body>
+</html>

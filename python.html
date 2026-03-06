@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python с нуля • Мастер кода • 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .code-block {
+            background: #0f172a;
+            border-radius: 12px;
+            padding: 1.5rem;
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            border: 1px solid #334155;
+        }
+        .highlight { color: #ffe16b; font-weight: bold; }
+        .tip { border-left: 4px solid #3776ab; padding-left: 1rem; }
+
+        .flashcard-container {
+            perspective: 1000px;
+            height: 220px;
+        }
+        .flashcard-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+        .flashcard-inner.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .flashcard-front, .flashcard-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            border-radius: 1rem;
+            text-align: center;
+        }
+        .flashcard-front {
+            background: linear-gradient(135deg, #306998, #3776ab);
+            border: 2px solid #ffe16b;
+            color: white;
+        }
+        .flashcard-back {
+            background: #1e293b;
+            color: #f1f5f9;
+            transform: rotateY(180deg);
+            border: 2px solid #3776ab;
+            flex-direction: column;
+        }
+        .scroll-cards {
+            max-height: 650px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        .scroll-cards::-webkit-scrollbar { width: 6px; }
+        .scroll-cards::-webkit-scrollbar-thumb { background: #ffe16b; border-radius: 10px; }
+        
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            border-radius: 1rem;
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .quiz-question {
+            background: rgba(30, 41, 59, 0.6);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            border: 1px solid #475569;
+        }
+        input[type="radio"] {
+            accent-color: #ffe16b;
+        }
+        .correct {
+            background-color: rgba(34, 197, 94, 0.25) !important;
+            border-color: #22c55e !important;
+            color: #bbf7d0;
+        }
+        .incorrect {
+            background-color: rgba(239, 68, 68, 0.25) !important;
+            border-color: #ef4444 !important;
+            color: #fecaca;
+        }
+        .missed {
+            background-color: rgba(249, 115, 22, 0.2) !important;
+            border-color: #f97316 !important;
+            color: #fed7aa;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-b from-slate-950 to-slate-900 text-slate-100 min-h-screen font-sans">
+
+    <nav class="p-6 max-w-6xl mx-auto flex justify-between items-center border-b border-slate-800">
+        <a href="index.html" class="text-blue-400 hover:text-blue-300 font-medium flex items-center">
+            ← Назад к курсам
+        </a>
+        <div class="px-4 py-1 bg-slate-800 rounded-full text-sm text-yellow-400 border border-blue-900/50">
+            Python (High-level Programming)
+        </div>
+    </nav>
+
+    <main class="max-w-5xl mx-auto p-6 pt-10">
+
+        <header class="text-center mb-12">
+            <h1 class="text-5xl md:text-6xl font-black mb-6 bg-gradient-to-r from-blue-400 via-yellow-200 to-yellow-500 bg-clip-text text-transparent">
+                Python — Сила Простоты
+            </h1>
+            <p class="text-xl md:text-2xl text-slate-300 max-w-4xl mx-auto leading-relaxed">
+                Изучаем самый популярный язык для Data Science, веба и автоматизации
+            </p>
+        </header>
+
+        <section class="mb-16 bg-slate-800/70 border border-blue-900/50 rounded-3xl p-8 md:p-12">
+            <h2 class="text-4xl font-bold mb-6 text-yellow-400 text-center">Полный курс для новичков</h2>
+            <p class="text-lg text-slate-300 mb-6 text-center">
+                От переменных до объектно-ориентированного программирования.<br>
+                Автор — Bro Code. Практика и понятные объяснения.
+            </p>
+
+            <div class="video-container shadow-2xl">
+                <iframe 
+                    src="https://www.youtube.com/embed/XKHEtdqhLK8" 
+                    title="Python Full Course for free 🐍 — Bro Code" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen>
+                </iframe>
+            </div>
+        </section>
+
+        <section class="mb-20 bg-slate-800/70 border border-blue-900/50 rounded-3xl p-8 md:p-12">
+            <h2 class="text-4xl font-bold mb-10 text-blue-400 text-center">Основы Языка</h2>
+            
+            <div class="grid md:grid-cols-2 gap-12 items-start">
+                <div class="space-y-6">
+                    <h3 class="text-2xl font-bold text-yellow-300 mb-4 text-center">Python Флешкарты</h3>
+                    <div class="scroll-cards space-y-8" id="python-cards-container"></div>
+                </div>
+
+                <div class="space-y-6 text-lg text-slate-200 leading-relaxed">
+                    <div class="tip">
+                        <p><strong>Python</strong> — это интерпретируемый язык. Его код читается почти как английский текст, что делает его идеальным для первого языка программирования.</p>
+                    </div>
+
+                    <p>Пример простой функции:</p>
+                    <div class="bg-slate-900 p-6 rounded-2xl border border-blue-800/40 font-mono text-sm">
+                        <span class="text-blue-400">def</span> <span class="text-yellow-300">greet</span>(name):<br>
+                        &nbsp;&nbsp;<span class="text-blue-400">print</span>(<span class="text-orange-300">f"Привет, {name}!"</span>)<br>
+                        <br>
+                        <span class="text-yellow-300">greet</span>(<span class="text-orange-300">"Мир"</span>)
+                    </div>
+
+                    <h4 class="text-xl font-bold text-blue-300 mt-6">Ключевые особенности:</h4>
+                    <ul class="list-disc pl-8 space-y-3 text-base">
+                        <li><strong>Динамическая типизация:</strong> не нужно указывать тип переменной явно.</li>
+                        <li><strong>Огромная библиотека:</strong> готовые решения для любых задач.</li>
+                        <li><strong>Отступы:</strong> структура кода определяется пробелами, а не скобками.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-20">
+            <h2 class="text-4xl font-bold mb-10 text-center text-blue-400">Попробуй в IDLE или VS Code</h2>
+            <div class="code-block text-base">
+# 1. Списки и циклы
+fruits = ["яблоко", "банан", "вишня"]
+for fruit in fruits:
+    print(fruit.upper())
+
+# 2. Условные конструкции
+age = 20
+if age >= 18:
+    print("Доступ разрешен")
+else:
+    print("Доступ закрыт")
+            </div>
+        </section>
+
+        
+            
+
+            <div id="solution-section" class="hidden animate-in fade-in slide-in-from-top-4 duration-500">
+                <div class="p-6 bg-blue-900/20 border border-blue-500/50 rounded-2xl">
+                    <h4 class="text-blue-400 font-bold mb-2 text-center">Возможное решение:</h4>
+                    <pre class="text-center text-slate-300 font-mono">def calculate(a, b):
+    s = a + b
+    if s > 100:
+        return "Big"
+    return s</pre>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-20 bg-slate-800/70 border border-blue-500/30 rounded-3xl p-8 md:p-12">
+            <h2 class="text-4xl font-bold mb-10 text-center text-blue-400">🧠 Мини-тест по Python</h2>
+            
+            <form id="python-quiz-form" class="space-y-10">
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-yellow-300 mb-4">1. Как вывести текст в консоль?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer">
+                        <input type="radio" name="q1" value="A" class="mr-3"> A) echo("Hello")
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer">
+                        <input type="radio" name="q1" value="B" class="mr-3"> B) print("Hello")
+                    </label>
+                    <label class="block p-3 rounded-lg border border-slate-700 cursor-pointer">
+                        <input type="radio" name="q1" value="C" class="mr-3"> C) console.log("Hello")
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-yellow-300 mb-4">2. Какой символ используется для комментариев?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer">
+                        <input type="radio" name="q2" value="A" class="mr-3"> A) //
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer">
+                        <input type="radio" name="q2" value="B" class="mr-3"> B) #
+                    </label>
+                    <label class="block p-3 rounded-lg border border-slate-700 cursor-pointer">
+                        <input type="radio" name="q2" value="C" class="mr-3"> C) /*
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-yellow-300 mb-4">3. Как создать переменную со значением 5?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer">
+                        <input type="radio" name="q3" value="A" class="mr-3"> A) x = 5
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer">
+                        <input type="radio" name="q3" value="B" class="mr-3"> B) int x = 5
+                    </label>
+                    <label class="block p-3 rounded-lg border border-slate-700 cursor-pointer">
+                        <input type="radio" name="q3" value="C" class="mr-3"> C) var x = 5
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-yellow-300 mb-4">4. Какой тип данных у "10"?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer">
+                        <input type="radio" name="q4" value="A" class="mr-3"> A) int
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer">
+                        <input type="radio" name="q4" value="B" class="mr-3"> B) str
+                    </label>
+                    <label class="block p-3 rounded-lg border border-slate-700 cursor-pointer">
+                        <input type="radio" name="q4" value="C" class="mr-3"> C) float
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-yellow-300 mb-4">5. Как начать цикл, который сработает 5 раз?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer">
+                        <input type="radio" name="q5" value="A" class="mr-3"> A) for i in 5:
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer">
+                        <input type="radio" name="q5" value="B" class="mr-3"> B) for i in range(5):
+                    </label>
+                    <label class="block p-3 rounded-lg border border-slate-700 cursor-pointer">
+                        <input type="radio" name="q5" value="C" class="mr-3"> C) loop 5 times:
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-yellow-300 mb-4">6. Как проверить равенство двух значений?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer">
+                        <input type="radio" name="q6" value="A" class="mr-3"> A) ==
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer">
+                        <input type="radio" name="q6" value="B" class="mr-3"> B) =
+                    </label>
+                    <label class="block p-3 rounded-lg border border-slate-700 cursor-pointer">
+                        <input type="radio" name="q6" value="C" class="mr-3"> C) is
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-yellow-300 mb-4">7. Какое расширение у файлов Python?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer">
+                        <input type="radio" name="q7" value="A" class="mr-3"> A) .pt
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer">
+                        <input type="radio" name="q7" value="B" class="mr-3"> B) .py
+                    </label>
+                    <label class="block p-3 rounded-lg border border-slate-700 cursor-pointer">
+                        <input type="radio" name="q7" value="C" class="mr-3"> C) .python
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-yellow-300 mb-4">8. Как добавить элемент в конец списка?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer">
+                        <input type="radio" name="q8" value="A" class="mr-3"> A) add()
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer">
+                        <input type="radio" name="q8" value="B" class="mr-3"> B) append()
+                    </label>
+                    <label class="block p-3 rounded-lg border border-slate-700 cursor-pointer">
+                        <input type="radio" name="q8" value="C" class="mr-3"> C) push()
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-yellow-300 mb-4">9. Какое ключевое слово создает функцию?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer">
+                        <input type="radio" name="q9" value="A" class="mr-3"> A) function
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer">
+                        <input type="radio" name="q9" value="B" class="mr-3"> B) def
+                    </label>
+                    <label class="block p-3 rounded-lg border border-slate-700 cursor-pointer">
+                        <input type="radio" name="q9" value="C" class="mr-3"> C) define
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-yellow-300 mb-4">10. Что делает оператор %?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer">
+                        <input type="radio" name="q10" value="A" class="mr-3"> A) Процент от числа
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer">
+                        <input type="radio" name="q10" value="B" class="mr-3"> B) Остаток от деления
+                    </label>
+                    <label class="block p-3 rounded-lg border border-slate-700 cursor-pointer">
+                        <input type="radio" name="q10" value="C" class="mr-3"> C) Возведение в степень
+                    </label>
+                </div>
+
+                <div class="text-center mt-12">
+                    <button type="button" onclick="checkPythonQuiz()"
+                        class="bg-blue-600 hover:bg-blue-500 text-white font-black py-5 px-16 rounded-xl text-xl transition-all shadow-lg">
+                        ПРОВЕРИТЬ ОТВЕТЫ
+                    </button>
+                </div>
+            </form>
+
+            <div id="python-quiz-result" class="hidden mt-10 p-8 bg-slate-900/80 rounded-2xl border border-blue-700/50 text-center">
+                <h3 class="text-3xl font-bold text-yellow-400 mb-6">Результат теста</h3>
+                <p id="python-score-text" class="text-4xl font-black mb-4"></p>
+            </div>
+        </section>
+
+        <div class="text-center pb-20">
+    <a href="cats_tasks.html" 
+       style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"
+       class="inline-flex items-center gap-3 bg-orange-600 hover:bg-orange-500 text-white font-black py-5 px-12 rounded-2xl text-2xl transition-all transform hover:scale-105 shadow-xl shadow-orange-900/40">
+        🐾 котики ждут тебя!
+    </a>
+    
+    <p class="mt-6 text-slate-400 text-lg animate-pulse" 
+       style="font-family: 'Courier New', Courier, monospace;">
+        Нажми, чтобы открыть секретный уровень с пушистыми задачами...
+    </p>
+</div>
+    </main>
+
+    <script>
+        const pythonCards = [
+            { q: "Как превратить строку в число?", a: "Функция int('10')" },
+            { q: "Как узнать длину списка или строки?", a: "Функция len()" },
+            { q: "Неизменяемый аналог списка?", a: "Кортеж (tuple)" },
+            { q: "Как получить ввод от пользователя?", a: "Функция input()" },
+            { q: "Коллекция 'ключ-значение'?", a: "Словарь (dict)" },
+            { q: "Как возвести 2 в степень 3?", a: "Оператор 2 ** 3" },
+            { q: "Как проверить наличие элемента в списке?", a: "Оператор in" },
+            { q: "Как импортировать модуль?", a: "Инструкция import math" },
+            { q: "Как выйти из цикла досрочно?", a: "Команда break" },
+            { q: "Тип данных для True/False?", a: "Логический тип (bool)" },
+            { q: "Как превратить число в строку?", a: "Функция str(5)" },
+            { q: "Как объединить два списка?", a: "Оператор + или метод extend()" },
+            { q: "Как получить срез списка?", a: "my_list[start:stop]" },
+            { q: "Что такое None?", a: "Специальное значение 'ничего'" },
+            { q: "Как вызвать метод у объекта?", a: "Через точку, например: string.lower()" }
+        ];
+
+        const container = document.getElementById('python-cards-container');
+
+        pythonCards.forEach((data, index) => {
+            const card = document.createElement('div');
+            card.className = 'flashcard-container';
+            card.innerHTML = `
+                <div class="flashcard-inner" onclick="this.classList.toggle('is-flipped')">
+                    <div class="flashcard-front font-bold text-lg">
+                        Python №${index + 1}: ${data.q}
+                    </div>
+                    <div class="flashcard-back">
+                        <p class="font-bold text-yellow-400 mb-2">Ответ:</p>
+                        <p class="text-lg font-mono">${data.a}</p>
+                        <p class="mt-4 text-xs text-slate-400">Нажми, чтобы вернуть</p>
+                    </div>
+                </div>
+                <div class="text-center mt-2 text-blue-500 font-bold">➡️</div>
+            `;
+            container.appendChild(card);
+        });
+
+        function applyPythonTask() {
+            const input = document.getElementById('python-task-input').value;
+            if (input.trim().length < 5) {
+                alert("Сначала напиши код функции!");
+                return;
+            }
+            const solution = document.getElementById('solution-section');
+            solution.classList.remove('hidden');
+            solution.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function checkPythonQuiz() {
+            const form = document.getElementById('python-quiz-form');
+            const resultDiv = document.getElementById('python-quiz-result');
+            const scoreText = document.getElementById('python-score-text');
+            const correctAnswers = {
+                q1: 'B', q2: 'B', q3: 'A', q4: 'B', q5: 'B',
+                q6: 'A', q7: 'B', q8: 'B', q9: 'B', q10: 'B'
+            };
+            let score = 0;
+            for (let i = 1; i <= 10; i++) {
+                const name = `q${i}`;
+                const radios = form.querySelectorAll(`input[name="${name}"]`);
+                let selectedValue = null;
+                radios.forEach(r => r.parentElement.classList.remove('correct', 'incorrect', 'missed'));
+                radios.forEach(r => { if (r.checked) selectedValue = r.value; });
+                const correctVal = correctAnswers[name];
+                const correctLabel = Array.from(radios).find(r => r.value === correctVal)?.parentElement;
+                const selectedLabel = selectedValue ? Array.from(radios).find(r => r.value === selectedValue)?.parentElement : null;
+                if (selectedValue === correctVal) {
+                    score++;
+                    if (correctLabel) correctLabel.classList.add('correct');
+                } else {
+                    if (correctLabel) correctLabel.classList.add('correct');
+                    if (selectedLabel) selectedLabel.classList.add('incorrect');
+                }
+                if (!selectedValue && correctLabel) { correctLabel.classList.add('missed'); }
+            }
+            scoreText.innerHTML = `Ты набрал <span class="text-yellow-400 font-black">${score}/10</span>`;
+            resultDiv.classList.remove('hidden');
+            resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            const btn = form.querySelector('button');
+            if (btn) {
+                btn.textContent = "Пройти тест ещё раз";
+                btn.onclick = () => location.reload();
+            }
+        }
+    </script>
+</body>
+</html>

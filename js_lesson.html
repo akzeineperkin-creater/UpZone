@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript с нуля • Оживи свой код • 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .code-block {
+            background: #1e1e1e;
+            border-radius: 12px;
+            padding: 1.5rem;
+            font-family: 'Fira Code', 'Courier New', monospace;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            border: 1px solid #444;
+        }
+        .highlight { color: #facc15; font-weight: bold; }
+        .tip { border-left: 4px solid #facc15; padding-left: 1rem; }
+
+        .video-wrapper {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            border-radius: 12px;
+            border: 2px solid #facc15;
+        }
+        .video-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .flashcard-container {
+            perspective: 1000px;
+            height: 220px;
+        }
+        .flashcard-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+        .flashcard-inner.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .flashcard-front, .flashcard-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            border-radius: 1rem;
+            text-align: center;
+        }
+        .flashcard-front {
+            background: linear-gradient(135deg, #b45309, #f59e0b);
+            border: 2px solid #fbbf24;
+            color: #000;
+        }
+        .flashcard-back {
+            background: #1e293b;
+            color: #f1f5f9;
+            transform: rotateY(180deg);
+            border: 2px solid #facc15;
+            flex-direction: column;
+        }
+        .scroll-cards {
+            max-height: 650px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        .scroll-cards::-webkit-scrollbar { width: 6px; }
+        .scroll-cards::-webkit-scrollbar-thumb { background: #facc15; border-radius: 10px; }
+
+        /* Стили для теста */
+        .quiz-question {
+            background: rgba(30, 41, 59, 0.6);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            border: 1px solid #475569;
+        }
+        input[type="radio"] {
+            accent-color: #facc15;
+        }
+        .correct {
+            background-color: rgba(34, 197, 94, 0.25) !important;
+            border-color: #22c55e !important;
+            color: #bbf7d0;
+        }
+        .incorrect {
+            background-color: rgba(239, 68, 68, 0.25) !important;
+            border-color: #ef4444 !important;
+            color: #fecaca;
+        }
+        .missed {
+            background-color: rgba(249, 115, 22, 0.2) !important;
+            border-color: #f97316 !important;
+            color: #fed7aa;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-b from-slate-950 to-slate-900 text-slate-100 min-h-screen font-sans">
+
+    <nav class="p-6 max-w-6xl mx-auto flex justify-between items-center border-b border-slate-800">
+        <a href="css_lesson.html" class="text-amber-400 hover:text-amber-300 font-medium flex items-center">
+            ← Назад к CSS
+        </a>
+        <div class="px-4 py-1 bg-slate-800 rounded-full text-sm text-amber-300 border border-amber-900/50">
+            JavaScript (JS)
+        </div>
+    </nav>
+
+    <main class="max-w-5xl mx-auto p-6 pt-10">
+
+        <header class="text-center mb-12">
+            <h1 class="text-5xl md:text-6xl font-black mb-6 bg-gradient-to-r from-yellow-400 via-amber-400 to-orange-400 bg-clip-text text-transparent">
+                JavaScript — Интеллект сайта
+            </h1>
+            <p class="text-xl md:text-2xl text-slate-300 max-w-4xl mx-auto leading-relaxed">
+                Учимся программировать логику, работать с данными и кликами
+            </p>
+        </header>
+
+        <section class="mb-16 bg-slate-800/70 border border-amber-900/50 rounded-3xl p-8 md:p-12">
+            <h2 class="text-4xl font-bold mb-6 text-amber-400 text-center">Не всё сразу, но постепенно</h2>
+            <p class="text-lg text-slate-300 mb-6 text-center">
+                Самый понятный и полный обзор JavaScript для абсолютных новичков.
+            </p>
+
+            <div class="video-wrapper shadow-2xl">
+                <iframe
+                    src="https://www.youtube.com/embed/lfmg-EJ8gm4"
+                    title="Learn JS in 1 hour 🌎 — Bro Code"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen>
+                </iframe>
+            </div>
+        </section>
+
+        <section class="mb-20 bg-slate-800/70 border border-amber-900/50 rounded-3xl p-8 md:p-12">
+            <h2 class="text-4xl font-bold mb-10 text-amber-400 text-center">Основы логики</h2>
+           
+            <div class="grid md:grid-cols-2 gap-12 items-start">
+                <div class="space-y-6">
+                    <h3 class="text-2xl font-bold text-amber-300 mb-4 text-center">JS Флешкарты</h3>
+                    <div class="scroll-cards space-y-8" id="js-cards-container"></div>
+                </div>
+
+                <div class="space-y-6 text-lg text-slate-200 leading-relaxed">
+                    <div class="tip">
+                        <p><strong>JavaScript</strong> — это мозг сайта. Он обрабатывает клики, считает данные и делает страницу живой.</p>
+                    </div>
+
+                    <h4 class="text-xl font-bold text-amber-300 mt-6">Базовый синтаксис:</h4>
+                    <div class="code-block text-sm">
+<span class="text-purple-400">let</span> name = <span class="text-green-400">"Аня"</span>; <span class="text-slate-500">// Переменная</span>
+<span class="text-purple-400">function</span> <span class="text-blue-400">sayHello</span>() {
+  <span class="text-blue-400">alert</span>(<span class="text-green-400">"Привет, "</span> + name);
+}
+                    </div>
+
+                    <h4 class="text-xl font-bold text-amber-300 mt-6">Подключение:</h4>
+                    <p class="text-base text-slate-300">
+                        Скрипт вставляется перед закрывающим тегом <code>&lt;/body&gt;</code>:
+                    </p>
+                    <code class="text-amber-200 bg-slate-900 p-2 rounded">&lt;script src="script.js"&gt;&lt;/script&gt;</code>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-20 bg-slate-900 p-8 rounded-3xl border border-slate-700">
+            <h2 class="text-3xl font-bold mb-6 text-center text-orange-400">Твой первый скрипт</h2>
+            <div class="code-block">
+console.log("Код работает!");
+alert("Привет из JavaScript!");
+            </div>
+        </section>
+
+        
+
+                <div id="solution-block" class="hidden animate-in fade-in slide-in-from-top-4 duration-500">
+                    <div class="bg-green-900/20 border border-green-500/50 p-6 rounded-2xl">
+                        <h4 class="text-green-400 font-bold mb-4 flex items-center gap-2">
+                            <span>✅ Код принят! Правильное решение:</span>
+                        </h4>
+                        <div class="code-block text-sm mb-6">
+<span class="text-purple-400">const</span> element = document.<span class="text-blue-400">querySelector</span>(<span class="text-green-400">'#status'</span>);
+element.textContent = <span class="text-green-400">"Задание выполнено!"</span>;</div>
+                       
+                        <div class="text-center p-6 bg-slate-900 rounded-xl border border-slate-800">
+                            <p class="text-slate-400 mb-2 uppercase text-xs tracking-widest">Живой результат:</p>
+                            <h3 id="status" class="text-2xl font-bold text-slate-600">Ожидание кода...</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- МИНИ-ТЕСТ ПО JAVASCRIPT – все варианты выровнены -->
+        <section class="mb-20 bg-slate-800/70 border border-amber-900/50 rounded-3xl p-8 md:p-12">
+            <h2 class="text-4xl font-bold mb-10 text-amber-400 text-center">🔍 Мини-тест по JavaScript</h2>
+            <p class="text-center text-slate-300 mb-12 text-lg">
+                Выбери один правильный вариант (A, B или C) на каждый вопрос
+            </p>
+
+            <form id="js-quiz-form" class="space-y-10">
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-amber-300 mb-4">1. Чем отличается <code class="text-amber-200">let</code> от <code class="text-amber-200">const</code>?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-amber-800/30 cursor-pointer transition-all">
+                        <input type="radio" name="q1" value="A" class="mr-3 accent-amber-500"> A) let — константа, const можно менять
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-amber-800/30 cursor-pointer transition-all">
+                        <input type="radio" name="q1" value="B" class="mr-3 accent-amber-500"> B) let можно переприсваивать, const — нельзя
+                    </label>
+                    <label class="block p-3 rounded-lg border border-amber-800/30 cursor-pointer transition-all">
+                        <input type="radio" name="q1" value="C" class="mr-3 accent-amber-500"> C) Между ними нет разницы
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-amber-300 mb-4">2. Как правильно объявить переменную со значением 42?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-amber-800/30 cursor-pointer transition-all">
+                        <input type="radio" name="q2" value="A" class="mr-3"> A) var 42 = number;
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-amber-800/30 cursor-pointer transition-all">
+                        <input type="radio" name="q2" value="B" class="mr-3"> B) let x = "42";
+                    </label>
+                    <label class="block p-3 rounded-lg border border-amber-800/30 cursor-pointer transition-all">
+                        <input type="radio" name="q2" value="C" class="mr-3"> C) let age = 42;
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-amber-300 mb-4">3. Что выведет <code>console.log("5" + 3)</code>?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-amber-800/30 cursor-pointer transition-all">
+                        <input type="radio" name="q3" value="A" class="mr-3"> A) 8
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-amber-800/30 cursor-pointer transition-all">
+                        <input type="radio" name="q3" value="B" class="mr-3"> B) "53"
+                    </label>
+                    <label class="block p-3 rounded-lg border border-amber-800/30 cursor-pointer transition-all">
+                        <input type="radio" name="q3" value="C" class="mr-3"> C) Ошибка
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-amber-300 mb-4">4. Как правильно создать функцию с alert?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-amber-800/30 cursor-pointer transition-all">
+                        <input type="radio" name="q4" value="A" class="mr-3"> A) function hi() { alert("Привет"); }
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-amber-800/30 cursor-pointer transition-all">
+                        <input type="radio" name="q4" value="B" class="mr-3"> B) let hi = alert("Привет");
+                    </label>
+                    <label class="block p-3 rounded-lg border border-amber-800/30 cursor-pointer transition-all">
+                        <input type="radio" name="q4" value="C" class="mr-3"> C) function alert hi()
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-amber-300 mb-4">5. Как найти элемент с id="menu"?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-amber-800/30 cursor-pointer transition-all">
+                        <input type="radio" name="q5" value="A" class="mr-3"> A) document.getElementById("menu")
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-amber-800/30 cursor-pointer transition-all">
+                        <input type="radio" name="q5" value="B" class="mr-3"> B) document.querySelector(".menu")
+                    </label>
+                    <label class="block p-3 rounded-lg border border-amber-800/30 cursor-pointer transition-all">
+                        <input type="radio" name="q5" value="C" class="mr-3"> C) getElementById("menu")
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-amber-300 mb-4">6. Что делает <code>element.textContent = "Готово!"</code>?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-amber-800/30 cursor-pointer transition-all">
+                        <input type="radio" name="q6" value="A" class="mr-3"> A) Меняет цвет текста
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-amber-800/30 cursor-pointer transition-all">
+                        <input type="radio" name="q6" value="B" class="mr-3"> B) Меняет текст внутри элемента
+                    </label>
+                    <label class="block p-3 rounded-lg border border-amber-800/30 cursor-pointer transition-all">
+                        <input type="radio" name="q6" value="C" class="mr-3"> C) Удаляет элемент
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-amber-300 mb-4">7. Как правильно добавить обработчик клика?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-amber-800/30 cursor-pointer transition-all">
+                        <input type="radio" name="q7" value="A" class="mr-3"> A) element.addEventListener("click", fn)
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-amber-800/30 cursor-pointer transition-all">
+                        <input type="radio" name="q7" value="B" class="mr-3"> B) element.onclick = fn
+                    </label>
+                    <label class="block p-3 rounded-lg border border-amber-800/30 cursor-pointer transition-all">
+                        <input type="radio" name="q7" value="C" class="mr-3"> C) Оба варианта правильные
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-amber-300 mb-4">8. Что такое массив?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-amber-800/30 cursor-pointer transition-all">
+                        <input type="radio" name="q8" value="A" class="mr-3"> A) Упорядоченный список значений
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-amber-800/30 cursor-pointer transition-all">
+                        <input type="radio" name="q8" value="B" class="mr-3"> B) Набор пар ключ-значение
+                    </label>
+                    <label class="block p-3 rounded-lg border border-amber-800/30 cursor-pointer transition-all">
+                        <input type="radio" name="q8" value="C" class="mr-3"> C) Только строки
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-amber-300 mb-4">9. Для чего нужна конструкция if...else?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-amber-800/30 cursor-pointer transition-all">
+                        <input type="radio" name="q9" value="A" class="mr-3"> A) Для циклов
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-amber-800/30 cursor-pointer transition-all">
+                        <input type="radio" name="q9" value="B" class="mr-3"> B) Для выполнения кода по условию
+                    </label>
+                    <label class="block p-3 rounded-lg border border-amber-800/30 cursor-pointer transition-all">
+                        <input type="radio" name="q9" value="C" class="mr-3"> C) Для объявления функций
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-amber-300 mb-4">10. Как перебрать элементы массива в консоль?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-amber-800/30 cursor-pointer transition-all">
+                        <input type="radio" name="q10" value="A" class="mr-3 accent-amber-500"> A) for (let i = 0; i < arr.length; i++) console.log(arr[i])
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-amber-800/30 cursor-pointer transition-all">
+                        <input type="radio" name="q10" value="B" class="mr-3 accent-amber-500"> B) console.log(arr.all)
+                    </label>
+                    <label class="block p-3 rounded-lg border border-amber-800/30 cursor-pointer transition-all">
+                        <input type="radio" name="q10" value="C" class="mr-3 accent-amber-500"> C) print(arr)
+                    </label>
+                </div>
+
+                <div class="text-center mt-12">
+                    <button type="button" onclick="checkJsQuiz()"
+                        class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-5 px-16 rounded-xl text-xl transition-all active:scale-95 shadow-lg shadow-amber-500/30">
+                        ПРОВЕРИТЬ ОТВЕТЫ
+                    </button>
+                </div>
+            </form>
+
+            <div id="js-quiz-result" class="hidden mt-10 p-8 bg-slate-900/80 rounded-2xl border border-amber-700/50 text-center">
+                <h3 class="text-3xl font-bold text-amber-400 mb-6">Результат теста</h3>
+                <p id="js-score-text" class="text-4xl font-black mb-4"></p>
+                <p class="text-slate-400 text-sm mt-2">
+                    Правильные — зелёный, твои ошибки — красный, пропущенные правильные — оранжевый
+                </p>
+            </div>
+        </section>
+
+    </main>
+
+    <script type="text/javascript">
+    (function(d, t) {
+        var v = d.createElement(t), s = d.getElementsByTagName(t)[0];
+        v.onload = function() {
+          window.voiceflow.chat.load({
+            verify: { projectID: '69691a2a690bb46ec57a9014' },
+            url: 'https://general-runtime.voiceflow.com',
+            versionID: 'production',
+            voice: {
+              url: "https://runtime-api.voiceflow.com"
+            }
+          });
+        }
+        v.src = "https://cdn.voiceflow.com/widget-next/bundle.mjs"; v.type = "text/javascript"; s.parentNode.insertBefore(v, s);
+    })(document, 'script');
+    </script>
+
+
+    <div class="text-center pb-20">
+    <a href="js_cats.html"
+       style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"
+       class="inline-flex items-center gap-3 bg-yellow-400 hover:bg-yellow-300 text-black font-black py-5 px-12 rounded-2xl text-2xl transition-all transform hover:scale-105 shadow-xl shadow-yellow-900/20">
+        🐾 котики ждут тебя!
+    </a>
+    
+    <p class="mt-6 text-slate-400 text-lg animate-pulse" 
+       style="font-family: 'Courier New', Courier, monospace;">
+        Нажми, чтобы открыть секретный уровень с пушистыми задачами...
+    </p>
+</div>
+
+
+    <script>
+        // Флешкарты JS
+        const jsCards = [
+            { q: "Как создать переменную?", a: "Используй let или const (например: let x = 5;)" },
+            { q: "Как вывести сообщение в окне?", a: "Функция alert('Привет!');" },
+            { q: "Как вывести данные в консоль?", a: "console.log(данные);" },
+            { q: "Что такое функция?", a: "Блок кода, который можно вызывать многократно." },
+            { q: "Как написать условие?", a: "if (условие) { ... } else { ... }" },
+            { q: "Что такое массив?", a: "Список данных: let list = [1, 2, 3];" },
+            { q: "Тип данных для текста?", a: "String (строка), пишется в кавычках." },
+            { q: "Тип данных для чисел?", a: "Number (число)." },
+            { q: "Как получить элемент из HTML?", a: "document.querySelector('.class');" },
+            { q: "Как отследить клик мышкой?", a: "element.addEventListener('click', ...);" },
+            { q: "Что такое объект?", a: "Набор данных {ключ: значение}." },
+            { q: "Как изменить текст в HTML через JS?", a: "element.textContent = 'Новый текст';" },
+            { q: "Для чего нужен цикл for?", a: "Чтобы повторить код несколько раз." },
+            { q: "В чем разница между let и const?", a: "let можно менять, const — это константа (нельзя)." },
+            { q: "Что такое DOM?", a: "Это структура HTML-страницы, доступная для JS." }
+        ];
+
+        const container = document.getElementById('js-cards-container');
+
+        jsCards.forEach((data, index) => {
+            const card = document.createElement('div');
+            card.className = 'flashcard-container';
+            card.innerHTML = `
+                <div class="flashcard-inner" onclick="this.classList.toggle('is-flipped')">
+                    <div class="flashcard-front font-bold text-lg text-slate-900">
+                        JS №${index + 1}: ${data.q}
+                    </div>
+                    <div class="flashcard-back">
+                        <p class="font-bold text-amber-400 mb-2">Ответ:</p>
+                        <p class="text-lg px-4">${data.a}</p>
+                        <p class="mt-4 text-xs text-slate-500 italic">Нажми, чтобы перевернуть</p>
+                    </div>
+                </div>
+                <div class="text-center mt-2 text-amber-500 font-bold">➡️</div>
+            `;
+            container.appendChild(card);
+        });
+
+        // Проверка задания
+        function submitTask() {
+            const input = document.getElementById('user-code-input').value;
+            if (input.trim().length < 5) {
+                alert("Пожалуйста, сначала напиши код!");
+                return;
+            }
+
+            document.getElementById('solution-block').classList.remove('hidden');
+       
+            const status = document.getElementById('status');
+            status.textContent = "Задание выполнено!";
+            status.classList.remove('text-slate-600');
+            status.classList.add('text-green-400');
+       
+            document.getElementById('solution-block').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // Проверка теста JS с подсветкой вариантов
+        function checkJsQuiz() {
+            const form = document.getElementById('js-quiz-form');
+            if (!form) {
+                alert("Форма теста не найдена!");
+                return;
+            }
+
+            const resultDiv = document.getElementById('js-quiz-result');
+            const scoreText = document.getElementById('js-score-text');
+
+            const correctAnswers = {
+                q1: 'B',
+                q2: 'C',
+                q3: 'B',
+                q4: 'A',
+                q5: 'A',
+                q6: 'B',
+                q7: 'C',
+                q8: 'A',
+                q9: 'B',
+                q10: 'A'
+            };
+
+            let score = 0;
+
+            for (let i = 1; i <= 10; i++) {
+                const name = `q${i}`;
+                const radios = form.querySelectorAll(`input[name="${name}"]`);
+                let selectedValue = null;
+
+                // Сбрасываем стили
+                radios.forEach(r => {
+                    r.parentElement.classList.remove('correct', 'incorrect', 'missed');
+                });
+
+                // Находим выбранный ответ
+                radios.forEach(r => {
+                    if (r.checked) selectedValue = r.value;
+                });
+
+                const correctVal = correctAnswers[name];
+                const correctLabel = Array.from(radios).find(r => r.value === correctVal)?.parentElement;
+                const selectedLabel = selectedValue ? Array.from(radios).find(r => r.value === selectedValue)?.parentElement : null;
+
+                if (selectedValue === correctVal) {
+                    score++;
+                    if (correctLabel) correctLabel.classList.add('correct');
+                } else {
+                    if (correctLabel) correctLabel.classList.add('correct');
+                    if (selectedLabel) selectedLabel.classList.add('incorrect');
+                }
+
+                if (!selectedValue && correctLabel) {
+                    correctLabel.classList.add('missed');
+                }
+            }
+
+            scoreText.innerHTML = `Ты набрал <span class="text-amber-400 font-black">${score}/10</span>`;
+            resultDiv.classList.remove('hidden');
+            resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            // Меняем кнопку
+            const btn = form.querySelector('button');
+            if (btn) {
+                btn.textContent = "Пройти тест ещё раз";
+                btn.onclick = () => location.reload();
+            }
+        }
+    </script>
+</body>
+</html>
