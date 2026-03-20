@@ -5,6 +5,80 @@
     <title>Pro Media | Ultimate Chat</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+        #chat-widget-button {
+            position: fixed;
+            bottom: 30px;
+            left: 30px; 
+            width: 70px;
+            height: 70px;
+            background: var(--accent-blue);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+        }
+        .chat-badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            min-width: 22px;
+            height: 22px;
+            border-radius: 11px;
+            background: #ef4444; 
+            color: #fff;
+            font-size: 12px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 5px;
+            border: 2px solid var(--bg-main); 
+        }
+        .chat-badge.hidden {
+            transform: scale(0);
+            opacity: 0;
+        }
+        .sdot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid var(--bg-sidebar); 
+            display: inline-block;
+            flex-shrink: 0;
+        }
+        .sdot.online { 
+            background: #43b581; 
+            position: relative; 
+        }
+        .sdot.offline { 
+            background: #747f8d; 
+        }
+        .sdot.online::after {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 50%;
+            border: 1.5px solid #43b581;
+            opacity: 0;
+            animation: pulse-ring 2.5s ease-out infinite;
+        }
+
+@keyframes pulse-ring {
+    0% { transform: scale(1); opacity: 0.5; }
+    70% { transform: scale(2); opacity: 0; }
+    100% { opacity: 0; }
+}
+
+        .header-status-text {
+            font-size: 13px;
+            color: #b9bbbe;
+            font-weight: normal;
+            margin-left: 8px;
+        }
+
         :root {
             --bg-main: #2c2f33;
             --bg-sidebar: #23272a;
@@ -27,7 +101,6 @@
         }
         #chat-widget-button:hover { transform: scale(1.1); }
 
-        /* FIX 1: Unified .chat-header h2 rule (was duplicated with conflicting styles) */
         .chat-header h2 {
             color: white;
             font-size: 20px;
@@ -53,7 +126,7 @@
             width: 320px; background: var(--bg-sidebar);
             border-right: 1px solid var(--border-color);
             display: flex; flex-direction: column;
-            flex-shrink: 0; /* FIX 2: prevent sidebar from shrinking */
+            flex-shrink: 0;
         }
         .sidebar-header { padding: 25px; font-size: 22px; font-weight: bold; color: white; border-bottom: 1px solid var(--border-color); }
         .sidebar-content { flex: 1; overflow-y: auto; padding-top: 10px; }
@@ -72,14 +145,12 @@
             width: 35px; height: 35px; border-radius: 50%; background: #5865f2;
             display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; flex-shrink: 0;
         }
-
-        /* FIX 3: main-chat must properly fill remaining space and not overflow */
         .main-chat {
             flex: 1;
             display: flex;
             flex-direction: column;
             background: var(--bg-main);
-            min-width: 0; /* FIX: prevents flex overflow */
+            min-width: 0; 
             overflow: hidden;
         }
 
@@ -87,10 +158,8 @@
             padding: 20px 30px; background: var(--bg-sidebar);
             display: flex; justify-content: space-between; align-items: center;
             border-bottom: 1px solid var(--border-color);
-            flex-shrink: 0; /* FIX 4: header must not shrink */
+            flex-shrink: 0; 
         }
-
-        /* FIX 5: messages-container must scroll properly */
         .messages-container {
             flex: 1;
             padding: 30px;
@@ -98,7 +167,7 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
-            min-height: 0; /* FIX: critical for flex scroll to work */
+            min-height: 0;
         }
 
         .message { max-width: 65%; padding: 12px 18px; border-radius: 18px; color: white; word-wrap: break-word; line-height: 1.4; }
@@ -109,8 +178,8 @@
         .input-panel {
             padding: 25px 30px; background: var(--bg-sidebar);
             display: flex; gap: 15px; align-items: center;
-            flex-shrink: 0; /* FIX 6: input panel must not shrink */
-            position: relative; /* FIX 7: for emoji picker positioning */
+            flex-shrink: 0; 
+            position: relative; 
         }
         #msgInput {
             flex: 1; padding: 14px 25px; border-radius: 30px; border: none;
@@ -126,19 +195,12 @@
             width: 100%; padding: 8px 15px; border-radius: 5px; border: none;
             background: var(--bg-input-area); color: white; outline: none; font-size: 14px;
         }
-
-        .ai-panel {
-            padding: 15px 20px; border-top: 1px solid var(--border-color);
-        }
-        .ai-panel label { display: flex; align-items: center; gap: 10px; cursor: pointer; color: #b9bbbe; font-size: 12px; font-weight: bold; text-transform: uppercase; }
-        .ai-panel p { font-size: 10px; color: #72767d; margin-top: 4px; }
-
         .toast {
             position: fixed; bottom: 110px; left: 30px;
             background: #43b581; color: white; padding: 10px 20px;
             border-radius: 10px; font-size: 14px; z-index: 9999;
             opacity: 0; transition: opacity 0.3s;
-            pointer-events: none; /* FIX 8: toast should not block clicks */
+            pointer-events: none; 
         }
         .toast.show { opacity: 1; }
 
@@ -152,7 +214,6 @@
         }
         .order-btn:hover { transform: scale(1.05); }
 
-        /* Room item hover actions */
         .room-item { position: relative; }
         .room-item .room-actions {
             position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
@@ -167,7 +228,6 @@
         .room-action-btn:hover { background: #f04747; color: white; }
         .room-action-btn.leave:hover { background: #f0a500; color: white; }
 
-        /* Room context modal */
         .room-modal-overlay {
             position: fixed; inset: 0; background: rgba(0,0,0,0.65);
             z-index: 9999; display: flex; align-items: center; justify-content: center;
@@ -193,7 +253,6 @@
         }
         .room-modal-btn:hover { filter: brightness(1.1); transform: translateX(3px); }
 
-        /* FIX 9: members panel layout fix — must be sibling of messages, not child */
         #membersPanel {
             width: 0;
             overflow: hidden;
@@ -205,8 +264,6 @@
             position: relative;
             flex-shrink: 0;
         }
-
-        /* FIX 10: chat-body wrapper to hold messages + members panel side by side */
         .chat-body {
             flex: 1;
             display: flex;
@@ -214,8 +271,6 @@
             min-height: 0;
             overflow: hidden;
         }
-
-        /* FIX 11: emoji picker anchored to input panel */
         #emojiPicker {
             display: none;
             position: absolute;
@@ -223,6 +278,122 @@
             left: 80px;
             z-index: 9999;
         }
+
+        /* ========== ПОИСК ПО СООБЩЕНИЯМ ========== */
+        #msgSearchOverlay {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--bg-main);
+            z-index: 100;
+            flex-direction: column;
+        }
+        #msgSearchOverlay.open { display: flex; }
+
+        .msearch-header {
+            padding: 16px 20px;
+            background: var(--bg-sidebar);
+            border-bottom: 1px solid var(--border-color);
+            display: flex; align-items: center; gap: 12px;
+            flex-shrink: 0;
+        }
+        .msearch-bar {
+            flex: 1; display: flex; align-items: center; gap: 10px;
+            background: var(--bg-input-area);
+            border-radius: 25px; padding: 9px 16px;
+            border: 1px solid transparent; transition: border-color 0.15s;
+        }
+        .msearch-bar:focus-within { border-color: #4f545c; }
+        .msearch-bar input {
+            flex: 1; border: none; outline: none;
+            background: transparent; color: white; font-size: 15px;
+            font-family: inherit;
+        }
+        .msearch-bar input::placeholder { color: #72767d; }
+        .msearch-clear {
+            background: none; border: none; color: #72767d;
+            cursor: pointer; font-size: 16px; line-height: 1;
+            padding: 2px 4px; border-radius: 4px; display: none;
+        }
+        .msearch-clear:hover { color: #b9bbbe; }
+        .msearch-close {
+            background: none; border: none; color: #72767d;
+            cursor: pointer; font-size: 24px; line-height: 1;
+            transition: color 0.15s;
+        }
+        .msearch-close:hover { color: white; }
+
+        .msearch-filters {
+            display: flex; gap: 8px; padding: 12px 20px;
+            background: var(--bg-sidebar);
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+        .msearch-chip {
+            padding: 5px 14px; border-radius: 20px; font-size: 13px;
+            cursor: pointer; border: 1px solid #4f545c;
+            background: transparent; color: #8e9297;
+            transition: all 0.15s; user-select: none;
+        }
+        .msearch-chip:hover { border-color: #72767d; color: #b9bbbe; }
+        .msearch-chip.active {
+            border-color: var(--accent-blue);
+            background: rgba(0,123,255,0.15);
+            color: #7ab8ff;
+        }
+
+        .msearch-info {
+            padding: 8px 20px; font-size: 12px; color: #72767d;
+            background: var(--bg-sidebar);
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0; min-height: 34px;
+            display: flex; align-items: center;
+        }
+        .msearch-info mark { background: rgba(234,179,8,0.25); color: #eab308; border-radius: 3px; padding: 0 3px; }
+
+        .msearch-list {
+            flex: 1; overflow-y: auto;
+            padding: 8px 0;
+        }
+        .msearch-item {
+            display: flex; align-items: flex-start; gap: 12px;
+            padding: 12px 20px; cursor: default;
+            border-left: 3px solid transparent;
+            transition: background 0.1s, border-color 0.1s;
+        }
+        .msearch-item:hover { background: #36393f; }
+        .msearch-item.match {
+            border-left-color: #eab308;
+            background: rgba(234,179,8,0.05);
+        }
+        .msearch-item.match:hover { background: rgba(234,179,8,0.1); }
+
+        .msearch-av {
+            width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: bold; margin-top: 1px;
+        }
+        .msearch-av.mine { background: #007bff; color: white; }
+        .msearch-av.other { background: #5865f2; color: white; }
+
+        .msearch-body { flex: 1; min-width: 0; }
+        .msearch-row {
+            display: flex; align-items: center; gap: 8px;
+            margin-bottom: 4px; flex-wrap: wrap;
+        }
+        .msearch-name { font-size: 13px; font-weight: 600; color: #dcddde; }
+        .msearch-time { font-size: 11px; color: #72767d; }
+        .msearch-text { font-size: 14px; color: #96989d; line-height: 1.5; word-break: break-word; }
+        .msearch-text mark { background: rgba(234,179,8,0.3); color: #fde68a; border-radius: 2px; padding: 0 2px; font-style: normal; }
+
+        .msearch-empty {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; flex: 1; gap: 12px;
+            color: #4f545c; padding: 60px 20px; text-align: center;
+        }
+        .msearch-empty svg { opacity: 0.4; }
+        .msearch-empty p { font-size: 14px; color: #72767d; }
+        /* ========================================= */
     </style>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/emoji-mart@5.5.2/css/emoji-mart.css">
     <script src="https://cdn.jsdelivr.net/npm/emoji-mart@5.5.2/dist/browser.js"></script>
@@ -233,7 +404,13 @@
 
 <div id="chat-window">
     <div class="sidebar">
-        <div class="sidebar-header">Pro Media</div>
+        <div class="sidebar-header" style="display: flex; align-items: center; justify-content: space-between;">
+    <span>Pro Media</span>
+    <div style="display: flex; align-items: center; gap: 8px;">
+        <div class="sdot online" id="my-sdot"></div>
+        <span id="my-status-txt" style="font-size: 12px; color: #43b581; font-weight: normal;">В сети</span>
+    </div>
+</div>
         <div class="sidebar-content">
             <div class="search-box" style="position:relative;">
                 <div style="display:flex; gap:6px; align-items:center;">
@@ -260,21 +437,30 @@
             <div id="roomList"></div>
             <div class="section-title" style="margin-top:20px;">Люди</div>
             <div id="userList"></div>
-            <div style="padding:10px 20px 15px;">
-                <button id="aiToggleBtn" onclick="toggleAIAutoReply()"
-                    style="width:100%; background:#4f545c; color:white; border:none; border-radius:10px;
-                           padding:10px; cursor:pointer; font-weight:bold; font-size:13px; transition:0.2s;">
-                    🤖 ИИ: ВЫКЛ
-                </button>
-                <p style="color:#72767d; font-size:10px; margin-top:5px; text-align:center;">Авто-ответ на входящие</p>
-            </div>
+            
         </div>
     </div>
 
     <div class="main-chat">
         <div class="chat-header">
-            <h2 id="currentChatTitle">Выберите чат</h2>
+            <div style="display: flex; flex-direction: column;">
+    <h2 id="currentChatTitle">Выберите чат</h2>
+    <div id="partnerStatus" style="display: flex; align-items: center; gap: 5px; margin-top: 2px; visibility: hidden;">
+        <div class="sdot offline" id="partner-sdot" style="width: 8px; height: 8px;"></div>
+        <span id="partner-status-txt" class="header-status-text">не в сети</span>
+    </div>
+</div>
             <div style="display:flex; align-items:center; gap:10px;">
+                <!-- КНОПКА ПОИСКА ПО СООБЩЕНИЯМ -->
+                <button id="msgSearchBtn" onclick="openMsgSearch()"
+                    title="Поиск по сообщениям"
+                    style="display:none; background:none; border:none; color:#8e9297;
+                           cursor:pointer; padding:4px 8px; border-radius:6px; transition:0.2s; line-height:1;"
+                    onmouseover="this.style.color='white'" onmouseout="this.style.color='#8e9297'">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                        <circle cx="11" cy="11" r="7"/><path d="M17 17l4 4"/>
+                    </svg>
+                </button>
                 <button id="membersMenuBtn" onclick="toggleMembersPanel()"
                     style="background:none; border:none; color:#8e9297; font-size:22px; cursor:pointer; line-height:1; display:none; padding:4px 8px; border-radius:6px; transition:0.2s;"
                     onmouseover="this.style.color='white'" onmouseout="this.style.color='#8e9297'">
@@ -284,11 +470,37 @@
             </div>
         </div>
 
-        <!-- FIX 12: chat-body wraps messages + members panel correctly -->
-        <div class="chat-body">
+        <div class="chat-body" style="position:relative;">
             <div class="messages-container" id="chatBox"></div>
 
-            <!-- FIX 13: membersPanel is now a sibling of chatBox inside chat-body -->
+            <!-- ПАНЕЛЬ ПОИСКА ПО СООБЩЕНИЯМ -->
+            <div id="msgSearchOverlay">
+                <div class="msearch-header">
+                    <div class="msearch-bar">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#72767d" stroke-width="2" stroke-linecap="round" style="flex-shrink:0;">
+                            <circle cx="11" cy="11" r="7"/><path d="M17 17l4 4"/>
+                        </svg>
+                        <input type="text" id="msgSearchInput" placeholder="Поиск по сообщениям..." autocomplete="off" />
+                        <button class="msearch-clear" id="msearchClear" onclick="clearMsgSearch()">✕</button>
+                    </div>
+                    <button class="msearch-close" onclick="closeMsgSearch()">×</button>
+                </div>
+                <div class="msearch-filters">
+                    <button class="msearch-chip active" data-f="all" onclick="setMsgFilter(this,'all')">Все</button>
+                    <button class="msearch-chip" data-f="mine" onclick="setMsgFilter(this,'mine')">Мои</button>
+                    <button class="msearch-chip" data-f="other" onclick="setMsgFilter(this,'other')">Собеседник</button>
+                </div>
+                <div class="msearch-info" id="msearchInfo"></div>
+                <div class="msearch-list" id="msearchList">
+                    <div class="msearch-empty">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
+                            <circle cx="11" cy="11" r="7"/><path d="M17 17l4 4"/>
+                        </svg>
+                        <p>Введите запрос для поиска</p>
+                    </div>
+                </div>
+            </div>
+
             <div id="membersPanel">
                 <div style="padding:20px; border-bottom:1px solid #40444b; display:flex; justify-content:space-between; align-items:center;">
                     <h3 style="color:white; font-size:16px; white-space:nowrap;">👥 Участники</h3>
@@ -317,12 +529,10 @@
                     <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
                 </svg>
             </label>
-<input type="file" id="fileInput" style="display:none" 
-    accept="image/*,video/*,application/pdf" onchange="uploadFile(this)">
+            <input type="file" id="fileInput" style="display:none" 
+                accept="image/*,video/*,application/pdf" onchange="uploadFile(this)">
             <button class="btn-icon" id="emojiBtn" onclick="toggleEmojiPicker()" style="font-size:20px;">😊</button>
-            <!-- FIX 14: emoji picker is now inside input-panel (which has position:relative) -->
             <div id="emojiPicker"></div>
-
             <input type="text" id="msgInput" placeholder="Напишите сообщение..." autocomplete="off">
             <button class="btn-send" id="sendBtn" onclick="handleSend()">Отправить</button>
         </div>
@@ -334,6 +544,21 @@
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2d2VnbWR5aGp5aWhyeHF2b2l3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0MDYwOTAsImV4cCI6MjA4Mzk4MjA5MH0.HrG5GijHH4Lj7mO3SorbG0kKfnl5FLtSCWp6aONYxJ8';
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+    async function requestNotificationPermission() {
+        if (!('Notification' in window)) return;
+        if (Notification.permission === 'default') {
+            await Notification.requestPermission();
+        }
+    }
+
+    function sendNotification(title, body) {
+        if (Notification.permission !== 'granted') return;
+        if (document.visibilityState === 'visible') return;
+        const n = new Notification(title, { body, icon: '/favicon.ico', badge: '/favicon.ico', tag: title });
+        n.onclick = () => { window.focus(); n.close(); };
+        setTimeout(() => n.close(), 5000);
+    }
+
     const GLOBAL_SERVER_ID = "7838b2eb-ece1-47d8-a3af-83b47fd2ff8a";
     const COOLDOWN_MS = 30000;
 
@@ -342,8 +567,15 @@
     let currentRoomId = null;
     let currentRecipientId = null;
     let lastMessageTime = 0;
+    let recentChats = JSON.parse(localStorage.getItem('recentChats_' + (localStorage.getItem('myUserId') || 'default')) || '[]');
 
-    // FIX 15: toast helper — clear previous timeout to avoid flicker
+    // ── кэш сообщений для поиска ──────────────────────────────────
+    let _cachedMessages = [];
+
+    function saveRecentChats() {
+        localStorage.setItem('recentChats_' + myId, JSON.stringify(recentChats));
+    }
+
     let toastTimer = null;
     function showToast(msg, color = '#43b581') {
         const t = document.getElementById('toast');
@@ -354,143 +586,243 @@
         toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
     }
 
+    // ════════════════════════════════════════════════════════════════
+    // ПОИСК ПО СООБЩЕНИЯМ
+    // ════════════════════════════════════════════════════════════════
+    let _msgSearchFilter = 'all';
+    let _msgSearchQuery  = '';
+
+    function openMsgSearch() {
+        const overlay = document.getElementById('msgSearchOverlay');
+        overlay.classList.add('open');
+        document.getElementById('msgSearchInput').focus();
+        renderMsgSearch();
+    }
+
+    function closeMsgSearch() {
+        document.getElementById('msgSearchOverlay').classList.remove('open');
+        clearMsgSearch();
+    }
+
+    function clearMsgSearch() {
+        _msgSearchQuery = '';
+        document.getElementById('msgSearchInput').value = '';
+        document.getElementById('msearchClear').style.display = 'none';
+        renderMsgSearch();
+    }
+
+    function setMsgFilter(el, val) {
+        _msgSearchFilter = val;
+        document.querySelectorAll('.msearch-chip').forEach(c => c.classList.remove('active'));
+        el.classList.add('active');
+        renderMsgSearch();
+    }
+
+    function escHtml(str) {
+        return String(str)
+            .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function hlText(text, query) {
+        if (!query) return escHtml(text);
+        const safe = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        return escHtml(text).replace(
+            new RegExp('(' + escHtml(safe) + ')', 'gi'),
+            '<mark>$1</mark>'
+        );
+    }
+
+    function renderMsgSearch() {
+        const q    = _msgSearchQuery.toLowerCase().trim();
+        const list = document.getElementById('msearchList');
+        const info = document.getElementById('msearchInfo');
+
+        // фильтруем
+        const filtered = _cachedMessages.filter(m => {
+            const isMine = m.user_id === myId;
+            if (_msgSearchFilter === 'mine'  && !isMine) return false;
+            if (_msgSearchFilter === 'other' &&  isMine) return false;
+
+            if (!q) return true;
+
+            const txt = (m.content || '').toLowerCase();
+            const name = (m.sender_name || '').toLowerCase();
+            return txt.includes(q) || name.includes(q);
+        });
+
+        // info
+        if (q) {
+            const n = filtered.length;
+            info.innerHTML = n
+                ? `Найдено <mark>${n}</mark> ${n === 1 ? 'сообщение' : n < 5 ? 'сообщения' : 'сообщений'}`
+                : 'Ничего не найдено';
+        } else {
+            info.innerHTML = _cachedMessages.length
+                ? `Всего сообщений в чате: <mark>${_cachedMessages.length}</mark>`
+                : '';
+        }
+
+        if (!filtered.length) {
+            list.innerHTML = `
+                <div class="msearch-empty">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
+                        <circle cx="11" cy="11" r="7"/><path d="M17 17l4 4"/>
+                    </svg>
+                    <p>${q ? 'По запросу «' + escHtml(q) + '» ничего не найдено' : 'Введите запрос для поиска'}</p>
+                </div>`;
+            return;
+        }
+
+        list.innerHTML = filtered.map(m => {
+            const isMine  = m.user_id === myId;
+            const isMatch = q && (m.content || '').toLowerCase().includes(q);
+            const avCls   = isMine ? 'mine' : 'other';
+            const avLetter = ((m.sender_name || '?')[0]).toUpperCase();
+
+            let preview = '';
+            if (m.content.startsWith('[image]:')) {
+                preview = '📷 Фото';
+            } else if (m.content.startsWith('[video]:')) {
+                preview = '🎥 Видео';
+            } else if (m.content.startsWith('[file:')) {
+                const nm = m.content.match(/^\[file:(.+?)\]/);
+                preview = '📄 ' + (nm ? nm[1] : 'Файл');
+            } else {
+                preview = hlText(m.content, _msgSearchQuery);
+            }
+
+            const msgDate = new Date(m.created_at);
+            const today   = new Date();
+            const isToday = msgDate.toDateString() === today.toDateString();
+            const timeStr = msgDate.toLocaleTimeString('ru-RU', { hour:'2-digit', minute:'2-digit' });
+            const dateStr = isToday ? timeStr
+                : msgDate.toLocaleDateString('ru-RU', { day:'2-digit', month:'2-digit' }) + ' ' + timeStr;
+
+            return `
+                <div class="msearch-item ${isMatch ? 'match' : ''}">
+                    <div class="msearch-av ${avCls}">${avLetter}</div>
+                    <div class="msearch-body">
+                        <div class="msearch-row">
+                            <span class="msearch-name">${escHtml(m.sender_name || (isMine ? 'Вы' : 'Собеседник'))}</span>
+                            <span class="msearch-time">${dateStr}</span>
+                        </div>
+                        <div class="msearch-text">${preview}</div>
+                    </div>
+                </div>`;
+        }).join('');
+    }
+
+    // слушаем ввод
+    document.getElementById('msgSearchInput').addEventListener('input', function() {
+        _msgSearchQuery = this.value;
+        document.getElementById('msearchClear').style.display = this.value ? 'block' : 'none';
+        renderMsgSearch();
+    });
+
+    // ════════════════════════════════════════════════════════════════
+
     function updateAIButton() {
-    const old = document.getElementById('askAIBtn');
-    if (old) old.remove();
-    const oldOrder = document.getElementById('orderBtn');
-    if (oldOrder) oldOrder.remove();
-    const oldConfirm = document.getElementById('confirmOrderHeaderBtn');
-    if (oldConfirm) oldConfirm.remove();
+        const old = document.getElementById('askAIBtn');
+        if (old) old.remove();
+        const oldOrder = document.getElementById('orderBtn');
+        if (oldOrder) oldOrder.remove();
+        const oldConfirm = document.getElementById('confirmOrderHeaderBtn');
+        if (oldConfirm) oldConfirm.remove();
 
-    const menuBtn = document.getElementById('membersMenuBtn');
-    if (menuBtn) {
-        menuBtn.style.display = (currentRoomId && !currentRecipientId) ? 'inline-block' : 'none';
+        const menuBtn = document.getElementById('membersMenuBtn');
+        if (menuBtn) {
+            menuBtn.style.display = (currentRoomId && !currentRecipientId) ? 'inline-block' : 'none';
+        }
+
+        // Показываем кнопку поиска только когда открыт чат
+        const searchBtn = document.getElementById('msgSearchBtn');
+        if (searchBtn) {
+            searchBtn.style.display = (currentRoomId || currentRecipientId) ? 'inline-block' : 'none';
+        }
+
+        closeMembersPanel();
+        if (!currentRecipientId) return;
+
+        const header = document.querySelector('.chat-header');
+
+        if (currentRecipientId !== myId) {
+            const aiBtn = document.createElement('button');
+            aiBtn.id = 'askAIBtn';
+            aiBtn.style.cssText = `
+                background: linear-gradient(135deg, #5865f2, #7289da);
+                color: white; border: none; border-radius: 20px;
+                padding: 8px 18px; cursor: pointer; font-size: 13px;
+                font-weight: bold; margin-right: 10px;
+                box-shadow: 0 2px 10px rgba(88,101,242,0.4); transition: 0.2s;
+            `;
+            aiBtn.textContent = '🤖 ИИ-ассистент';
+            aiBtn.onmouseover = () => aiBtn.style.transform = 'scale(1.05)';
+            aiBtn.onmouseout  = () => aiBtn.style.transform = 'scale(1)';
+            aiBtn.onclick = () => openAIModal();
+            header.insertBefore(aiBtn, header.lastElementChild);
+        }
+
+        if (currentRecipientId !== myId) {
+            const orderBtn = document.createElement('button');
+            orderBtn.id = 'orderBtn';
+            orderBtn.className = 'order-btn';
+            orderBtn.textContent = '⭐ Заказать';
+            orderBtn.onclick = () => openOrderModal();
+            header.insertBefore(orderBtn, header.lastElementChild);
+
+            const confirmBtn = document.createElement('button');
+            confirmBtn.id = 'confirmOrderHeaderBtn';
+            confirmBtn.title = 'Подтвердить выполнение заказа';
+            confirmBtn.style.cssText = `
+                background: linear-gradient(135deg, #43b581, #2d8a5e);
+                color: white; border: none; border-radius: 50%;
+                width: 38px; height: 38px; cursor: pointer; font-size: 18px;
+                display: flex; align-items: center; justify-content: center;
+                margin-right: 6px; box-shadow: 0 2px 10px rgba(67,181,129,0.4);
+                transition: 0.2s; flex-shrink: 0;
+            `;
+            confirmBtn.innerHTML = '✓';
+            confirmBtn.onmouseover = () => confirmBtn.style.transform = 'scale(1.1)';
+            confirmBtn.onmouseout  = () => confirmBtn.style.transform = 'scale(1)';
+            confirmBtn.onclick = () => openConfirmOrderModal();
+            header.insertBefore(confirmBtn, header.lastElementChild);
+        }
     }
-
-    closeMembersPanel();
-
-    if (!currentRecipientId) return;
-
-    const header = document.querySelector('.chat-header');
-
-    // ✅ Кнопка ИИ-ассистента
-    if (currentRecipientId !== myId) {
-        const aiBtn = document.createElement('button');
-        aiBtn.id = 'askAIBtn';
-        aiBtn.style.cssText = `
-            background: linear-gradient(135deg, #5865f2, #7289da);
-            color: white; border: none; border-radius: 20px;
-            padding: 8px 18px; cursor: pointer; font-size: 13px;
-            font-weight: bold; margin-right: 10px;
-            box-shadow: 0 2px 10px rgba(88,101,242,0.4);
-            transition: 0.2s;
-        `;
-        aiBtn.textContent = '🤖 ИИ-ассистент';
-        aiBtn.onmouseover = () => aiBtn.style.transform = 'scale(1.05)';
-        aiBtn.onmouseout = () => aiBtn.style.transform = 'scale(1)';
-        aiBtn.onclick = () => openAIModal();
-        header.insertBefore(aiBtn, header.lastElementChild);
-    }
-
-    // ✅ Кнопка Заказать
-    if (currentRecipientId !== myId) {
-        const orderBtn = document.createElement('button');
-        orderBtn.id = 'orderBtn';
-        orderBtn.className = 'order-btn';
-        orderBtn.textContent = '⭐ Заказать';
-        orderBtn.onclick = () => openOrderModal();
-        header.insertBefore(orderBtn, header.lastElementChild);
-
-        // ✅ Кнопка подтверждения заказа (галочка)
-        const confirmBtn = document.createElement('button');
-        confirmBtn.id = 'confirmOrderHeaderBtn';
-        confirmBtn.title = 'Подтвердить выполнение заказа';
-        confirmBtn.style.cssText = `
-            background: linear-gradient(135deg, #43b581, #2d8a5e);
-            color: white; border: none; border-radius: 50%;
-            width: 38px; height: 38px; cursor: pointer; font-size: 18px;
-            display: flex; align-items: center; justify-content: center;
-            margin-right: 6px; box-shadow: 0 2px 10px rgba(67,181,129,0.4);
-            transition: 0.2s; flex-shrink: 0;
-        `;
-        confirmBtn.innerHTML = '✓';
-        confirmBtn.onmouseover = () => confirmBtn.style.transform = 'scale(1.1)';
-        confirmBtn.onmouseout = () => confirmBtn.style.transform = 'scale(1)';
-        confirmBtn.onclick = () => openConfirmOrderModal();
-        header.insertBefore(confirmBtn, header.lastElementChild);
-    }
-}
 
     function openAIModal() {
         const oldModal = document.getElementById('aiModal');
         if (oldModal) oldModal.remove();
-
         const modal = document.createElement('div');
         modal.id = 'aiModal';
-        modal.style.cssText = `
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(0,0,0,0.6); z-index: 9999;
-            display: flex; align-items: center; justify-content: center;
-        `;
-
+        modal.style.cssText = `position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:center;justify-content:center;`;
         modal.innerHTML = `
-            <div style="background:#2c2f33; border-radius:16px; width:480px; max-height:70vh;
-                        display:flex; flex-direction:column; box-shadow:0 20px 60px rgba(0,0,0,0.5);
-                        border:1px solid #40444b; overflow:hidden;">
-                <div style="padding:20px 25px; background:#23272a; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #40444b;">
-                    <div>
-                        <div style="color:white; font-size:18px; font-weight:bold;">🤖 ИИ-Ассистент</div>
-                        <div style="color:#72767d; font-size:12px; margin-top:2px;">Спрашивайте об услугах продавца</div>
-                    </div>
-                    <button onclick="document.getElementById('aiModal').remove()"
-                        style="background:none;border:none;color:#72767d;font-size:24px;cursor:pointer;">×</button>
+            <div style="background:#2c2f33;border-radius:16px;width:480px;max-height:70vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.5);border:1px solid #40444b;overflow:hidden;">
+                <div style="padding:20px 25px;background:#23272a;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #40444b;">
+                    <div><div style="color:white;font-size:18px;font-weight:bold;">🤖 ИИ-Ассистент</div><div style="color:#72767d;font-size:12px;margin-top:2px;">Спрашивайте об услугах продавца</div></div>
+                    <button onclick="document.getElementById('aiModal').remove()" style="background:none;border:none;color:#72767d;font-size:24px;cursor:pointer;">×</button>
                 </div>
-                <div id="aiChatBox" style="flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:12px; min-height:250px;">
-                    <div style="text-align:center; color:#72767d; font-size:13px; padding:20px;">
-                        Задайте вопрос об услугах, ценах или портфолио продавца
-                    </div>
+                <div id="aiChatBox" style="flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px;min-height:250px;">
+                    <div style="text-align:center;color:#72767d;font-size:13px;padding:20px;">Задайте вопрос об услугах, ценах или портфолио продавца</div>
                 </div>
-                <div style="padding:15px 20px; background:#23272a; border-top:1px solid #40444b; display:flex; gap:10px;">
-                    <input type="text" id="aiModalInput" placeholder="Ваш вопрос..."
-                        style="flex:1; padding:12px 18px; border-radius:25px; border:none;
-                               background:#36393f; color:white; outline:none; font-size:14px;">
-                    <button onclick="sendAIQuestion()"
-                        style="background:#007bff; color:white; border:none; border-radius:25px;
-                               padding:12px 20px; cursor:pointer; font-weight:bold; white-space:nowrap;">
-                        Спросить
-                    </button>
+                <div style="padding:15px 20px;background:#23272a;border-top:1px solid #40444b;display:flex;gap:10px;">
+                    <input type="text" id="aiModalInput" placeholder="Ваш вопрос..." style="flex:1;padding:12px 18px;border-radius:25px;border:none;background:#36393f;color:white;outline:none;font-size:14px;">
+                    <button onclick="sendAIQuestion()" style="background:#007bff;color:white;border:none;border-radius:25px;padding:12px 20px;cursor:pointer;font-weight:bold;white-space:nowrap;">Спросить</button>
                 </div>
-            </div>
-        `;
-
+            </div>`;
         document.body.appendChild(modal);
-
-        document.getElementById('aiModalInput').addEventListener('keydown', e => {
-            if (e.key === 'Enter') sendAIQuestion();
-        });
-
-        modal.addEventListener('click', e => {
-            if (e.target === modal) modal.remove();
-        });
-
+        document.getElementById('aiModalInput').addEventListener('keydown', e => { if (e.key === 'Enter') sendAIQuestion(); });
+        modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
         loadSellerInfo();
     }
 
     let sellerInfoCache = null;
-
     async function loadSellerInfo() {
         if (!currentRecipientId) return;
-
-        const { data } = await _supabase
-            .from('seller_info')
-            .select('*')
-            .eq('user_id', currentRecipientId)
-            .maybeSingle();
-
+        const { data } = await _supabase.from('seller_info').select('*').eq('user_id', currentRecipientId).maybeSingle();
         sellerInfoCache = data;
-
         if (data) {
-            addAIMessage(`Привет! Я знаю об этом продавце следующее:\n📦 Услуги: ${data.services || 'не указано'}\n💰 Цены: ${data.prices || 'не указано'}\n⏱ Время ответа: ${data.response_time || '1-2 часа'}\n\nЗадайте любой вопрос!`, false);
+            addAIMessage(`Привет! Я знаю об этом продавце следующее:\n📦 Услуги: ${data.services||'не указано'}\n💰 Цены: ${data.prices||'не указано'}\n⏱ Время ответа: ${data.response_time||'1-2 часа'}\n\nЗадайте любой вопрос!`, false);
         } else {
             addAIMessage('Привет! Продавец ещё не заполнил информацию о себе. Но я могу ответить на общие вопросы!', false);
         }
@@ -499,18 +831,10 @@
     function addAIMessage(text, isUser = false) {
         const box = document.getElementById('aiChatBox');
         if (!box) return;
-
         const placeholder = box.querySelector('div[style*="text-align:center"]');
         if (placeholder) placeholder.remove();
-
         const msg = document.createElement('div');
-        msg.style.cssText = `
-            max-width: 85%; padding: 10px 15px; border-radius: 15px;
-            color: white; font-size: 14px; line-height: 1.5; white-space: pre-wrap;
-            align-self: ${isUser ? 'flex-end' : 'flex-start'};
-            background: ${isUser ? '#007bff' : '#40444b'};
-            ${isUser ? 'border-bottom-right-radius:4px' : 'border-bottom-left-radius:4px'};
-        `;
+        msg.style.cssText = `max-width:85%;padding:10px 15px;border-radius:15px;color:white;font-size:14px;line-height:1.5;white-space:pre-wrap;align-self:${isUser?'flex-end':'flex-start'};background:${isUser?'#007bff':'#40444b'};${isUser?'border-bottom-right-radius:4px':'border-bottom-left-radius:4px'};`;
         msg.textContent = text;
         box.appendChild(msg);
         box.scrollTop = box.scrollHeight;
@@ -521,447 +845,223 @@
         if (!input) return;
         const question = input.value.trim();
         if (!question) return;
-
         input.value = '';
         addAIMessage(question, true);
-
         const typing = document.createElement('div');
         typing.id = 'aiTyping';
-        typing.style.cssText = 'color:#72767d; font-size:13px; padding:5px 10px; align-self:flex-start;';
+        typing.style.cssText = 'color:#72767d;font-size:13px;padding:5px 10px;align-self:flex-start;';
         typing.textContent = '🤖 печатает...';
         document.getElementById('aiChatBox')?.appendChild(typing);
-
         const sellerContext = sellerInfoCache
-            ? `Информация о продавце:\nУслуги: ${sellerInfoCache.services || 'не указано'}\nЦены: ${sellerInfoCache.prices || 'не указано'}\nПортфолио: ${sellerInfoCache.portfolio || 'не указано'}\nВремя ответа: ${sellerInfoCache.response_time || '1-2 часа'}`
+            ? `Информация о продавце:\nУслуги: ${sellerInfoCache.services||'не указано'}\nЦены: ${sellerInfoCache.prices||'не указано'}\nПортфолио: ${sellerInfoCache.portfolio||'не указано'}\nВремя ответа: ${sellerInfoCache.response_time||'1-2 часа'}`
             : 'Информация о продавце не заполнена.';
-
-        const { data, error } = await _supabase.functions.invoke('ai-reply', {
-            body: {
-                message: question,
-                sellerId: currentRecipientId,
-                context: sellerContext
-            }
-        });
-
+        const { data, error } = await _supabase.functions.invoke('ai-reply', { body: { message: question, sellerId: currentRecipientId, context: sellerContext } });
         document.getElementById('aiTyping')?.remove();
-
-        if (error || !data?.reply) {
-            addAIMessage('Извините, не могу ответить сейчас. Попробуйте позже.', false);
-            return;
-        }
-
+        if (error || !data?.reply) { addAIMessage('Извините, не могу ответить сейчас.', false); return; }
         addAIMessage(data.reply, false);
-
-        const orderKeywords = ['заказать', 'хочу', 'купить', 'оформить', 'нужно', 'закажу', 'интересует'];
-        const isOrder = orderKeywords.some(word => question.toLowerCase().includes(word));
-
-        if (isOrder) {
-            const orderMsg = `🤖 ИИ-ассистент:\nКлиент заинтересован в заказе!\n\nЗапрос клиента: "${question}"\nОтвет ИИ: "${data.reply}"`;
-            await _supabase.from('messages').insert([{
-                content: orderMsg,
-                user_id: myId,
-                sender_name: '🤖 Новый заказ от клиента',
-                recipient_id: currentRecipientId,
-                room_id: null
-            }]);
-            addAIMessage('✅ Ваш запрос отправлен продавцу! Он скоро свяжется с вами.', false);
+        const orderKeywords = ['заказать','хочу','купить','оформить','нужно','закажу','интересует'];
+        if (orderKeywords.some(w => question.toLowerCase().includes(w))) {
+            await _supabase.from('messages').insert([{ content: `🤖 ИИ-ассистент:\nКлиент заинтересован!\n\n"${question}"\nОтвет ИИ: "${data.reply}"`, user_id: myId, sender_name: '🤖 Новый заказ от клиента', recipient_id: currentRecipientId, room_id: null }]);
+            addAIMessage('✅ Ваш запрос отправлен продавцу!', false);
         }
     }
 
-    // ─── Авторизация ─────────────────────────────────────────────
     async function syncSession() {
         const { data: { user }, error } = await _supabase.auth.getUser();
-        if (error || !user) {
-            window.location.href = 'login.html';
-            return;
-        }
+        if (error || !user) { window.location.href = 'login.html'; return; }
         myId = user.id;
+        recentChats = JSON.parse(localStorage.getItem('recentChats_' + user.id) || '[]');
         const { data: profile } = await _supabase.from('profiles').select('*').eq('id', myId).single();
         myProfileData = profile;
-
         await loadRooms();
-        await loadUsers();
-
+        loadUsers();
         currentRoomId = GLOBAL_SERVER_ID;
         currentRecipientId = null;
         openChat("Общий чат 🌍");
+        await requestNotificationPermission();
     }
 
-    // ─── URL параметры (маркетплейс) ──────────────────────────────
     async function handleMarketRedirect() {
         const params = new URLSearchParams(window.location.search);
         const sellerId = params.get('user_id');
         const sellerName = params.get('name');
-
         if (!sellerId || !sellerName) return;
-
         let attempts = 0;
-        while (!myId && attempts < 20) {
-            await new Promise(r => setTimeout(r, 200));
-            attempts++;
-        }
+        while (!myId && attempts < 20) { await new Promise(r => setTimeout(r, 200)); attempts++; }
         if (!myId) return;
-
         currentRecipientId = sellerId;
         currentRoomId = null;
-
-        document.querySelectorAll('#userList .item').forEach(item => {
-            if (item.onclick?.toString().includes(sellerId)) {
-                setActiveItem(item);
-            }
-        });
-
         openChat(decodeURIComponent(sellerName));
-
-        const { data } = await _supabase
-            .from('messages')
-            .select('id')
-            .or(`and(user_id.eq.${myId},recipient_id.eq.${sellerId}),and(user_id.eq.${sellerId},recipient_id.eq.${myId})`)
-            .limit(1);
-
+        const { data } = await _supabase.from('messages').select('id').or(`and(user_id.eq.${myId},recipient_id.eq.${sellerId}),and(user_id.eq.${sellerId},recipient_id.eq.${myId})`).limit(1);
         if (!data?.length) {
-            const { data: sellerInfo } = await _supabase
-                .from('seller_info')
-                .select('*')
-                .eq('user_id', sellerId)
-                .maybeSingle();
-
-            const context = sellerInfo
-                ? `Услуги: ${sellerInfo.services || 'не указано'}\nЦены: ${sellerInfo.prices || 'не указано'}\nПортфолио: ${sellerInfo.portfolio || 'не указано'}\nВремя ответа: ${sellerInfo.response_time || '1-2 часа'}`
-                : 'Информация не заполнена.';
-
-            const { data: aiData } = await _supabase.functions.invoke('ai-reply', {
-                body: {
-                    message: 'Поприветствуй нового клиента очень коротко и предложи помощь',
-                    sellerId: sellerId,
-                    context: context
-                }
-            });
-
+            const { data: sellerInfo } = await _supabase.from('seller_info').select('*').eq('user_id', sellerId).maybeSingle();
+            const context = sellerInfo ? `Услуги: ${sellerInfo.services||'не указано'}\nЦены: ${sellerInfo.prices||'не указано'}\nПортфолио: ${sellerInfo.portfolio||'не указано'}\nВремя ответа: ${sellerInfo.response_time||'1-2 часа'}` : 'Информация не заполнена.';
+            const { data: aiData } = await _supabase.functions.invoke('ai-reply', { body: { message: 'Поприветствуй нового клиента очень коротко и предложи помощь', sellerId, context } });
             if (aiData?.reply) {
-                await _supabase.from('messages').insert([{
-                    content: aiData.reply,
-                    user_id: sellerId,
-                    sender_name: `🤖 ИИ-ассистент @${decodeURIComponent(sellerName)}`,
-                    recipient_id: myId,
-                    is_ai_reply: true
-                }]);
+                await _supabase.from('messages').insert([{ content: aiData.reply, user_id: sellerId, sender_name: `🤖 ИИ-ассистент @${decodeURIComponent(sellerName)}`, recipient_id: myId, is_ai_reply: true }]);
             }
         }
     }
 
     window.addEventListener('load', async () => {
         await syncSession();
-        await loadAISettings();
         await handleMarketRedirect();
     });
 
-    // ─── Комнаты ──────────────────────────────────────────────────
     async function loadRooms() {
-        // Получаем только комнаты где я участник
-        const { data: myMemberships } = await _supabase
-            .from('room_members')
-            .select('room_id')
-            .eq('user_id', myId);
+        const { data: myMemberships } = await _supabase.from('room_members').select('room_id').eq('user_id', myId);
         const myRoomIds = new Set((myMemberships || []).map(m => m.room_id));
-
-        // Получаем комнаты которые я создал
-        const { data: createdRooms } = await _supabase
-            .from('rooms')
-            .select('id, created_by')
-            .eq('created_by', myId);
+        const { data: createdRooms } = await _supabase.from('rooms').select('id, created_by').eq('created_by', myId);
         const myCreatedIds = new Set((createdRooms || []).map(r => r.id));
-
-        // Собираем все ID комнат доступных мне (участник или создатель или глобальный)
         const visibleIds = new Set([...myRoomIds, ...myCreatedIds, GLOBAL_SERVER_ID]);
-
-        // Загружаем только свои комнаты + глобальный
-        const idsArray = [...visibleIds];
-        const { data: rooms } = await _supabase
-            .from('rooms')
-            .select('*')
-            .in('id', idsArray)
-            .order('name');
-
+        const { data: rooms } = await _supabase.from('rooms').select('*').in('id', [...visibleIds]).order('name');
         const list = document.getElementById('roomList');
         list.innerHTML = '';
-
         rooms?.forEach(room => {
-            const isGlobal = room.id === GLOBAL_SERVER_ID;
-            const isMember = myRoomIds.has(room.id);
+            const isGlobal  = room.id === GLOBAL_SERVER_ID;
+            const isMember  = myRoomIds.has(room.id);
             const isCreator = myCreatedIds.has(room.id);
-
             const div = document.createElement('div');
             div.className = 'item room-item' + (currentRoomId === room.id && !currentRecipientId ? ' active' : '');
-
-            // Кнопки действий — не показываем для глобального чата
             const actionsHtml = isGlobal ? '' : `
                 <div class="room-actions">
-                    ${isMember ? `<button class="room-action-btn leave" title="Выйти из группы"
-                        onclick="event.stopPropagation(); leaveRoom('${room.id}', '${escapeAttr(room.name)}')">
-                        ↩ Выйти
-                    </button>` : ''}
-                    ${isCreator ? `<button class="room-action-btn" title="Удалить группу"
-                        onclick="event.stopPropagation(); deleteRoom('${room.id}', '${escapeAttr(room.name)}')">
-                        🗑
-                    </button>` : ''}
-                    ${!isMember && !isCreator ? `<button class="room-action-btn leave" title="Вступить в группу"
-                        onclick="event.stopPropagation(); joinRoom('${room.id}', '${escapeAttr(room.name)}', this.closest('.room-item'))">
-                        + Войти
-                    </button>` : ''}
-                </div>
-            `;
-
-            div.innerHTML = `
-                <div class="avatar" style="background:#43b581">#</div>
-                <span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${room.name}</span>
-                ${actionsHtml}
-            `;
-
-            div.onclick = () => {
-                currentRoomId = room.id;
-                currentRecipientId = null;
-                setActiveItem(div);
-                openChat(room.name);
-            };
-
+                    ${isMember ? `<button class="room-action-btn leave" onclick="event.stopPropagation();leaveRoom('${room.id}','${escapeAttr(room.name)}')">↩ Выйти</button>` : ''}
+                    ${isCreator ? `<button class="room-action-btn" onclick="event.stopPropagation();deleteRoom('${room.id}','${escapeAttr(room.name)}')">🗑</button>` : ''}
+                    ${!isMember && !isCreator ? `<button class="room-action-btn leave" onclick="event.stopPropagation();joinRoom('${room.id}','${escapeAttr(room.name)}',this.closest('.room-item'))">+ Войти</button>` : ''}
+                </div>`;
+            div.innerHTML = `<div class="avatar" style="background:#43b581">#</div><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${room.name}</span>${actionsHtml}`;
+            div.onclick = () => { currentRoomId = room.id; currentRecipientId = null; setActiveItem(div); openChat(room.name); };
             list.appendChild(div);
         });
     }
 
-
-    function appendMessage(text, type = 'sent') {
-    const chatMessages = document.querySelector('.chat-messages');
-    if (!chatMessages) return; // Защита от ошибок, если чат еще не загрузился
-
-    const messageDiv = document.createElement('div');
-    
-    // Используем классы, которые точно есть в вашем CSS
-    messageDiv.className = `message ${type === 'sent' ? 'sent' : 'received'}`;
-    
-    messageDiv.innerHTML = `
-        <div class="message-text">${text}</div>
-        <div class="message-time">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
-    `;
-    
-    chatMessages.appendChild(messageDiv);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-
-}
-    // Экранирование для inline onclick атрибутов
-    function escapeAttr(str) {
-        return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
-    }
+    function escapeAttr(str) { return (str||'').replace(/'/g,"\\'").replace(/"/g,'&quot;'); }
 
     async function createNewRoom() {
         const name = prompt("Введите название новой группы:");
         if (!name?.trim()) return;
-        const { data: newRoom, error } = await _supabase
-            .from('rooms')
-            .insert([{ name: name.trim(), created_by: myId }])
-            .select()
-            .single();
+        const { data: newRoom, error } = await _supabase.from('rooms').insert([{ name: name.trim(), created_by: myId }]).select().single();
         if (error) { showToast("Ошибка: " + error.message, '#f04747'); return; }
-        // Создатель автоматически получает роль owner
         await _supabase.from('room_members').insert([{ room_id: newRoom.id, user_id: myId, role: 'owner', added_by: myId }]);
         showToast("Группа создана!");
         await loadRooms();
     }
 
-    // ─── Удалить группу ───────────────────────────────────────────
-    async function deleteRoom(roomId, roomName) {
-        openRoomActionModal(roomId, roomName, 'delete');
-    }
+    async function deleteRoom(roomId, roomName) { openRoomActionModal(roomId, roomName, 'delete'); }
+    async function leaveRoom(roomId, roomName)  { openRoomActionModal(roomId, roomName, 'leave'); }
 
-    // ─── Выйти из группы ──────────────────────────────────────────
-    async function leaveRoom(roomId, roomName) {
-        openRoomActionModal(roomId, roomName, 'leave');
-    }
-
-    // ─── Вступить в группу ────────────────────────────────────────
     async function joinRoom(roomId, roomName, itemEl) {
-        const { error } = await _supabase.from('room_members').insert([{
-            room_id: roomId, user_id: myId, added_by: myId
-        }]);
+        const { error } = await _supabase.from('room_members').insert([{ room_id: roomId, user_id: myId, added_by: myId }]);
         if (error) { showToast('Ошибка при вступлении!', '#f04747'); return; }
-        await _supabase.from('messages').insert([{
-            content: `👋 @${myProfileData?.username || 'Пользователь'} вступил в группу`,
-            user_id: myId, sender_name: 'Система', room_id: roomId, recipient_id: null
-        }]);
+        await _supabase.from('messages').insert([{ content: `👋 @${myProfileData?.username||'Пользователь'} вступил в группу`, user_id: myId, sender_name: 'Система', room_id: roomId, recipient_id: null }]);
         showToast(`Вы вступили в "${roomName}"!`, '#43b581');
         await loadRooms();
-        // Открываем чат
-        currentRoomId = roomId;
-        currentRecipientId = null;
+        currentRoomId = roomId; currentRecipientId = null;
         openChat(roomName);
     }
 
-    // ─── Модалка подтверждения действия с группой ─────────────────
     function openRoomActionModal(roomId, roomName, action) {
         const old = document.getElementById('roomActionModal');
         if (old) old.remove();
-
         const isDelete = action === 'delete';
-
         const overlay = document.createElement('div');
         overlay.id = 'roomActionModal';
         overlay.className = 'room-modal-overlay';
-
         overlay.innerHTML = `
             <div class="room-modal">
                 <div class="room-modal-header">
-                    <div>
-                        <div style="color:white; font-size:17px; font-weight:bold;">
-                            ${isDelete ? '🗑 Удалить группу' : '↩ Выйти из группы'}
-                        </div>
-                        <div style="color:#72767d; font-size:12px; margin-top:3px;">${roomName}</div>
-                    </div>
-                    <button onclick="document.getElementById('roomActionModal').remove()"
-                        style="background:none;border:none;color:#72767d;font-size:24px;cursor:pointer;line-height:1;">×</button>
+                    <div><div style="color:white;font-size:17px;font-weight:bold;">${isDelete?'🗑 Удалить группу':'↩ Выйти из группы'}</div><div style="color:#72767d;font-size:12px;margin-top:3px;">${roomName}</div></div>
+                    <button onclick="document.getElementById('roomActionModal').remove()" style="background:none;border:none;color:#72767d;font-size:24px;cursor:pointer;line-height:1;">×</button>
                 </div>
                 <div class="room-modal-body">
-                    <div style="background:#40444b; border-radius:10px; padding:14px; color:#dcddde; font-size:13px; line-height:1.6;">
-                        ${isDelete
-                            ? `⚠️ Группа <strong style="color:white">"${roomName}"</strong> будет удалена вместе со всеми сообщениями. Это действие необратимо.`
-                            : `Вы покинете группу <strong style="color:white">"${roomName}"</strong>. Вас можно добавить снова.`
-                        }
-                    </div>
-                    <button class="room-modal-btn"
-                        style="background:${isDelete ? '#f04747' : '#f0a500'}; color:white;"
-                        onclick="${isDelete ? `confirmDeleteRoom('${roomId}')` : `confirmLeaveRoom('${roomId}', '${escapeAttr(roomName)}')`}">
-                        ${isDelete ? '🗑 Да, удалить навсегда' : '↩ Да, выйти из группы'}
-                    </button>
-                    <button class="room-modal-btn"
-                        style="background:#40444b; color:#b9bbbe;"
-                        onclick="document.getElementById('roomActionModal').remove()">
-                        Отмена
-                    </button>
+                    <div style="background:#40444b;border-radius:10px;padding:14px;color:#dcddde;font-size:13px;line-height:1.6;">${isDelete?`⚠️ Группа <strong style="color:white">"${roomName}"</strong> будет удалена вместе со всеми сообщениями.`:`Вы покинете группу <strong style="color:white">"${roomName}"</strong>.`}</div>
+                    <button class="room-modal-btn" style="background:${isDelete?'#f04747':'#f0a500'};color:white;" onclick="${isDelete?`confirmDeleteRoom('${roomId}')`:`confirmLeaveRoom('${roomId}','${escapeAttr(roomName)}')`}">${isDelete?'🗑 Да, удалить навсегда':'↩ Да, выйти из группы'}</button>
+                    <button class="room-modal-btn" style="background:#40444b;color:#b9bbbe;" onclick="document.getElementById('roomActionModal').remove()">Отмена</button>
                 </div>
-            </div>
-        `;
-
+            </div>`;
         overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
         document.body.appendChild(overlay);
     }
 
     async function confirmDeleteRoom(roomId) {
         document.getElementById('roomActionModal')?.remove();
-
-        // Удаляем сообщения, участников и саму комнату
         await _supabase.from('messages').delete().eq('room_id', roomId);
         await _supabase.from('room_members').delete().eq('room_id', roomId);
         const { error } = await _supabase.from('rooms').delete().eq('id', roomId);
-
         if (error) { showToast('Ошибка удаления группы!', '#f04747'); return; }
-
         showToast('Группа удалена', '#f04747');
-
-        // Если были в этой группе — возвращаемся в общий чат
-        if (currentRoomId === roomId) {
-            currentRoomId = GLOBAL_SERVER_ID;
-            currentRecipientId = null;
-            openChat('Общий чат 🌍');
-        }
+        if (currentRoomId === roomId) { currentRoomId = GLOBAL_SERVER_ID; currentRecipientId = null; openChat('Общий чат 🌍'); }
         await loadRooms();
     }
 
     async function confirmLeaveRoom(roomId, roomName) {
         document.getElementById('roomActionModal')?.remove();
-
-        const { error } = await _supabase
-            .from('room_members')
-            .delete()
-            .eq('room_id', roomId)
-            .eq('user_id', myId);
-
+        const { error } = await _supabase.from('room_members').delete().eq('room_id', roomId).eq('user_id', myId);
         if (error) { showToast('Ошибка при выходе!', '#f04747'); return; }
-
-        await _supabase.from('messages').insert([{
-            content: `👋 @${myProfileData?.username || 'Пользователь'} покинул группу`,
-            user_id: myId, sender_name: 'Система', room_id: roomId, recipient_id: null
-        }]);
-
+        await _supabase.from('messages').insert([{ content: `👋 @${myProfileData?.username||'Пользователь'} покинул группу`, user_id: myId, sender_name: 'Система', room_id: roomId, recipient_id: null }]);
         showToast(`Вы вышли из "${roomName}"`, '#f0a500');
-
-        if (currentRoomId === roomId) {
-            currentRoomId = GLOBAL_SERVER_ID;
-            currentRecipientId = null;
-            openChat('Общий чат 🌍');
-        }
+        if (currentRoomId === roomId) { currentRoomId = GLOBAL_SERVER_ID; currentRecipientId = null; openChat('Общий чат 🌍'); }
         await loadRooms();
     }
 
     async function loadUsers() {
         if (!myId) return;
         const rawSearch = document.getElementById('userSearch').value.trim();
-        // Strip leading @ so user can type either "@name" or "name"
         const searchText = rawSearch.startsWith('@') ? rawSearch.slice(1) : rawSearch;
+        const list = document.getElementById('userList');
+        const { data: unreadData } = await _supabase.from('messages').select('user_id').eq('recipient_id', myId).eq('is_read', false).is('room_id', null);
+        const unreadCounts = {};
+        unreadData?.forEach(msg => { unreadCounts[msg.user_id] = (unreadCounts[msg.user_id] || 0) + 1; });
+
+        if (!searchText && !window._activeDirection) {
+            list.innerHTML = '';
+            if (recentChats.length === 0) {
+                list.innerHTML = '<div style="color:#72767d;text-align:center;padding:20px;font-size:12px;">🔍 Введите ник для поиска</div>';
+            } else {
+                recentChats.forEach(user => {
+                    const div = document.createElement('div');
+                    div.className = 'item' + (currentRecipientId === user.id ? ' active' : '');
+                    const name = user.username ? `@${user.username}` : 'Аноним';
+                    const directionLine = user.direction ? `<div style="font-size:12px;color:#43b581;">${user.direction}</div>` : '';
+                    const letter = (user.username?.[0] || '?').toUpperCase();
+                    const avatarStyle = user.avatar_url ? `background-image:url(${user.avatar_url});background-size:cover;` : `background:#5865f2;`;
+                    const unreadCount = unreadCounts?.[user.id] || 0;
+                    const badge = unreadCount > 0 ? `<div style="background:#f04747;color:white;border-radius:50%;min-width:18px;height:18px;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:bold;padding:0 4px;">${unreadCount}</div>` : '';
+                    div.innerHTML = `<div class="avatar" style="${avatarStyle}">${!user.avatar_url ? letter : ''}</div><div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0;"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${name}</span>${directionLine}</div>${badge}`;
+                    div.onclick = () => { currentRecipientId = user.id; currentRoomId = null; setActiveItem(div); openChat(name); markAsRead(user.id); };
+                    list.appendChild(div);
+                });
+            }
+            return;
+        }
 
         let query = _supabase.from('profiles').select('*').neq('id', myId);
-
-        if (searchText) {
-            query = query.or(
-                `username.ilike.%${searchText}%,full_name.ilike.%${searchText}%,direction.ilike.%${searchText}%`
-            );
-        }
-
-        // Apply direction filter if active
-        if (window._activeDirection) {
-            query = query.eq('direction', window._activeDirection);
-        }
-
+        if (searchText) query = query.ilike('username', `%${searchText}%`);
+        if (window._activeDirection) query = query.eq('direction', window._activeDirection);
         const { data } = await query;
-
-        const { data: unreadData } = await _supabase
-            .from('messages')
-            .select('user_id')
-            .eq('recipient_id', myId)
-            .eq('is_read', false)
-            .is('room_id', null);
-
-        const unreadCounts = {};
-        unreadData?.forEach(msg => {
-            unreadCounts[msg.user_id] = (unreadCounts[msg.user_id] || 0) + 1;
-        });
-
-        const list = document.getElementById('userList');
         list.innerHTML = '';
-
-        data?.forEach(user => {
+        if (!data?.length) { list.innerHTML = '<div style="color:#72767d;text-align:center;padding:20px;font-size:12px;">Никого не найдено</div>'; return; }
+        data.forEach(user => {
             const div = document.createElement('div');
             div.className = 'item' + (currentRecipientId === user.id ? ' active' : '');
-
             const name = user.username ? `@${user.username}` : 'Аноним';
             const directionLine = user.direction ? `<div style="font-size:12px;color:#43b581;">${user.direction}</div>` : '';
             const letter = (user.username?.[0] || '?').toUpperCase();
-            const avatarStyle = user.avatar_url ? `background-image:url(${user.avatar_url}); background-size:cover;` : `background:#5865f2;`;
-
-            const unread = unreadCounts[user.id] || 0;
-            const badge = unread > 0 ? `<div style="background:#f04747; color:white; border-radius:50%; width:18px; height:18px; font-size:11px; display:flex; align-items:center; justify-content:center; font-weight:bold; margin-left:auto;">${unread}</div>` : '';
-
-            div.innerHTML = `
-                <div class="avatar" style="${avatarStyle}">${!user.avatar_url ? letter : ''}</div>
-                <div style="display:flex; flex-direction:column; gap:2px; flex:1; min-width:0;">
-                    <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${name}</span>
-                    ${directionLine}
-                </div>
-                ${badge}
-            `;
-
+            const avatarStyle = user.avatar_url ? `background-image:url(${user.avatar_url});background-size:cover;` : `background:#5865f2;`;
+            div.innerHTML = `<div class="avatar" style="${avatarStyle}">${!user.avatar_url ? letter : ''}</div><div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0;"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${name}</span>${directionLine}</div>`;
             div.onclick = () => {
-                currentRecipientId = user.id;
-                currentRoomId = null;
-                setActiveItem(div);
-                openChat(name);
-                markAsRead(user.id);
+                currentRecipientId = user.id; currentRoomId = null;
+                setActiveItem(div); openChat(name); markAsRead(user.id);
+                if (!recentChats.find(u => u.id === user.id)) recentChats.unshift(user);
+                saveRecentChats();
+                document.getElementById('userSearch').value = '';
+                loadUsers();
             };
-
             div.ondblclick = () => openUserProfile(user);
             list.appendChild(div);
         });
     }
 
-    // ─── Фильтр по направлению ───────────────────────────────────
     window._activeDirection = null;
     window._dirFilterOpen = false;
 
@@ -969,70 +1069,31 @@
         const dropdown = document.getElementById('dirFilterDropdown');
         const btn = document.getElementById('dirFilterBtn');
         window._dirFilterOpen = !window._dirFilterOpen;
-
-        if (!window._dirFilterOpen) {
-            dropdown.style.display = 'none';
-            btn.style.background = '#40444b';
-            btn.style.color = '#b9bbbe';
-            return;
-        }
-
-        btn.style.background = '#5865f2';
-        btn.style.color = 'white';
+        if (!window._dirFilterOpen) { dropdown.style.display = 'none'; btn.style.background = '#40444b'; btn.style.color = '#b9bbbe'; return; }
+        btn.style.background = '#5865f2'; btn.style.color = 'white';
         dropdown.style.display = 'block';
-
-        // Направления: value (в БД) → label (отображение)
         const directions = [
-            { value: 'hr',        label: 'HRTech' },
-            { value: 'ai',        label: 'AI & Data' },
-            { value: 'health',    label: 'HealthTech' },
-            { value: 'ecommerce', label: '🛒 E-commerce' },
-            { value: 'mobile',    label: '📱 Mobile Dev' },
-            { value: 'design',    label: '🎨 Design & Creative' },
-            { value: 'marketing', label: '📈 Marketing & SMM' },
-            { value: 'fintech',   label: '💰 FinTech' },
-            { value: 'edtech',    label: '🎓 EdTech' },
-            { value: 'proptech',  label: '🏗 PropTech' },
-            { value: 'greentech', label: '🌱 GreenTech' },
-            { value: 'gamedev',   label: '🎮 GameDev' },
-            { value: 'saas',      label: '🤝 B2B SaaS' },
-            { value: 'other',     label: 'Другое' },
+            {value:'hr',label:'HRTech'},{value:'ai',label:'AI & Data'},{value:'health',label:'HealthTech'},
+            {value:'ecommerce',label:'🛒 E-commerce'},{value:'mobile',label:'📱 Mobile Dev'},{value:'design',label:'🎨 Design & Creative'},
+            {value:'marketing',label:'📈 Marketing & SMM'},{value:'fintech',label:'💰 FinTech'},{value:'edtech',label:'🎓 EdTech'},
+            {value:'proptech',label:'🏗 PropTech'},{value:'greentech',label:'🌱 GreenTech'},{value:'gamedev',label:'🎮 GameDev'},
+            {value:'saas',label:'🤝 B2B SaaS'},{value:'other',label:'Другое'},
         ];
-
         const list = document.getElementById('dirFilterList');
         list.innerHTML = '';
-
-        // Кнопка "Все"
         const allBtn = document.createElement('div');
-        allBtn.style.cssText = `padding:8px 12px; cursor:pointer; border-radius:7px; font-size:13px;
-            color:${!window._activeDirection ? 'white' : '#b9bbbe'};
-            background:${!window._activeDirection ? '#5865f2' : 'transparent'};
-            font-weight:${!window._activeDirection ? 'bold' : 'normal'}; transition:0.15s;`;
+        allBtn.style.cssText = `padding:8px 12px;cursor:pointer;border-radius:7px;font-size:13px;color:${!window._activeDirection?'white':'#b9bbbe'};background:${!window._activeDirection?'#5865f2':'transparent'};font-weight:${!window._activeDirection?'bold':'normal'};transition:0.15s;`;
         allBtn.textContent = '👥 Все';
-        allBtn.onmouseover = () => { if(window._activeDirection) allBtn.style.background = '#40444b'; };
-        allBtn.onmouseout = () => { if(window._activeDirection) allBtn.style.background = 'transparent'; };
-        allBtn.onclick = () => {
-            window._activeDirection = null;
-            closeDirectionFilter();
-            loadUsers();
-        };
+        allBtn.onclick = () => { window._activeDirection = null; closeDirectionFilter(); loadUsers(); };
         list.appendChild(allBtn);
-
         directions.forEach(dir => {
             const item = document.createElement('div');
             const isActive = window._activeDirection === dir.value;
-            item.style.cssText = `padding:8px 12px; cursor:pointer; border-radius:7px; font-size:13px;
-                color:${isActive ? 'white' : '#b9bbbe'};
-                background:${isActive ? '#5865f2' : 'transparent'};
-                font-weight:${isActive ? 'bold' : 'normal'}; transition:0.15s;`;
+            item.style.cssText = `padding:8px 12px;cursor:pointer;border-radius:7px;font-size:13px;color:${isActive?'white':'#b9bbbe'};background:${isActive?'#5865f2':'transparent'};font-weight:${isActive?'bold':'normal'};transition:0.15s;`;
             item.textContent = dir.label;
-            item.onmouseover = () => { if(!isActive) item.style.background = '#40444b'; item.style.color = 'white'; };
-            item.onmouseout = () => { if(!isActive) item.style.background = 'transparent'; item.style.color = '#b9bbbe'; };
-            item.onclick = () => {
-                window._activeDirection = dir.value;
-                closeDirectionFilter();
-                loadUsers();
-            };
+            item.onmouseover = () => { if (!isActive) { item.style.background='#40444b'; item.style.color='white'; } };
+            item.onmouseout  = () => { if (!isActive) { item.style.background='transparent'; item.style.color='#b9bbbe'; } };
+            item.onclick = () => { window._activeDirection = dir.value; closeDirectionFilter(); loadUsers(); };
             list.appendChild(item);
         });
     }
@@ -1045,28 +1106,17 @@
         btn.style.color = window._activeDirection ? 'white' : '#b9bbbe';
     }
 
-    // Закрыть дропдаун при клике вне
     document.addEventListener('click', e => {
-        if (window._dirFilterOpen &&
-            !document.getElementById('dirFilterDropdown')?.contains(e.target) &&
-            !document.getElementById('dirFilterBtn')?.contains(e.target)) {
-            closeDirectionFilter();
-        }
+        if (window._dirFilterOpen && !document.getElementById('dirFilterDropdown')?.contains(e.target) && !document.getElementById('dirFilterBtn')?.contains(e.target)) closeDirectionFilter();
     });
 
     let searchTimeout;
-    document.getElementById('userSearch').addEventListener('input', () => {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(loadUsers, 300);
-    });
+    document.getElementById('userSearch').addEventListener('input', () => { clearTimeout(searchTimeout); searchTimeout = setTimeout(loadUsers, 300); });
 
     async function markAsRead(senderId) {
-        await _supabase
-            .from('messages')
-            .update({ is_read: true })
-            .eq('user_id', senderId)
-            .eq('recipient_id', myId)
-            .is('room_id', null);
+        await _supabase.from('messages').update({ is_read: true }).eq('user_id', senderId).eq('recipient_id', myId).is('room_id', null);
+        const { data } = await _supabase.from('messages').select('id').eq('recipient_id', myId).eq('is_read', false).is('room_id', null);
+        setUnread(data?.length || 0);
         loadUsers();
     }
 
@@ -1075,53 +1125,42 @@
         el.classList.add('active');
     }
 
-    // ─── Загрузка сообщений ───────────────────────────────────────
     async function loadMessages() {
         const box = document.getElementById('chatBox');
         box.innerHTML = '<div style="color:#72767d;text-align:center;padding:20px;">Загрузка...</div>';
-
         let query = _supabase.from('messages').select('*');
-
         if (currentRoomId) {
             query = query.eq('room_id', currentRoomId).is('recipient_id', null);
         } else if (currentRecipientId) {
-            query = query.or(
-                `and(user_id.eq.${myId},recipient_id.eq.${currentRecipientId}),` +
-                `and(user_id.eq.${currentRecipientId},recipient_id.eq.${myId})`
-            ).is('room_id', null);
-        } else {
-            box.innerHTML = '';
-            return;
-        }
+            query = query.or(`and(user_id.eq.${myId},recipient_id.eq.${currentRecipientId}),and(user_id.eq.${currentRecipientId},recipient_id.eq.${myId})`).is('room_id', null);
+        } else { box.innerHTML = ''; return; }
 
         const { data, error } = await query.order('created_at', { ascending: true });
+        if (error) { box.innerHTML = '<div style="color:#f04747;text-align:center;padding:20px;">Ошибка загрузки</div>'; return; }
 
-        if (error) {
-            console.error('Ошибка загрузки сообщений:', error);
-            box.innerHTML = '<div style="color:#f04747;text-align:center;padding:20px;">Ошибка загрузки</div>';
-            return;
-        }
+        // сохраняем в кэш для поиска
+        _cachedMessages = data || [];
 
         box.innerHTML = '';
-        if (!data?.length) {
-            box.innerHTML = '<div style="color:#72767d;text-align:center;padding:20px;">Сообщений пока нет</div>';
-            return;
-        }
+        if (!data?.length) { box.innerHTML = '<div style="color:#72767d;text-align:center;padding:20px;">Сообщений пока нет</div>'; return; }
         data.forEach(msg => renderMessage(msg));
         box.scrollTop = box.scrollHeight;
     }
 
-    // ─── Отрисовка сообщения ──────────────────────────────────────
     function renderMessage(msg) {
         const box = document.getElementById('chatBox');
         const isMine = msg.user_id === myId;
 
-        // FIX 17: remove placeholder "нет сообщений" when first message arrives
+        // добавляем в кэш поиска если ещё не добавлено
+        if (!_cachedMessages.find(m => m.id === msg.id)) {
+            _cachedMessages.push(msg);
+        }
+
         const emptyPlaceholder = box.querySelector('div[style*="Сообщений пока нет"]');
         if (emptyPlaceholder) emptyPlaceholder.remove();
 
         const wrapper = document.createElement('div');
-        wrapper.style.cssText = `display:flex; flex-direction:column; align-items:${isMine ? 'flex-end' : 'flex-start'}; gap:2px;`;
+        wrapper.style.cssText = `display:flex;flex-direction:column;align-items:${isMine?'flex-end':'flex-start'};gap:2px;`;
         wrapper.dataset.msgId = msg.id;
 
         if (!isMine && currentRoomId) {
@@ -1141,68 +1180,51 @@
             img.onclick = () => window.open(img.src, '_blank');
             div.appendChild(img);
         } else if (msg.content.startsWith('[video]:')) {
-    const vid = document.createElement('video');
-    vid.src = msg.content.replace('[video]:', '');
-    vid.className = 'chat-media';
-    vid.controls = true;
-    div.appendChild(vid);
-
-// ✅ ДОБАВЬТЕ ЭТОТ БЛОК:
-} else if (msg.content.startsWith('[file:')) {
-    const match = msg.content.match(/^\[file:(.+?)\]:(.+)$/);
-    if (match) {
-        const fileName = match[1];
-        const fileUrl = match[2];
-        const fileLink = document.createElement('a');
-        fileLink.href = fileUrl;
-        fileLink.target = '_blank';
-        fileLink.style.cssText = `
-            display:flex; align-items:center; gap:10px; padding:10px 14px;
-            background:rgba(0,0,0,0.2); border-radius:10px; text-decoration:none;
-            color:white; margin-top:4px; transition:0.2s;
-        `;
-        fileLink.innerHTML = `
-            <span style="font-size:28px;">📄</span>
-            <div>
-                <div style="font-size:13px;font-weight:bold;">${fileName}</div>
-                <div style="font-size:11px;color:rgba(255,255,255,0.6);">Нажмите для открытия</div>
-            </div>
-        `;
-        div.appendChild(fileLink);
-    }
-
+            const vid = document.createElement('video');
+            vid.src = msg.content.replace('[video]:', '');
+            vid.className = 'chat-media';
+            vid.controls = true;
+            div.appendChild(vid);
+        } else if (msg.content.startsWith('[file:')) {
+            const match = msg.content.match(/^\[file:(.+?)\]:(.+)$/);
+            if (match) {
+                const fileLink = document.createElement('a');
+                fileLink.href = match[2]; fileLink.target = '_blank';
+                fileLink.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(0,0,0,0.2);border-radius:10px;text-decoration:none;color:white;margin-top:4px;';
+                fileLink.innerHTML = `<span style="font-size:28px;">📄</span><div><div style="font-size:13px;font-weight:bold;">${match[1]}</div><div style="font-size:11px;color:rgba(255,255,255,0.6);">Нажмите для открытия</div></div>`;
+                div.appendChild(fileLink);
+            }
         } else {
-            // FIX 18: use innerHTML with safe escaping to support newlines in messages
             div.innerHTML = escapeHtml(msg.content).replace(/\n/g, '<br>');
         }
 
         const bottomRow = document.createElement('div');
-        bottomRow.style.cssText = `display:flex; align-items:center; gap:8px; padding:0 5px; flex-direction:${isMine ? 'row-reverse' : 'row'};`;
-
+        bottomRow.style.cssText = `display:flex;align-items:center;gap:8px;padding:0 5px;flex-direction:${isMine?'row-reverse':'row'};`;
         const timeEl = document.createElement('div');
         timeEl.style.cssText = 'font-size:10px;color:#72767d;';
-        timeEl.textContent = new Date(msg.created_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-
+        const msgDate = new Date(msg.created_at);
+        const today = new Date();
+        const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
+        const isToday = msgDate.toDateString() === today.toDateString();
+        const isYesterday = msgDate.toDateString() === yesterday.toDateString();
+        const timeStr = msgDate.toLocaleTimeString('ru-RU', { hour:'2-digit', minute:'2-digit' });
+        timeEl.textContent = isToday ? timeStr : isYesterday ? `Вчера ${timeStr}` : `${msgDate.toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit'})} ${timeStr}`;
         bottomRow.appendChild(timeEl);
 
         if (isMine) {
             const delBtn = document.createElement('button');
-            delBtn.style.cssText = `
-                background: #f04747; border: none; cursor: pointer;
-                font-size: 11px; opacity: 0; transition: opacity 0.2s;
-                padding: 3px 8px; border-radius: 5px; color: white;
-                font-weight: bold;
-            `;
+            delBtn.style.cssText = 'background:#f04747;border:none;cursor:pointer;font-size:11px;opacity:0;transition:opacity 0.2s;padding:3px 8px;border-radius:5px;color:white;font-weight:bold;';
             delBtn.textContent = '🗑 Удалить';
-
             wrapper.addEventListener('mouseenter', () => delBtn.style.opacity = '1');
             wrapper.addEventListener('mouseleave', () => delBtn.style.opacity = '0');
-
             delBtn.onclick = async () => {
                 if (!confirm('Удалить сообщение?')) return;
                 const { error } = await _supabase.from('messages').delete().eq('id', msg.id);
                 if (error) showToast('Ошибка удаления!', '#f04747');
-                else wrapper.remove();
+                else {
+                    wrapper.remove();
+                    _cachedMessages = _cachedMessages.filter(m => m.id !== msg.id);
+                }
             };
             bottomRow.appendChild(delBtn);
         }
@@ -1213,180 +1235,88 @@
         box.scrollTop = box.scrollHeight;
     }
 
-    // FIX 19: XSS protection helper
     function escapeHtml(text) {
-        return text
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
+        return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
     }
 
-    // ─── Отправка ─────────────────────────────────────────────────
     async function handleSend() {
         const input = document.getElementById('msgInput');
         const text = input.value.trim();
         if (!text || !myId) return;
-
-        // FIX 20: disable send button during send to prevent duplicate messages
         const sendBtn = document.getElementById('sendBtn');
         sendBtn.disabled = true;
-
         const now = Date.now();
         if (currentRoomId === GLOBAL_SERVER_ID) {
             const passed = now - lastMessageTime;
-            if (passed < COOLDOWN_MS) {
-                showToast(`Подождите ${Math.ceil((COOLDOWN_MS - passed) / 1000)} сек.`, '#f04747');
-                sendBtn.disabled = false;
-                return;
-            }
+            if (passed < COOLDOWN_MS) { showToast(`Подождите ${Math.ceil((COOLDOWN_MS - passed) / 1000)} сек.`, '#f04747'); sendBtn.disabled = false; return; }
         }
-
         input.value = '';
-
-        const payload = {
-            content: text,
-            user_id: myId,
-            sender_name: myProfileData?.username || myProfileData?.full_name || "Аноним",
-            room_id: currentRoomId || null,
-            recipient_id: currentRecipientId || null
-        };
-
+        const payload = { content: text, user_id: myId, sender_name: myProfileData?.username || myProfileData?.full_name || "Аноним", room_id: currentRoomId || null, recipient_id: currentRecipientId || null };
         const { data: newMsg, error } = await _supabase.from('messages').insert([payload]).select().single();
-        if (error) {
-            console.error('Ошибка отправки:', error);
-            showToast('Ошибка отправки!', '#f04747');
-            input.value = text;
-        } else {
-            renderMessage(newMsg); // ← сразу показываем своё сообщение
-            if (currentRoomId === GLOBAL_SERVER_ID) {
-                lastMessageTime = Date.now();
-                startVisualCooldown(30);
-                return; // cooldown handles re-enabling
-            }
+        if (error) { showToast('Ошибка отправки!', '#f04747'); input.value = text; }
+        else {
+            renderMessage(newMsg);
+            if (currentRoomId === GLOBAL_SERVER_ID) { lastMessageTime = Date.now(); startVisualCooldown(30); return; }
         }
-
         sendBtn.disabled = false;
     }
 
-    // ─── Загрузка файла ───────────────────────────────────────────
     async function uploadFile(input) {
-    const file = input.files[0];
-    if (!file || !myId) return;
+        const file = input.files[0];
+        if (!file || !myId) return;
+        const isImage = file.type.startsWith('image/');
+        const isVideo = file.type.startsWith('video/');
+        const isPDF   = file.type === 'application/pdf';
+        if (!isImage && !isVideo && !isPDF) { showToast('Поддерживаются: картинки, видео и PDF!', '#f04747'); return; }
 
-    const isImage = file.type.startsWith('image/');
-    const isVideo = file.type.startsWith('video/');
-    const isPDF = file.type === 'application/pdf';
+        const box = document.getElementById('chatBox');
+        const loadingDiv = document.createElement('div');
+        loadingDiv.id = 'uploadingIndicator';
+        loadingDiv.style.cssText = 'display:flex;justify-content:flex-end;padding:5px 0;';
+        loadingDiv.innerHTML = `<div style="background:#40444b;border-radius:18px;padding:12px 18px;color:#b9bbbe;font-size:13px;min-width:220px;max-width:65%;"><div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;"><span style="font-size:22px;">📎</span><div style="flex:1;min-width:0;"><div style="color:white;font-weight:bold;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${file.name}</div><div id="uploadPercent" style="font-size:11px;color:#7289da;margin-top:2px;">0%</div></div></div><div style="background:#2c2f33;border-radius:10px;height:6px;overflow:hidden;"><div id="uploadBar" style="height:100%;width:0%;background:linear-gradient(90deg,#5865f2,#7289da);border-radius:10px;transition:width 0.2s ease;"></div></div></div>`;
+        box.appendChild(loadingDiv);
+        box.scrollTop = box.scrollHeight;
+        const sendBtn = document.getElementById('sendBtn');
+        sendBtn.disabled = true;
 
-    if (!isImage && !isVideo && !isPDF) {
-        showToast('Поддерживаются: картинки, видео и PDF!', '#f04747');
-        return;
-    }
+        const ext = file.name.split('.').pop();
+        const filePath = `${myId}/${Date.now()}.${ext}`;
+        const uploadUrl = `${SUPABASE_URL}/storage/v1/object/chat-media/${filePath}`;
 
-    // ✅ Индикатор с прогресс-баром
-    const box = document.getElementById('chatBox');
-    const loadingDiv = document.createElement('div');
-    loadingDiv.id = 'uploadingIndicator';
-    loadingDiv.style.cssText = 'display:flex; justify-content:flex-end; padding:5px 0;';
-    loadingDiv.innerHTML = `
-        <div style="background:#40444b; border-radius:18px; padding:12px 18px;
-                    color:#b9bbbe; font-size:13px; min-width:220px; max-width:65%;">
-            <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
-                <span style="font-size:22px;">📎</span>
-                <div style="flex:1; min-width:0;">
-                    <div style="color:white;font-weight:bold;font-size:13px;
-                                overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
-                        ${file.name}
-                    </div>
-                    <div id="uploadPercent" style="font-size:11px;color:#7289da;margin-top:2px;">0%</div>
-                </div>
-            </div>
-            <!-- Прогресс бар -->
-            <div style="background:#2c2f33; border-radius:10px; height:6px; overflow:hidden;">
-                <div id="uploadBar" style="height:100%; width:0%; background:linear-gradient(90deg,#5865f2,#7289da);
-                     border-radius:10px; transition:width 0.2s ease;"></div>
-            </div>
-        </div>
-    `;
+        const publicUrl = await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', uploadUrl);
+            xhr.setRequestHeader('Authorization', `Bearer ${SUPABASE_KEY}`);
+            xhr.setRequestHeader('x-upsert', 'false');
+            xhr.setRequestHeader('Content-Type', file.type);
+            xhr.upload.addEventListener('progress', e => {
+                if (e.lengthComputable) {
+                    const pct = Math.round((e.loaded / e.total) * 100);
+                    const bar = document.getElementById('uploadBar');
+                    const label = document.getElementById('uploadPercent');
+                    if (bar) bar.style.width = pct + '%';
+                    if (label) label.textContent = pct + '%';
+                }
+            });
+            xhr.addEventListener('load', () => {
+                if (xhr.status === 200 || xhr.status === 201) resolve(`${SUPABASE_URL}/storage/v1/object/public/chat-media/${filePath}`);
+                else reject(new Error('Upload failed: ' + xhr.status));
+            });
+            xhr.addEventListener('error', () => reject(new Error('Network error')));
+            xhr.send(file);
+        }).catch(err => { console.error(err); loadingDiv.remove(); sendBtn.disabled = false; showToast('Ошибка загрузки файла', '#f04747'); return null; });
 
-    if (!document.getElementById('spinStyle')) {
-        const style = document.createElement('style');
-        style.id = 'spinStyle';
-        style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
-        document.head.appendChild(style);
-    }
-
-    box.appendChild(loadingDiv);
-    box.scrollTop = box.scrollHeight;
-
-    const sendBtn = document.getElementById('sendBtn');
-    sendBtn.disabled = true;
-
-    const ext = file.name.split('.').pop();
-    const filePath = `${myId}/${Date.now()}.${ext}`;
-    const uploadUrl = `${SUPABASE_URL}/storage/v1/object/chat-media/${filePath}`;
-
-    // ✅ XHR для отслеживания прогресса
-    const publicUrl = await new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open('POST', uploadUrl);
-        xhr.setRequestHeader('Authorization', `Bearer ${SUPABASE_KEY}`);
-        xhr.setRequestHeader('x-upsert', 'false');
-        xhr.setRequestHeader('Content-Type', file.type);
-
-        xhr.upload.addEventListener('progress', e => {
-            if (e.lengthComputable) {
-                const pct = Math.round((e.loaded / e.total) * 100);
-                const bar = document.getElementById('uploadBar');
-                const label = document.getElementById('uploadPercent');
-                if (bar) bar.style.width = pct + '%';
-                if (label) label.textContent = pct + '%';
-            }
-        });
-
-        xhr.addEventListener('load', () => {
-            if (xhr.status === 200 || xhr.status === 201) {
-                const url = `${SUPABASE_URL}/storage/v1/object/public/chat-media/${filePath}`;
-                resolve(url);
-            } else {
-                reject(new Error('Upload failed: ' + xhr.status));
-            }
-        });
-
-        xhr.addEventListener('error', () => reject(new Error('Network error')));
-        xhr.send(file);
-    }).catch(err => {
-        console.error(err);
         loadingDiv.remove();
         sendBtn.disabled = false;
-        showToast('Ошибка загрузки файла', '#f04747');
-        return null;
-    });
+        if (!publicUrl) { input.value = ''; return; }
 
-    loadingDiv.remove();
-    sendBtn.disabled = false;
+        const prefix = isImage ? '[image]:' : isVideo ? '[video]:' : `[file:${file.name}]:`;
+        const { data: newMsg, error } = await _supabase.from('messages').insert([{ content: prefix + publicUrl, user_id: myId, sender_name: myProfileData?.username || "Аноним", room_id: currentRoomId || null, recipient_id: currentRecipientId || null }]).select().single();
+        if (error) showToast('Ошибка отправки медиа', '#f04747');
+        else renderMessage(newMsg);
+        input.value = '';
+    }
 
-    if (!publicUrl) { input.value = ''; return; }
-
-    const prefix = isImage ? '[image]:' : isVideo ? '[video]:' : `[file:${file.name}]:`;
-
-    const { data: newMsg, error } = await _supabase.from('messages').insert([{
-    content: prefix + publicUrl,
-    user_id: myId,
-    sender_name: myProfileData?.username || "Аноним",
-    room_id: currentRoomId || null,
-    recipient_id: currentRecipientId || null
-}]).select().single();  // ← обязательно .select().single()
-
-if (error) {
-    showToast('Ошибка отправки медиа', '#f04747');
-} else {
-    renderMessage(newMsg);  // ← ручной рендер сразу
-}
-input.value = '';
-}
-    // ─── Cooldown ─────────────────────────────────────────────────
     function startVisualCooldown(seconds) {
         const btn = document.getElementById('sendBtn');
         let left = seconds;
@@ -1394,55 +1324,41 @@ input.value = '';
         const itv = setInterval(() => {
             btn.textContent = `${left}s`;
             left--;
-            if (left < 0) {
-                clearInterval(itv);
-                btn.textContent = "Отправить";
-                btn.disabled = false;
-            }
+            if (left < 0) { clearInterval(itv); btn.textContent = "Отправить"; btn.disabled = false; }
         }, 1000);
     }
 
-    // ─── Realtime ─────────────────────────────────────────────────
     _supabase.channel('db_changes')
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
             const m = payload.new;
-
             const isCurrentRoom = currentRoomId && m.room_id === currentRoomId;
-            const isCurrentDM =
-                !currentRoomId && currentRecipientId &&
-                !m.room_id &&
-                ((m.user_id === currentRecipientId && m.recipient_id === myId) ||
-                 (m.user_id === myId && m.recipient_id === currentRecipientId));
-
-            // FIX 21: prevent duplicate messages — realtime fires for own messages too
-            // Only render if the message was NOT sent by me (mine already rendered optimistically)
-            // OR if it was sent by the other person
-            if ((isCurrentRoom || isCurrentDM) && m.user_id !== myId) {
-                renderMessage(m);
-            }
-
+            const isCurrentDM = !currentRoomId && currentRecipientId && !m.room_id && ((m.user_id === currentRecipientId && m.recipient_id === myId) || (m.user_id === myId && m.recipient_id === currentRecipientId));
+            if ((isCurrentRoom || isCurrentDM) && m.user_id !== myId) renderMessage(m);
             if (m.recipient_id === myId) {
+                if (m.user_id !== myId && !m.room_id) {
+                    const alreadyInChats = recentChats.find(u => u.id === m.user_id);
+                    if (!alreadyInChats) {
+                        _supabase.from('profiles').select('*').eq('id', m.user_id).single().then(({ data: sp }) => {
+                            if (sp && !recentChats.find(u => u.id === sp.id)) { recentChats.unshift(sp); saveRecentChats(); loadUsers(); }
+                        });
+                    } else { recentChats = recentChats.filter(u => u.id !== m.user_id); recentChats.unshift(alreadyInChats); saveRecentChats(); }
+                    sendNotification(`💬 Новое сообщение от @${m.sender_name||'кто-то'}`, m.content.startsWith('[image]') ? '📷 Фото' : m.content.startsWith('[video]') ? '🎥 Видео' : m.content.startsWith('[file') ? '📄 Файл' : m.content.slice(0, 60));
+                    if (currentRecipientId !== m.user_id) setUnread(unreadCount + 1);
+                }
                 loadUsers();
             }
+        }).subscribe();
 
-            if (m.recipient_id === myId && m.user_id !== myId && !m.is_ai_reply && !m.room_id) {
-                processAIResponse(m);
-            }
-        })
-        .subscribe();
-
-    // FIX 22: Also handle DELETE events to keep UI in sync
     _supabase.channel('db_deletes')
         .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'messages' }, payload => {
             const deleted = payload.old;
             if (deleted?.id) {
                 const el = document.querySelector(`[data-msg-id="${deleted.id}"]`);
                 if (el) el.remove();
+                _cachedMessages = _cachedMessages.filter(m => m.id !== deleted.id);
             }
-        })
-        .subscribe();
+        }).subscribe();
 
-    // ─── Переключатель чата ───────────────────────────────────────
     function toggleChat() {
         const win = document.getElementById('chat-window');
         const isOpen = win.style.display !== 'none';
@@ -1452,188 +1368,67 @@ input.value = '';
     function openChat(title) {
         document.getElementById('currentChatTitle').textContent = title;
         document.getElementById('inputArea').style.visibility = 'visible';
+        // закрываем поиск при смене чата
+        closeMsgSearch();
+        _cachedMessages = [];
         updateAIButton();
         loadMessages();
-        if (currentRecipientId) markAsRead(currentRecipientId);
-    if (currentRecipientId) loadPendingOrders();
-}
-// ─── Подтверждение заказа продавцом ──────────────────────────
-async function loadPendingOrders() {
-    const { data: orders } = await _supabase
-        .from('orders')
-        .select('*')
-        .eq('seller_id', myId)
-        .eq('status', 'frozen');
-
-    if (!orders?.length) return;
-
-    const box = document.getElementById('chatBox');
-
-    orders.forEach(order => {
-        // Не показываем если уже есть кнопка для этого заказа
-        if (document.querySelector(`[data-order-confirm="${order.id}"]`)) return;
-
-        const div = document.createElement('div');
-        div.style.cssText = 'display:flex; justify-content:center; margin:15px 0;';
-        div.dataset.orderConfirm = order.id;
-        div.innerHTML = `
-            <div style="background:#23272a; border:1px solid #40444b; border-radius:16px;
-                        padding:18px 24px; max-width:380px; width:100%; text-align:center;">
-                <div style="font-size:22px; margin-bottom:8px;">🔒</div>
-                <div style="color:white; font-weight:bold; font-size:15px; margin-bottom:4px;">
-                    Новый заказ #${order.id.slice(0,8)}
-                </div>
-                <div style="color:#b9bbbe; font-size:13px; margin-bottom:4px;">
-                    📦 ${order.post_title || 'Услуга'}
-                </div>
-                <div style="color:#eab308; font-weight:bold; font-size:16px; margin-bottom:12px;">
-                    ${order.amount} ⭐ заморожено
-                </div>
-                <div style="color:#72767d; font-size:11px; margin-bottom:15px;">
-                    Покупатель: @${order.buyer_name || 'клиент'}
-                </div>
-                <div style="display:flex; gap:10px;">
-                    <button onclick="sellerConfirmOrder('${order.id}', this)"
-                        style="flex:1; background:linear-gradient(135deg,#43b581,#2d8a5e);
-                               color:white; border:none; border-radius:10px; padding:11px;
-                               cursor:pointer; font-weight:bold; font-size:14px; transition:0.2s;"
-                        onmouseover="this.style.opacity='0.85'"
-                        onmouseout="this.style.opacity='1'">
-                        ✅ Принять заказ
-                    </button>
-                    <button onclick="sellerRejectOrder('${order.id}', ${order.amount}, '${order.buyer_id}', this)"
-                        style="flex:1; background:#f04747; color:white; border:none;
-                               border-radius:10px; padding:11px; cursor:pointer;
-                               font-weight:bold; font-size:14px; transition:0.2s;"
-                        onmouseover="this.style.opacity='0.85'"
-                        onmouseout="this.style.opacity='1'">
-                        ❌ Отклонить
-                    </button>
-                </div>
-            </div>
-        `;
-        box.appendChild(div);
-        box.scrollTop = box.scrollHeight;
-    });
-}
-
-async function sellerConfirmOrder(orderId, btn) {
-    btn.disabled = true;
-    btn.textContent = 'Обработка...';
-
-    const { error } = await _supabase
-        .from('orders')
-        .update({ status: 'in_progress' })
-        .eq('id', orderId);
-
-    if (error) {
-        showToast('Ошибка!', '#f04747');
-        btn.disabled = false;
-        btn.textContent = '✅ Принять заказ';
-        return;
+        if (currentRecipientId) { markAsRead(currentRecipientId); loadPendingOrders(); }
     }
 
-    const { data: order } = await _supabase
-        .from('orders')
-        .select('*')
-        .eq('id', orderId)
-        .single();
-
-    await _supabase.from('messages').insert([{
-        content: `✅ Продавец принял заказ #${orderId.slice(0,8)}!\n📦 ${order?.post_title || 'Услуга'}\n\nРабота началась! Средства будут переведены после подтверждения покупателем.`,
-        user_id: myId,
-        sender_name: myProfileData?.username,
-        recipient_id: order?.buyer_id,
-        room_id: null
-    }]);
-
-    btn.closest('[data-order-confirm]').remove();
-    showToast('✅ Заказ принят! Приступайте к работе.', '#43b581');
-}
-
-  async function sellerRejectOrder(orderId, amount, buyerId, btn) {
-    if (!confirm('Отклонить заказ? Звёзды вернутся покупателю.')) return;
-
-    btn.disabled = true;
-    btn.textContent = 'Обработка...';
-
-    // Возвращаем звёзды покупателю
-    const { data: buyer } = await _supabase
-        .from('profiles')
-        .select('wallet_balance, frozen_balance')
-        .eq('id', buyerId)
-        .single();
-
-    await _supabase.from('profiles').update({
-        wallet_balance: (buyer?.wallet_balance || 0) + amount,
-        frozen_balance: Math.max(0, (buyer?.frozen_balance || 0) - amount)
-    }).eq('id', buyerId);
-
-    await _supabase.from('orders')
-        .update({ status: 'cancelled' })
-        .eq('id', orderId);
-
-    await _supabase.from('messages').insert([{
-        content: `❌ Продавец отклонил заказ #${orderId.slice(0,8)}.\n💫 ${amount} ⭐ возвращено на ваш баланс.`,
-        user_id: myId,
-        sender_name: myProfileData?.username,
-        recipient_id: buyerId,
-        room_id: null
-    }]);
-
-    btn.closest('[data-order-confirm]').remove();
-    showToast(`❌ Заказ отклонён. ${amount} ⭐ возвращено покупателю.`, '#f04747');
-}
-    // ─── ИИ авто-ответ ─────────────────────────────────────────
-    let aiAutoReplyEnabled = false;
-
-    async function loadAISettings() {
-        const { data: s } = await _supabase.from('ai_settings').select('is_enabled').eq('user_id', myId).maybeSingle();
-        aiAutoReplyEnabled = s?.is_enabled === true;
-        updateAIToggleUI();
-    }
-
-    async function toggleAIAutoReply() {
-        aiAutoReplyEnabled = !aiAutoReplyEnabled;
-        await _supabase.from('ai_settings').upsert([{ user_id: myId, is_enabled: aiAutoReplyEnabled }], { onConflict: 'user_id' });
-        updateAIToggleUI();
-        showToast(aiAutoReplyEnabled ? '🤖 Авто-ответ ИИ включён' : '🤖 Авто-ответ ИИ выключен', aiAutoReplyEnabled ? '#43b581' : '#f0a500');
-    }
-
-    function updateAIToggleUI() {
-        const btn = document.getElementById('aiToggleBtn');
-        if (!btn) return;
-        btn.textContent = aiAutoReplyEnabled ? '🤖 ИИ: ВКЛ' : '🤖 ИИ: ВЫКЛ';
-        btn.style.background = aiAutoReplyEnabled ? 'linear-gradient(135deg,#43b581,#2d8a5e)' : '#4f545c';
-    }
-
-    async function processAIResponse(incomingMsg) {
-        if (!myId || !aiAutoReplyEnabled) return;
-
-        const { data, error } = await _supabase.functions.invoke('ai-reply', {
-            body: { message: incomingMsg.content, userId: myId }
+    async function loadPendingOrders() {
+        const { data: orders } = await _supabase.from('orders').select('*').eq('seller_id', myId).eq('status', 'frozen');
+        if (!orders?.length) return;
+        const box = document.getElementById('chatBox');
+        orders.forEach(order => {
+            if (document.querySelector(`[data-order-confirm="${order.id}"]`)) return;
+            const div = document.createElement('div');
+            div.style.cssText = 'display:flex;justify-content:center;margin:15px 0;';
+            div.dataset.orderConfirm = order.id;
+            div.innerHTML = `<div style="background:#23272a;border:1px solid #40444b;border-radius:16px;padding:18px 24px;max-width:380px;width:100%;text-align:center;"><div style="font-size:22px;margin-bottom:8px;">🔒</div><div style="color:white;font-weight:bold;font-size:15px;margin-bottom:4px;">Новый заказ #${order.id.slice(0,8)}</div><div style="color:#b9bbbe;font-size:13px;margin-bottom:4px;">📦 ${order.post_title||'Услуга'}</div><div style="color:#eab308;font-weight:bold;font-size:16px;margin-bottom:12px;">${order.amount} ⭐ заморожено</div><div style="color:#72767d;font-size:11px;margin-bottom:15px;">Покупатель: @${order.buyer_name||'клиент'}</div><div style="display:flex;gap:10px;"><button onclick="sellerConfirmOrder('${order.id}',this)" style="flex:1;background:linear-gradient(135deg,#43b581,#2d8a5e);color:white;border:none;border-radius:10px;padding:11px;cursor:pointer;font-weight:bold;font-size:14px;">✅ Принять заказ</button><button onclick="sellerRejectOrder('${order.id}',${order.amount},'${order.buyer_id}',this)" style="flex:1;background:#f04747;color:white;border:none;border-radius:10px;padding:11px;cursor:pointer;font-weight:bold;font-size:14px;">❌ Отклонить</button></div></div>`;
+            box.appendChild(div);
+            box.scrollTop = box.scrollHeight;
         });
-
-        if (error || !data?.reply) return;
-
-        await _supabase.from('messages').insert([{
-            content: data.reply,
-            user_id: myId,
-            sender_name: "AI Продавец 🤖",
-            recipient_id: incomingMsg.user_id,
-            is_ai_reply: true
-        }]);
     }
 
-    // ─── Enter для отправки ───────────────────────────────────────
-    document.getElementById('msgInput').addEventListener('keydown', e => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            handleSend();
-        }
-    });
+    async function sellerConfirmOrder(orderId, btn) {
+        btn.disabled = true; btn.textContent = 'Обработка...';
+        const { error } = await _supabase.from('orders').update({ status: 'in_progress' }).eq('id', orderId);
+        if (error) { showToast('Ошибка!', '#f04747'); btn.disabled = false; btn.textContent = '✅ Принять заказ'; return; }
+        const { data: order } = await _supabase.from('orders').select('*').eq('id', orderId).single();
+        await _supabase.from('messages').insert([{ content: `✅ Продавец принял заказ #${orderId.slice(0,8)}!\n📦 ${order?.post_title||'Услуга'}\n\nРабота началась!`, user_id: myId, sender_name: myProfileData?.username, recipient_id: order?.buyer_id, room_id: null }]);
+        btn.closest('[data-order-confirm]').remove();
+        showToast('✅ Заказ принят!', '#43b581');
+        const deliverBtn = document.createElement('button');
+        deliverBtn.textContent = '📦 Сдать работу';
+        deliverBtn.style.cssText = 'background:#5865f2;color:white;border:none;border-radius:10px;padding:10px 20px;cursor:pointer;font-weight:bold;';
+        const box = document.getElementById('chatBox');
+        const deliverWrap = document.createElement('div');
+        deliverWrap.style.cssText = 'display:flex;justify-content:center;margin:15px 0;';
+        deliverWrap.appendChild(deliverBtn);
+        box.appendChild(deliverWrap);
+        box.scrollTop = box.scrollHeight;
+        deliverBtn.onclick = async () => {
+            await _supabase.from('orders').update({ delivered_at: new Date().toISOString(), status: 'in_progress' }).eq('id', orderId);
+            await _supabase.from('messages').insert([{ content: `📦 Продавец сдал работу!\n✅ У вас есть 3 дня чтобы проверить и подтвердить.`, user_id: myId, sender_name: myProfileData?.username, recipient_id: order.buyer_id, room_id: null }]);
+            deliverWrap.remove();
+            showToast('✅ Работа сдана!', '#43b581');
+        };
+    }
 
-    // ─── Emoji picker ─────────────────────────────────────────────
+    async function sellerRejectOrder(orderId, amount, buyerId, btn) {
+        if (!confirm('Отклонить заказ? Звёзды вернутся покупателю.')) return;
+        btn.disabled = true; btn.textContent = 'Обработка...';
+        const { data: buyer } = await _supabase.from('profiles').select('wallet_balance,frozen_balance').eq('id', buyerId).single();
+        await _supabase.from('profiles').update({ wallet_balance: (buyer?.wallet_balance||0) + amount, frozen_balance: Math.max(0, (buyer?.frozen_balance||0) - amount) }).eq('id', buyerId);
+        await _supabase.from('orders').update({ status: 'cancelled' }).eq('id', orderId);
+        await _supabase.from('messages').insert([{ content: `❌ Продавец отклонил заказ #${orderId.slice(0,8)}.\n💫 ${amount} ⭐ возвращено на ваш баланс.`, user_id: myId, sender_name: myProfileData?.username, recipient_id: buyerId, room_id: null }]);
+        btn.closest('[data-order-confirm]').remove();
+        showToast(`❌ Заказ отклонён. ${amount} ⭐ возвращено покупателю.`, '#f04747');
+    }
+
+    document.getElementById('msgInput').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } });
+
     let pickerInstance = null;
     function toggleEmojiPicker() {
         const container = document.getElementById('emojiPicker');
@@ -1645,7 +1440,6 @@ async function sellerConfirmOrder(orderId, btn) {
                 onEmojiSelect: (emoji) => {
                     const input = document.getElementById('msgInput');
                     const pos = input.selectionStart ?? input.value.length;
-                    // FIX 23: insert emoji at cursor position, not always at end
                     input.value = input.value.slice(0, pos) + emoji.native + input.value.slice(pos);
                     input.focus();
                     input.selectionStart = input.selectionEnd = pos + emoji.native.length;
@@ -1661,89 +1455,21 @@ async function sellerConfirmOrder(orderId, btn) {
     document.addEventListener('click', (e) => {
         const picker = document.getElementById('emojiPicker');
         const btn = document.getElementById('emojiBtn');
-        if (picker && !picker.contains(e.target) && !btn.contains(e.target)) {
-            picker.style.display = 'none';
-        }
+        if (picker && !picker.contains(e.target) && !btn.contains(e.target)) picker.style.display = 'none';
     });
 
-    // ─── Заказ ───────────────────────────────────────────────────
     async function openOrderModal() {
         const old = document.getElementById('orderModal');
         if (old) old.remove();
-
-        const { data: posts } = await _supabase
-            .from('posts')
-            .select('*')
-            .eq('author_id', currentRecipientId);
-
+        const { data: posts } = await _supabase.from('posts').select('*').eq('author_id', currentRecipientId);
         const myBalance = myProfileData?.wallet_balance || 0;
-
         const modal = document.createElement('div');
         modal.id = 'orderModal';
-        modal.style.cssText = `
-            position:fixed; top:0; left:0; width:100vw; height:100vh;
-            background:rgba(0,0,0,0.7); z-index:9999;
-            display:flex; align-items:center; justify-content:center;
-        `;
-
-        const postOptions = posts?.length
-            ? posts.map(p => `<option value="${p.id}" data-price="${p.price}">${p.title} — ${p.price} ⭐</option>`).join('')
-            : '<option disabled>Нет услуг</option>';
-
-        modal.innerHTML = `
-            <div style="background:#2c2f33; border-radius:20px; width:440px; padding:30px;
-                        box-shadow:0 20px 60px rgba(0,0,0,0.5); border:1px solid #40444b;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                    <h2 style="color:white; font-size:20px;">⭐ Оформить заказ</h2>
-                    <button onclick="document.getElementById('orderModal').remove()"
-                        style="background:none;border:none;color:#72767d;font-size:24px;cursor:pointer;">×</button>
-                </div>
-                <div style="background:#23272a; border-radius:12px; padding:15px; margin-bottom:20px;">
-                    <p style="color:#72767d; font-size:12px; text-transform:uppercase; font-weight:bold; margin-bottom:5px;">Твой баланс</p>
-                    <p style="color:#eab308; font-size:24px; font-weight:900;">${myBalance} ⭐</p>
-                </div>
-                <div style="margin-bottom:15px;">
-                    <p style="color:#b9bbbe; font-size:13px; margin-bottom:8px; font-weight:bold;">Выбери услугу:</p>
-                    <select id="orderPostSelect" onchange="updateOrderPrice()"
-                        style="width:100%; padding:12px; border-radius:10px; border:none;
-                               background:#36393f; color:white; font-size:14px; outline:none;">
-                        <option value="">-- Выбери --</option>
-                        ${postOptions}
-                    </select>
-                </div>
-                <div id="orderPriceBlock" style="display:none; background:#40444b; border-radius:12px; padding:15px; margin-bottom:20px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span style="color:#b9bbbe; font-size:14px;">Сумма заморозки:</span>
-                        <span id="orderPriceDisplay" style="color:#eab308; font-weight:900; font-size:20px;"></span>
-                    </div>
-                    <p style="color:#72767d; font-size:11px; margin-top:8px;">
-                        ⚠️ Звёзды будут заморожены до подтверждения выполнения
-                    </p>
-                </div>
-                <div style="background:#1e3a2f; border:1px solid #2d6a4f; border-radius:12px; padding:12px; margin-bottom:20px;">
-                    <p style="color:#52b788; font-size:12px; line-height:1.6;">
-                        🛡 <strong>Защита заказа:</strong><br>
-                        Звёзды заморозятся и перейдут продавцу только после твоего подтверждения.<br>
-                        Если не подтвердишь в течение 3 дней — звёзды вернутся тебе.
-                    </p>
-                </div>
-                <button onclick="placeOrder()"
-                    style="width:100%; background:linear-gradient(135deg,#eab308,#f59e0b);
-                           color:black; border:none; border-radius:12px; padding:15px;
-                           font-size:16px; font-weight:900; cursor:pointer; transition:0.2s;"
-                    onmouseover="this.style.opacity='0.9'"
-                    onmouseout="this.style.opacity='1'">
-                    🔒 Заморозить и заказать
-                </button>
-            </div>
-        `;
-
+        modal.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;';
+        const postOptions = posts?.length ? posts.map(p => `<option value="${p.id}" data-price="${p.price}">${p.title} — ${p.price} ⭐</option>`).join('') : '<option disabled>Нет услуг</option>';
+        modal.innerHTML = `<div style="background:#2c2f33;border-radius:20px;width:440px;padding:30px;box-shadow:0 20px 60px rgba(0,0,0,0.5);border:1px solid #40444b;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;"><h2 style="color:white;font-size:20px;">⭐ Оформить заказ</h2><button onclick="document.getElementById('orderModal').remove()" style="background:none;border:none;color:#72767d;font-size:24px;cursor:pointer;">×</button></div><div style="background:#23272a;border-radius:12px;padding:15px;margin-bottom:20px;"><p style="color:#72767d;font-size:12px;text-transform:uppercase;font-weight:bold;margin-bottom:5px;">Твой баланс</p><p style="color:#eab308;font-size:24px;font-weight:900;">${myBalance} ⭐</p></div><div style="margin-bottom:15px;"><p style="color:#b9bbbe;font-size:13px;margin-bottom:8px;font-weight:bold;">Выбери услугу:</p><select id="orderPostSelect" onchange="updateOrderPrice()" style="width:100%;padding:12px;border-radius:10px;border:none;background:#36393f;color:white;font-size:14px;outline:none;"><option value="">-- Выбери --</option>${postOptions}</select></div><div id="orderPriceBlock" style="display:none;background:#40444b;border-radius:12px;padding:15px;margin-bottom:20px;"><div style="display:flex;justify-content:space-between;align-items:center;"><span style="color:#b9bbbe;font-size:14px;">Сумма заморозки:</span><span id="orderPriceDisplay" style="color:#eab308;font-weight:900;font-size:20px;"></span></div><p style="color:#72767d;font-size:11px;margin-top:8px;">⚠️ Звёзды будут заморожены до подтверждения</p></div><div style="background:#1e3a2f;border:1px solid #2d6a4f;border-radius:12px;padding:12px;margin-bottom:20px;"><p style="color:#52b788;font-size:12px;line-height:1.6;">🛡 <strong>Защита заказа:</strong><br>Звёзды заморозятся и перейдут продавцу только после твоего подтверждения.</p></div><button onclick="placeOrder()" style="width:100%;background:linear-gradient(135deg,#eab308,#f59e0b);color:black;border:none;border-radius:12px;padding:15px;font-size:16px;font-weight:900;cursor:pointer;">🔒 Заморозить и заказать</button></div>`;
         document.body.appendChild(modal);
-
-        // FIX 24: close modal on backdrop click
-        modal.addEventListener('click', e => {
-            if (e.target === modal) modal.remove();
-        });
+        modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
     }
 
     function updateOrderPrice() {
@@ -1752,525 +1478,196 @@ async function sellerConfirmOrder(orderId, btn) {
         const price = opt?.dataset?.price;
         const block = document.getElementById('orderPriceBlock');
         const display = document.getElementById('orderPriceDisplay');
-        if (price) {
-            block.style.display = 'block';
-            display.textContent = price + ' ⭐';
-        } else {
-            block.style.display = 'none';
-        }
+        if (price) { block.style.display = 'block'; display.textContent = price + ' ⭐'; } else { block.style.display = 'none'; }
     }
 
     async function placeOrder() {
+        const placeBtn = document.querySelector('[onclick="placeOrder()"]');
+        if (placeBtn) { placeBtn.disabled = true; placeBtn.textContent = '⏳ Обработка...'; }
         const sel = document.getElementById('orderPostSelect');
         const postId = sel.value;
         const opt = sel.options[sel.selectedIndex];
         const price = parseInt(opt?.dataset?.price);
         const postTitle = opt?.text?.split(' —')[0];
-
-        if (!postId || !price) return showToast('Выбери услугу!', '#f04747');
-
+        if (!postId || !price) { showToast('Выбери услугу!', '#f04747'); if (placeBtn) { placeBtn.disabled = false; placeBtn.textContent = '🔒 Заморозить и заказать'; } return; }
         const myBalance = myProfileData?.wallet_balance || 0;
-        if (myBalance < price) {
-            showToast('Недостаточно звёзд!', '#f04747');
-            return;
-        }
-
+        if (myBalance < price) { showToast('Недостаточно звёзд!', '#f04747'); if (placeBtn) { placeBtn.disabled = false; placeBtn.textContent = '🔒 Заморозить и заказать'; } return; }
         const newBalance = myBalance - price;
         const newFrozen = (myProfileData?.frozen_balance || 0) + price;
-
-        const { error: balErr } = await _supabase
-            .from('profiles')
-            .update({ wallet_balance: newBalance, frozen_balance: newFrozen })
-            .eq('id', myId);
-
-        if (balErr) return showToast('Ошибка списания!', '#f04747');
-
+        const { error: balErr } = await _supabase.from('profiles').update({ wallet_balance: newBalance, frozen_balance: newFrozen }).eq('id', myId);
+        if (balErr) { showToast('Ошибка списания!', '#f04747'); return; }
         const autoComplete = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString();
-        const { data: order, error: orderErr } = await _supabase
-            .from('orders')
-            .insert([{
-                buyer_id: myId,
-                seller_id: currentRecipientId,
-                buyer_name: myProfileData?.username,
-                seller_name: document.getElementById('currentChatTitle').textContent,
-                post_id: postId,
-                post_title: postTitle,
-                amount: price,
-                status: 'frozen',
-                auto_complete_at: autoComplete
-            }])
-            .select()
-            .single();
-
-        if (orderErr) {
-            await _supabase.from('profiles').update({ wallet_balance: myBalance, frozen_balance: myProfileData?.frozen_balance || 0 }).eq('id', myId);
-            return showToast('Ошибка создания заказа!', '#f04747');
-        }
-
+        const { data: order, error: orderErr } = await _supabase.from('orders').insert([{ buyer_id: myId, seller_id: currentRecipientId, buyer_name: myProfileData?.username, seller_name: document.getElementById('currentChatTitle').textContent, post_id: postId, post_title: postTitle, amount: price, status: 'frozen', auto_complete_at: autoComplete }]).select().single();
+        if (orderErr) { await _supabase.from('profiles').update({ wallet_balance: myBalance, frozen_balance: myProfileData?.frozen_balance || 0 }).eq('id', myId); showToast('Ошибка создания заказа!', '#f04747'); return; }
         myProfileData.wallet_balance = newBalance;
         myProfileData.frozen_balance = newFrozen;
-
-        await _supabase.from('messages').insert([{
-            content: `🔒 [ЗАКАЗ #${order.id.slice(0,8)}]\n📦 Услуга: ${postTitle}\n💰 Сумма: ${price} ⭐ (заморожено)\n\nПродавец, подтверди принятие заказа!`,
-            user_id: myId,
-            sender_name: myProfileData?.username,
-            recipient_id: currentRecipientId,
-            room_id: null
-        }]);
-
+        await _supabase.from('messages').insert([{ content: `🔒 [ЗАКАЗ #${order.id.slice(0,8)}]\n📦 Услуга: ${postTitle}\n💰 Сумма: ${price} ⭐ (заморожено)\n\nПродавец, подтверди принятие заказа!`, user_id: myId, sender_name: myProfileData?.username, recipient_id: currentRecipientId, room_id: null }]);
         document.getElementById('orderModal').remove();
         showToast(`✅ Заказ оформлен! ${price} ⭐ заморожено`, '#43b581');
         showConfirmOrderBtn(order.id, price);
+        if (placeBtn) { placeBtn.disabled = false; placeBtn.textContent = '🔒 Заморозить и заказать'; }
     }
 
     function showConfirmOrderBtn(orderId, amount) {
         const box = document.getElementById('chatBox');
         const div = document.createElement('div');
-        div.style.cssText = 'display:flex; justify-content:center; margin:15px 0;';
-        div.innerHTML = `
-            <button onclick="confirmOrder('${orderId}', ${amount}, this)"
-                style="background:#43b581; color:white; border:none; border-radius:12px;
-                       padding:12px 25px; cursor:pointer; font-weight:bold; font-size:14px;">
-                ✅ Подтвердить получение и отправить ${amount} ⭐ продавцу
-            </button>
-        `;
+        div.style.cssText = 'display:flex;justify-content:center;gap:10px;margin:15px 0;';
+        div.innerHTML = `<button onclick="confirmOrder('${orderId}',${amount},this)" style="background:#43b581;color:white;border:none;border-radius:12px;padding:12px 25px;cursor:pointer;font-weight:bold;font-size:14px;">✅ Подтвердить получение и отправить ${amount} ⭐ продавцу</button><button onclick="openDispute('${orderId}')" style="background:#f04747;color:white;border:none;border-radius:12px;padding:12px 25px;cursor:pointer;font-weight:bold;font-size:14px;">⚠️ Открыть спор</button>`;
         box.appendChild(div);
         box.scrollTop = box.scrollHeight;
     }
 
-
-async function submitReview(orderId, sellerId) {
-    const selected = document.querySelectorAll('#starRow span.selected').length;
-    if (!selected) return showToast('Выберите оценку!', '#f04747');
-
-    const comment = document.getElementById('reviewComment').value.trim();
-    const btn = document.getElementById('submitReviewBtn');
-    btn.disabled = true;
-    btn.textContent = 'Отправка...';
-
-    const buyerName = myProfileData?.username || 'Аноним';
-
-    const { error } = await _supabase.from('reviews').insert([{
-        order_id: orderId,
-        buyer_id: myId,
-        buyer_name: buyerName,
-        seller_id: sellerId,
-        rating: selected,
-        comment: comment || null
-    }]);
-
-    if (error) {
-        showToast('Ошибка отправки отзыва!', '#f04747');
-        btn.disabled = false;
-        btn.textContent = 'Отправить оценку';
-        return;
+    async function openDispute(orderId) {
+        const reason = prompt('Опишите проблему:');
+        if (!reason) return;
+        await _supabase.from('orders').update({ status: 'dispute', dispute_reason: reason }).eq('id', orderId);
+        const { data: order } = await _supabase.from('orders').select('*').eq('id', orderId).single();
+        await _supabase.from('messages').insert([{ content: `⚠️ Покупатель открыл спор!\nПричина: ${reason}\n\nМодератор свяжется с вами в течение 24 часов.`, user_id: myId, sender_name: myProfileData?.username, recipient_id: order?.seller_id, room_id: null }]);
+        showToast('⚠️ Спор открыт. Ожидайте модератора.', '#f0a500');
+        sendNotification('⚠️ Открыт спор!', `Причина: ${reason}`);
     }
 
-    // Считаем новый средний рейтинг
-    const { data: allReviews } = await _supabase
-        .from('reviews')
-        .select('rating')
-        .eq('seller_id', sellerId);
-
-    if (allReviews?.length) {
-        const avg = allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length;
-        const newRating = Math.round(avg * 10) / 10;
-        const newCount = allReviews.length;
-
-        // Обновляем профиль продавца
-        await _supabase.from('profiles').update({
-            rating: newRating,
-            reviews_count: newCount
-        }).eq('id', sellerId);
-
-        // Обновляем рейтинг во ВСЕХ постах продавца
-        await _supabase.from('posts').update({
-            rating: newRating,
-            review_count: newCount
-        }).eq('author_id', sellerId);
+    async function submitReview(orderId, sellerId) {
+        const selected = document.querySelectorAll('#starRow span.selected').length;
+        if (!selected) return showToast('Выберите оценку!', '#f04747');
+        const comment = document.getElementById('reviewComment').value.trim();
+        const btn = document.getElementById('submitReviewBtn');
+        btn.disabled = true; btn.textContent = 'Отправка...';
+        const { error } = await _supabase.from('reviews').insert([{ order_id: orderId, buyer_id: myId, buyer_name: myProfileData?.username||'Аноним', seller_id: sellerId, rating: selected, comment: comment||null }]);
+        if (error) { showToast('Ошибка отправки отзыва!', '#f04747'); btn.disabled = false; btn.textContent = 'Отправить оценку'; return; }
+        const { data: allReviews } = await _supabase.from('reviews').select('rating').eq('seller_id', sellerId);
+        if (allReviews?.length) {
+            const avg = allReviews.reduce((s, r) => s + r.rating, 0) / allReviews.length;
+            await _supabase.from('profiles').update({ rating: Math.round(avg * 10) / 10, reviews_count: allReviews.length }).eq('id', sellerId);
+            await _supabase.from('posts').update({ rating: Math.round(avg * 10) / 10, review_count: allReviews.length }).eq('author_id', sellerId);
+        }
+        document.getElementById('reviewModal').remove();
+        showToast('✅ Спасибо за отзыв!', '#43b581');
     }
 
-    document.getElementById('reviewModal').remove();
-    showToast('✅ Спасибо за отзыв!', '#43b581');
-}
-
-    // ─── Панель участников (с ролями) ─────────────────────────────
     let membersPanelOpen = false;
-    let membersPanelData = [];   // [{user_id, role, profiles:{...}}]
-    let currentRoomRole = null;  // 'owner' | 'admin' | 'member' | null — роль текущего пользователя
+    let membersPanelData = [];
+    let currentRoomRole = null;
 
-    function toggleMembersPanel() {
-        membersPanelOpen ? closeMembersPanel() : openMembersPanel();
-    }
-
-    function closeMembersPanel() {
-        const panel = document.getElementById('membersPanel');
-        if (panel) panel.style.width = '0';
-        membersPanelOpen = false;
-    }
+    function toggleMembersPanel() { membersPanelOpen ? closeMembersPanel() : openMembersPanel(); }
+    function closeMembersPanel() { const panel = document.getElementById('membersPanel'); if (panel) panel.style.width = '0'; membersPanelOpen = false; }
 
     async function openMembersPanel() {
         const panel = document.getElementById('membersPanel');
         panel.style.width = '280px';
         membersPanelOpen = true;
-
-        document.getElementById('membersPanelList').innerHTML =
-            '<div style="color:#72767d;text-align:center;padding:20px;font-size:13px;">Загрузка...</div>';
-
-        // Загружаем участников с их ролями
-        const { data: members } = await _supabase
-            .from('room_members')
-            .select('user_id, role, profiles(id, username, avatar_url, direction)')
-            .eq('room_id', currentRoomId);
-
+        document.getElementById('membersPanelList').innerHTML = '<div style="color:#72767d;text-align:center;padding:20px;font-size:13px;">Загрузка...</div>';
+        const { data: members } = await _supabase.from('room_members').select('user_id,role,profiles(id,username,avatar_url,direction)').eq('room_id', currentRoomId);
         membersPanelData = members || [];
-
-        // Определяем роль текущего пользователя в этой комнате
         const me = membersPanelData.find(m => m.user_id === myId);
         currentRoomRole = me?.role || null;
-
-        // Также проверяем: если я создатель комнаты — роль owner
-        const { data: roomInfo } = await _supabase
-            .from('rooms')
-            .select('created_by')
-            .eq('id', currentRoomId)
-            .single();
+        const { data: roomInfo } = await _supabase.from('rooms').select('created_by').eq('id', currentRoomId).single();
         if (roomInfo?.created_by === myId) currentRoomRole = 'owner';
-
         renderMembersPanel(membersPanelData);
         updateAddMemberButton();
     }
 
-    // Показываем/скрываем кнопку "Добавить участника" только для admin/owner
     function updateAddMemberButton() {
         const btn = document.querySelector('#membersPanel > div:last-child button');
         if (!btn) return;
-        const canManage = currentRoomRole === 'owner' || currentRoomRole === 'admin';
-        btn.style.display = canManage ? 'block' : 'none';
+        btn.style.display = (currentRoomRole === 'owner' || currentRoomRole === 'admin') ? 'block' : 'none';
     }
 
     function renderMembersPanel(members) {
         const list = document.getElementById('membersPanelList');
-        if (!members.length) {
-            list.innerHTML = '<div style="color:#72767d;text-align:center;padding:20px;font-size:13px;">Нет участников</div>';
-            return;
-        }
-
+        if (!members.length) { list.innerHTML = '<div style="color:#72767d;text-align:center;padding:20px;font-size:13px;">Нет участников</div>'; return; }
         const canManage = currentRoomRole === 'owner' || currentRoomRole === 'admin';
-
-        // Сортировка: owner → admin → member
-        const roleOrder = { owner: 0, admin: 1, member: 2 };
-        const sorted = [...members].sort((a, b) =>
-            (roleOrder[a.role] ?? 2) - (roleOrder[b.role] ?? 2)
-        );
-
+        const roleOrder = { owner:0, admin:1, member:2 };
+        const sorted = [...members].sort((a, b) => (roleOrder[a.role]??2) - (roleOrder[b.role]??2));
         list.innerHTML = sorted.map(m => {
             const u = m.profiles;
             if (!u) return '';
             const uid = u.id;
             const name = u.username ? `@${u.username}` : 'Аноним';
             const safeName = escapeAttr(name);
-            const letter = (u.username?.[0] || '?').toUpperCase();
-            const dir = u.direction
-                ? `<div style="font-size:11px;color:#43b581;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${u.direction}</div>`
-                : '';
-            const avatarStyle = u.avatar_url
-                ? `background-image:url(${u.avatar_url});background-size:cover;`
-                : `background:#5865f2;`;
-
+            const letter = (u.username?.[0]||'?').toUpperCase();
+            const dir = u.direction ? `<div style="font-size:11px;color:#43b581;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${u.direction}</div>` : '';
+            const avatarStyle = u.avatar_url ? `background-image:url(${u.avatar_url});background-size:cover;` : `background:#5865f2;`;
             const role = m.role || 'member';
             const isOwner = role === 'owner';
             const isAdmin = role === 'admin';
-            const isSelf = uid === myId;
-
-            // Бейдж роли
-            const roleBadge = isOwner
-                ? `<span style="font-size:10px;background:#eab308;color:#000;border-radius:4px;padding:1px 6px;font-weight:bold;margin-left:4px;">👑 Владелец</span>`
-                : isAdmin
-                ? `<span style="font-size:10px;background:#5865f2;color:#fff;border-radius:4px;padding:1px 6px;font-weight:bold;margin-left:4px;">⚡ Админ</span>`
-                : '';
-
-            // Кнопки управления — показываем только если я admin/owner и это не я сам и не owner
+            const isSelf  = uid === myId;
+            const roleBadge = isOwner ? `<span style="font-size:10px;background:#eab308;color:#000;border-radius:4px;padding:1px 6px;font-weight:bold;margin-left:4px;">👑 Владелец</span>` : isAdmin ? `<span style="font-size:10px;background:#5865f2;color:#fff;border-radius:4px;padding:1px 6px;font-weight:bold;margin-left:4px;">⚡ Админ</span>` : '';
             let actionBtns = '';
             if (canManage && !isSelf && !isOwner) {
-                const isTarget = isAdmin;
-                actionBtns = `
-                    <div class="member-actions" style="display:none;gap:4px;flex-shrink:0;">
-                        ${currentRoomRole === 'owner' ? `
-                        <button title="${isTarget ? 'Снять админа' : 'Сделать админом'}"
-                            onclick="event.stopPropagation();toggleAdminRole('${uid}','${safeName}','${role}')"
-                            style="background:${isTarget ? '#4f545c' : '#5865f2'};border:none;border-radius:6px;
-                                   color:white;cursor:pointer;font-size:11px;padding:4px 7px;white-space:nowrap;transition:0.15s;"
-                            onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
-                            ${isTarget ? '⬇ Снять' : '⚡ Админ'}
-                        </button>` : ''}
-                        <button title="Исключить из группы"
-                            onclick="event.stopPropagation();kickMember('${uid}','${safeName}')"
-                            style="background:#f04747;border:none;border-radius:6px;
-                                   color:white;cursor:pointer;font-size:11px;padding:4px 7px;white-space:nowrap;transition:0.15s;"
-                            onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
-                            🚫 Kick
-                        </button>
-                    </div>
-                `;
+                actionBtns = `<div class="member-actions" style="display:none;gap:4px;flex-shrink:0;">${currentRoomRole==='owner'?`<button title="${isAdmin?'Снять админа':'Сделать админом'}" onclick="event.stopPropagation();toggleAdminRole('${uid}','${safeName}','${role}')" style="background:${isAdmin?'#4f545c':'#5865f2'};border:none;border-radius:6px;color:white;cursor:pointer;font-size:11px;padding:4px 7px;white-space:nowrap;">${isAdmin?'⬇ Снять':'⚡ Админ'}</button>`:''}<button title="Исключить" onclick="event.stopPropagation();kickMember('${uid}','${safeName}')" style="background:#f04747;border:none;border-radius:6px;color:white;cursor:pointer;font-size:11px;padding:4px 7px;white-space:nowrap;">🚫 Kick</button></div>`;
             }
-
-            return `
-                <div class="member-row"
-                     style="display:flex;align-items:center;gap:10px;padding:10px 14px;
-                            cursor:pointer;transition:0.15s;position:relative;"
-                     onmouseover="this.style.background='#36393f'; const a=this.querySelector('.member-actions'); if(a) a.style.display='flex';"
-                     onmouseout="this.style.background=''; const a=this.querySelector('.member-actions'); if(a) a.style.display='none';">
-                    <div style="width:36px;height:36px;border-radius:50%;flex-shrink:0;${avatarStyle}
-                        display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:14px;">
-                        ${!u.avatar_url ? letter : ''}
-                    </div>
-                    <div style="flex:1;min-width:0;overflow:hidden;" onclick="openDMFromPanel('${uid}','${safeName}')">
-                        <div style="display:flex;align-items:center;flex-wrap:wrap;gap:2px;">
-                            <span style="color:white;font-size:13px;white-space:nowrap;">${name}</span>
-                            ${roleBadge}
-                        </div>
-                        ${dir}
-                    </div>
-                    ${actionBtns}
-                </div>
-            `;
+            return `<div class="member-row" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;transition:0.15s;position:relative;" onmouseover="this.style.background='#36393f';const a=this.querySelector('.member-actions');if(a)a.style.display='flex';" onmouseout="this.style.background='';const a=this.querySelector('.member-actions');if(a)a.style.display='none';"><div style="width:36px;height:36px;border-radius:50%;flex-shrink:0;${avatarStyle}display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:14px;">${!u.avatar_url?letter:''}</div><div style="flex:1;min-width:0;overflow:hidden;" onclick="openDMFromPanel('${uid}','${safeName}')"><div style="display:flex;align-items:center;flex-wrap:wrap;gap:2px;"><span style="color:white;font-size:13px;white-space:nowrap;">${name}</span>${roleBadge}</div>${dir}</div>${actionBtns}</div>`;
         }).join('');
     }
 
-    function filterMembersPanel(q) {
-        const filtered = membersPanelData.filter(m =>
-            !q || (m.profiles?.username || '').toLowerCase().includes(q.toLowerCase())
-        );
-        renderMembersPanel(filtered);
-    }
+    function filterMembersPanel(q) { renderMembersPanel(membersPanelData.filter(m => !q || (m.profiles?.username||'').toLowerCase().includes(q.toLowerCase()))); }
+    function openDMFromPanel(userId, name) { currentRecipientId = userId; currentRoomId = null; closeMembersPanel(); document.querySelectorAll('#userList .item').forEach(i => i.classList.remove('active')); openChat(name); }
 
-    function openDMFromPanel(userId, name) {
-        currentRecipientId = userId;
-        currentRoomId = null;
-        closeMembersPanel();
-        document.querySelectorAll('#userList .item').forEach(i => i.classList.remove('active'));
-        openChat(name);
-    }
-
-    // ─── Назначить / снять админа ─────────────────────────────────
     async function toggleAdminRole(userId, userName, currentRole) {
         const isAdmin = currentRole === 'admin';
         const newRole = isAdmin ? 'member' : 'admin';
-        const action = isAdmin ? `снять роль админа у` : `назначить админом`;
-
-        if (!confirm(`${action.charAt(0).toUpperCase() + action.slice(1)} ${userName}?`)) return;
-
-        const { error } = await _supabase
-            .from('room_members')
-            .update({ role: newRole })
-            .eq('room_id', currentRoomId)
-            .eq('user_id', userId);
-
+        if (!confirm(`${isAdmin?'Снять роль админа у':'Назначить админом'} ${userName}?`)) return;
+        const { error } = await _supabase.from('room_members').update({ role: newRole }).eq('room_id', currentRoomId).eq('user_id', userId);
         if (error) { showToast('Ошибка!', '#f04747'); return; }
-
-        const msg = isAdmin
-            ? `⬇ ${userName} больше не является администратором`
-            : `⚡ ${userName} назначен администратором`;
-
-        await _supabase.from('messages').insert([{
-            content: msg,
-            user_id: myId,
-            sender_name: 'Система',
-            room_id: currentRoomId,
-            recipient_id: null
-        }]);
-
-        showToast(isAdmin ? `${userName} снят с должности админа` : `${userName} теперь админ!`, '#5865f2');
-        await openMembersPanel(); // обновляем панель
+        await _supabase.from('messages').insert([{ content: isAdmin ? `⬇ ${userName} больше не администратор` : `⚡ ${userName} назначен администратором`, user_id: myId, sender_name: 'Система', room_id: currentRoomId, recipient_id: null }]);
+        showToast(isAdmin ? `${userName} снят` : `${userName} теперь админ!`, '#5865f2');
+        await openMembersPanel();
     }
 
-    // ─── Исключить участника ──────────────────────────────────────
     async function kickMember(userId, userName) {
-        // Открываем красивую модалку подтверждения
         const old = document.getElementById('kickModal');
         if (old) old.remove();
-
         const overlay = document.createElement('div');
         overlay.id = 'kickModal';
         overlay.className = 'room-modal-overlay';
-        overlay.innerHTML = `
-            <div class="room-modal">
-                <div class="room-modal-header">
-                    <div>
-                        <div style="color:white;font-size:17px;font-weight:bold;">🚫 Исключить участника</div>
-                        <div style="color:#f04747;font-size:13px;margin-top:3px;font-weight:bold;">${userName}</div>
-                    </div>
-                    <button onclick="document.getElementById('kickModal').remove()"
-                        style="background:none;border:none;color:#72767d;font-size:24px;cursor:pointer;line-height:1;">×</button>
-                </div>
-                <div class="room-modal-body">
-                    <div style="background:#40444b;border-radius:10px;padding:14px;color:#dcddde;font-size:13px;line-height:1.6;">
-                        Участник <strong style="color:white">${userName}</strong> будет исключён из группы.
-                        Он сможет вступить снова, если его пригласят.
-                    </div>
-                    <button class="room-modal-btn" style="background:#f04747;color:white;"
-                        onclick="confirmKickMember('${userId}','${escapeAttr(userName)}')">
-                        🚫 Да, исключить
-                    </button>
-                    <button class="room-modal-btn" style="background:#40444b;color:#b9bbbe;"
-                        onclick="document.getElementById('kickModal').remove()">
-                        Отмена
-                    </button>
-                </div>
-            </div>
-        `;
+        overlay.innerHTML = `<div class="room-modal"><div class="room-modal-header"><div><div style="color:white;font-size:17px;font-weight:bold;">🚫 Исключить участника</div><div style="color:#f04747;font-size:13px;margin-top:3px;font-weight:bold;">${userName}</div></div><button onclick="document.getElementById('kickModal').remove()" style="background:none;border:none;color:#72767d;font-size:24px;cursor:pointer;line-height:1;">×</button></div><div class="room-modal-body"><div style="background:#40444b;border-radius:10px;padding:14px;color:#dcddde;font-size:13px;line-height:1.6;">Участник <strong style="color:white">${userName}</strong> будет исключён из группы.</div><button class="room-modal-btn" style="background:#f04747;color:white;" onclick="confirmKickMember('${userId}','${escapeAttr(userName)}')">🚫 Да, исключить</button><button class="room-modal-btn" style="background:#40444b;color:#b9bbbe;" onclick="document.getElementById('kickModal').remove()">Отмена</button></div></div>`;
         overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
         document.body.appendChild(overlay);
     }
 
     async function confirmKickMember(userId, userName) {
         document.getElementById('kickModal')?.remove();
-
-        const { error } = await _supabase
-            .from('room_members')
-            .delete()
-            .eq('room_id', currentRoomId)
-            .eq('user_id', userId);
-
+        const { error } = await _supabase.from('room_members').delete().eq('room_id', currentRoomId).eq('user_id', userId);
         if (error) { showToast('Ошибка при исключении!', '#f04747'); return; }
-
-        await _supabase.from('messages').insert([{
-            content: `🚫 ${userName} был исключён из группы`,
-            user_id: myId,
-            sender_name: 'Система',
-            room_id: currentRoomId,
-            recipient_id: null
-        }]);
-
+        await _supabase.from('messages').insert([{ content: `🚫 ${userName} был исключён из группы`, user_id: myId, sender_name: 'Система', room_id: currentRoomId, recipient_id: null }]);
         showToast(`${userName} исключён`, '#f04747');
         await openMembersPanel();
     }
 
-    // ─── Добавить участника ───────────────────────────────────────
     async function openAddMemberFromPanel() {
-        // Только admin/owner
-        if (currentRoomRole !== 'owner' && currentRoomRole !== 'admin') {
-            showToast('Недостаточно прав!', '#f04747');
-            return;
-        }
-
+        if (currentRoomRole !== 'owner' && currentRoomRole !== 'admin') { showToast('Недостаточно прав!', '#f04747'); return; }
         const memberIds = new Set(membersPanelData.map(m => m.user_id));
-
-        const { data: allUsers } = await _supabase
-            .from('profiles')
-            .select('id, username, avatar_url')
-            .neq('id', myId);
-
+        const { data: allUsers } = await _supabase.from('profiles').select('id,username,avatar_url').neq('id', myId);
         const available = allUsers?.filter(u => !memberIds.has(u.id)) || [];
-
         const old = document.getElementById('addMemberPicker');
         if (old) { old.remove(); return; }
-
         const picker = document.createElement('div');
         picker.id = 'addMemberPicker';
-        picker.style.cssText = `
-            position:absolute; bottom:70px; left:10px; right:10px;
-            background:#36393f; border-radius:12px; border:1px solid #40444b;
-            max-height:250px; overflow-y:auto; z-index:100;
-            box-shadow:0 -5px 20px rgba(0,0,0,0.4);
-        `;
-
+        picker.style.cssText = 'position:absolute;bottom:70px;left:10px;right:10px;background:#36393f;border-radius:12px;border:1px solid #40444b;max-height:250px;overflow-y:auto;z-index:100;box-shadow:0 -5px 20px rgba(0,0,0,0.4);';
         picker.innerHTML = available.length ? available.map(u => {
             const name = u.username ? `@${u.username}` : 'Аноним';
-            const letter = (u.username?.[0] || '?').toUpperCase();
-            const av = u.avatar_url
-                ? `background-image:url(${u.avatar_url});background-size:cover;`
-                : `background:#5865f2;`;
-            return `
-                <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;transition:0.2s;"
-                     onmouseover="this.style.background='#40444b'" onmouseout="this.style.background=''"
-                     onclick="quickAddMember('${u.id}','${escapeAttr(name)}',this.parentElement)">
-                    <div style="width:30px;height:30px;border-radius:50%;flex-shrink:0;${av}
-                        display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:12px;">
-                        ${!u.avatar_url ? letter : ''}
-                    </div>
-                    <span style="color:white;font-size:13px;">${name}</span>
-                </div>
-            `;
+            const letter = (u.username?.[0]||'?').toUpperCase();
+            const av = u.avatar_url ? `background-image:url(${u.avatar_url});background-size:cover;` : `background:#5865f2;`;
+            return `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;transition:0.2s;" onmouseover="this.style.background='#40444b'" onmouseout="this.style.background=''" onclick="quickAddMember('${u.id}','${escapeAttr(name)}',this.parentElement)"><div style="width:30px;height:30px;border-radius:50%;flex-shrink:0;${av}display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:12px;">${!u.avatar_url?letter:''}</div><span style="color:white;font-size:13px;">${name}</span></div>`;
         }).join('') : '<div style="color:#72767d;text-align:center;padding:15px;font-size:13px;">Все уже добавлены</div>';
-
         document.getElementById('membersPanel').appendChild(picker);
         setTimeout(() => document.addEventListener('click', closePicker), 100);
     }
 
-    function closePicker(e) {
-        const picker = document.getElementById('addMemberPicker');
-        if (picker && !picker.contains(e.target)) {
-            picker.remove();
-            document.removeEventListener('click', closePicker);
-        }
-    }
-    // ─── Модалка подтверждения заказа (через галочку в хедере) ──
+    function closePicker(e) { const picker = document.getElementById('addMemberPicker'); if (picker && !picker.contains(e.target)) { picker.remove(); document.removeEventListener('click', closePicker); } }
+
     async function openConfirmOrderModal() {
-        // Ищем активный заказ покупателя с этим продавцом
-        const { data: orders } = await _supabase
-            .from('orders')
-            .select('*')
-            .eq('buyer_id', myId)
-            .eq('seller_id', currentRecipientId)
-            .in('status', ['frozen', 'in_progress'])
-            .order('created_at', { ascending: false })
-            .limit(1);
-
-        if (!orders?.length) {
-            showToast('Нет активных заказов с этим продавцом', '#f0a500');
-            return;
-        }
-
+        const { data: orders } = await _supabase.from('orders').select('*').eq('buyer_id', myId).eq('seller_id', currentRecipientId).in('status', ['frozen','in_progress']).order('created_at', { ascending: false }).limit(1);
+        if (!orders?.length) { showToast('Нет активных заказов с этим продавцом', '#f0a500'); return; }
         const order = orders[0];
         const amount = order.amount;
-
         const old = document.getElementById('confirmOrderModal');
         if (old) old.remove();
-
         const modal = document.createElement('div');
         modal.id = 'confirmOrderModal';
-        modal.style.cssText = `
-            position:fixed; top:0; left:0; width:100vw; height:100vh;
-            background:rgba(0,0,0,0.75); z-index:9999;
-            display:flex; align-items:center; justify-content:center;
-            animation: fadeInModal 0.2s ease;
-        `;
-
-        modal.innerHTML = `
-            <style>
-                @keyframes fadeInModal { from { opacity:0; transform:scale(0.95); } to { opacity:1; transform:scale(1); } }
-            </style>
-            <div style="background:#2c2f33; border-radius:20px; width:420px; padding:32px;
-                        box-shadow:0 20px 60px rgba(0,0,0,0.6); border:1px solid #40444b; text-align:center;">
-                <div style="font-size:48px; margin-bottom:12px;">✅</div>
-                <h2 style="color:white; font-size:20px; font-weight:900; margin-bottom:8px;">
-                    Подтвердить выполнение?
-                </h2>
-                <p style="color:#b9bbbe; font-size:15px; margin-bottom:6px;">
-                    <span style="color:#eab308; font-weight:900;">${amount} ⭐</span> будут переведены продавцу
-                </p>
-                <p style="color:#72767d; font-size:12px; margin-bottom:28px;">
-                    У вас есть 10 дней для подтверждения
-                </p>
-                <div style="display:flex; gap:12px;">
-                    <button onclick="document.getElementById('confirmOrderModal').remove()"
-                        style="flex:1; background:#40444b; color:#b9bbbe; border:none;
-                               border-radius:12px; padding:14px; cursor:pointer; font-size:14px; font-weight:bold;">
-                        Отмена
-                    </button>
-                    <button id="doConfirmOrderBtn" onclick="doConfirmOrder('${order.id}', ${amount})"
-                        style="flex:2; background:linear-gradient(135deg,#43b581,#2d8a5e);
-                               color:white; border:none; border-radius:12px; padding:14px;
-                               cursor:pointer; font-weight:900; font-size:15px; transition:0.2s;"
-                        onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
-                        ✅ Подтвердить
-                    </button>
-                </div>
-            </div>
-        `;
-
+        modal.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.75);z-index:9999;display:flex;align-items:center;justify-content:center;';
+        modal.innerHTML = `<div style="background:#2c2f33;border-radius:20px;width:420px;padding:32px;box-shadow:0 20px 60px rgba(0,0,0,0.6);border:1px solid #40444b;text-align:center;"><div style="font-size:48px;margin-bottom:12px;">✅</div><h2 style="color:white;font-size:20px;font-weight:900;margin-bottom:8px;">Подтвердить выполнение?</h2><p style="color:#b9bbbe;font-size:15px;margin-bottom:6px;"><span style="color:#eab308;font-weight:900;">${amount} ⭐</span> будут переведены продавцу</p><p style="color:#72767d;font-size:12px;margin-bottom:28px;">У вас есть 10 дней для подтверждения</p><div style="display:flex;gap:12px;"><button onclick="document.getElementById('confirmOrderModal').remove()" style="flex:1;background:#40444b;color:#b9bbbe;border:none;border-radius:12px;padding:14px;cursor:pointer;font-size:14px;font-weight:bold;">Отмена</button><button id="doConfirmOrderBtn" onclick="doConfirmOrder('${order.id}',${amount})" style="flex:2;background:linear-gradient(135deg,#43b581,#2d8a5e);color:white;border:none;border-radius:12px;padding:14px;cursor:pointer;font-weight:900;font-size:15px;">✅ Подтвердить</button></div></div>`;
         modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
         document.body.appendChild(modal);
     }
@@ -2278,282 +1675,97 @@ async function submitReview(orderId, sellerId) {
     async function doConfirmOrder(orderId, amount) {
         const btn = document.getElementById('doConfirmOrderBtn');
         if (btn) { btn.disabled = true; btn.textContent = 'Обработка...'; }
-
         const { data: order } = await _supabase.from('orders').select('*').eq('id', orderId).single();
         if (!order) { showToast('Заказ не найден!', '#f04747'); return; }
-
-        // Снимаем заморозку у покупателя
         const { data: buyer } = await _supabase.from('profiles').select('frozen_balance').eq('id', myId).single();
-        await _supabase.from('profiles').update({
-            frozen_balance: Math.max(0, (buyer?.frozen_balance || 0) - amount)
-        }).eq('id', myId);
-
-        // Начисляем звёзды продавцу
+        await _supabase.from('profiles').update({ frozen_balance: Math.max(0, (buyer?.frozen_balance||0) - amount) }).eq('id', myId);
         const { data: seller } = await _supabase.from('profiles').select('wallet_balance').eq('id', order.seller_id).single();
-        await _supabase.from('profiles').update({
-            wallet_balance: (seller?.wallet_balance || 0) + amount
-        }).eq('id', order.seller_id);
-
-        // Обновляем статус заказа
-        await _supabase.from('orders').update({
-            status: 'completed',
-            completed_at: new Date().toISOString()
-        }).eq('id', orderId);
-
-        // Отправляем сообщение продавцу
-        await _supabase.from('messages').insert([{
-            content: `✅ Заказ выполнен! ${amount} ⭐ отправлено продавцу.`,
-            user_id: myId,
-            sender_name: myProfileData?.username,
-            recipient_id: order.seller_id,
-            room_id: null
-        }]);
-
+        await _supabase.from('profiles').update({ wallet_balance: (seller?.wallet_balance||0) + amount }).eq('id', order.seller_id);
+        await _supabase.from('orders').update({ status: 'completed', completed_at: new Date().toISOString() }).eq('id', orderId);
+        await _supabase.from('messages').insert([{ content: `✅ Заказ выполнен! ${amount} ⭐ отправлено продавцу.`, user_id: myId, sender_name: myProfileData?.username, recipient_id: order.seller_id, room_id: null }]);
         document.getElementById('confirmOrderModal')?.remove();
         showToast(`✅ ${amount} ⭐ успешно отправлено продавцу!`, '#43b581');
-
-        // Открываем модалку оценки
         openReviewModal(orderId, order.seller_id, amount);
     }
 
     async function confirmOrder(orderId, amount, btn) {
-    if (!confirm(`Подтвердить получение работы и отправить ${amount} ⭐ продавцу?`)) return;
+        if (!confirm(`Подтвердить получение работы и отправить ${amount} ⭐ продавцу?`)) return;
+        btn.disabled = true; btn.textContent = 'Обработка...';
+        const { data: order } = await _supabase.from('orders').select('*').eq('id', orderId).single();
+        if (!order) return showToast('Заказ не найден!', '#f04747');
+        const { data: buyer } = await _supabase.from('profiles').select('frozen_balance').eq('id', myId).single();
+        await _supabase.from('profiles').update({ frozen_balance: Math.max(0, (buyer?.frozen_balance||0) - amount) }).eq('id', myId);
+        const { data: seller } = await _supabase.from('profiles').select('wallet_balance').eq('id', order.seller_id).single();
+        await _supabase.from('profiles').update({ wallet_balance: (seller?.wallet_balance||0) + amount }).eq('id', order.seller_id);
+        await _supabase.from('orders').update({ status: 'completed', completed_at: new Date().toISOString() }).eq('id', orderId);
+        await _supabase.from('messages').insert([{ content: `✅ Заказ выполнен! ${amount} ⭐ отправлено продавцу.`, user_id: myId, sender_name: myProfileData?.username, recipient_id: order.seller_id, room_id: null }]);
+        btn.parentElement.remove();
+        showToast(`✅ ${amount} ⭐ отправлено продавцу!`, '#43b581');
+        openReviewModal(orderId, order.seller_id, amount);
+    }
 
-    btn.disabled = true;
-    btn.textContent = 'Обработка...';
+    function openReviewModal(orderId, sellerId, amount) {
+        const old = document.getElementById('reviewModal');
+        if (old) old.remove();
+        const modal = document.createElement('div');
+        modal.id = 'reviewModal';
+        modal.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.75);z-index:9999;display:flex;align-items:center;justify-content:center;';
+        modal.innerHTML = `<div style="background:#2c2f33;border-radius:20px;width:420px;padding:30px;box-shadow:0 20px 60px rgba(0,0,0,0.6);border:1px solid #40444b;"><div style="text-align:center;margin-bottom:20px;"><div style="font-size:40px;">⭐</div><h2 style="color:white;font-size:20px;margin-top:8px;">Оцените продавца</h2><p style="color:#72767d;font-size:13px;margin-top:5px;">Ваш отзыв поможет другим покупателям</p></div><div id="starRow" style="display:flex;justify-content:center;gap:10px;margin-bottom:20px;">${[1,2,3,4,5].map(i=>`<span data-star="${i}" style="font-size:40px;cursor:pointer;transition:transform 0.15s;filter:grayscale(1);" onmouseover="hoverStars(${i})" onmouseout="resetStars()" onclick="selectStar(${i})">★</span>`).join('')}</div><div id="ratingLabel" style="text-align:center;color:#eab308;font-size:14px;font-weight:bold;margin-bottom:15px;min-height:20px;"></div><textarea id="reviewComment" placeholder="Напишите отзыв (необязательно)..." style="width:100%;padding:14px;border-radius:12px;border:none;background:#36393f;color:white;font-size:14px;outline:none;resize:none;height:90px;font-family:inherit;margin-bottom:20px;"></textarea><div style="display:flex;gap:10px;"><button onclick="document.getElementById('reviewModal').remove()" style="flex:1;background:#40444b;color:#b9bbbe;border:none;border-radius:12px;padding:13px;cursor:pointer;font-size:14px;">Пропустить</button><button id="submitReviewBtn" onclick="submitReview('${orderId}','${sellerId}')" style="flex:2;background:linear-gradient(135deg,#eab308,#f59e0b);color:black;border:none;border-radius:12px;padding:13px;cursor:pointer;font-weight:900;font-size:15px;">Отправить оценку</button></div></div>`;
+        document.body.appendChild(modal);
+        modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+    }
 
-    const { data: order } = await _supabase.from('orders').select('*').eq('id', orderId).single();
-    if (!order) return showToast('Заказ не найден!', '#f04747');
-
-    const { data: buyer } = await _supabase.from('profiles').select('frozen_balance').eq('id', myId).single();
-    await _supabase.from('profiles').update({
-        frozen_balance: Math.max(0, (buyer?.frozen_balance || 0) - amount)
-    }).eq('id', myId);
-
-    const { data: seller } = await _supabase.from('profiles').select('wallet_balance').eq('id', order.seller_id).single();
-    await _supabase.from('profiles').update({
-        wallet_balance: (seller?.wallet_balance || 0) + amount
-    }).eq('id', order.seller_id);
-
-    await _supabase.from('orders').update({
-        status: 'completed',
-        completed_at: new Date().toISOString()
-    }).eq('id', orderId);
-
-    await _supabase.from('messages').insert([{
-        content: `✅ Заказ выполнен! ${amount} ⭐ отправлено продавцу.`,
-        user_id: myId,
-        sender_name: myProfileData?.username,
-        recipient_id: order.seller_id,
-        room_id: null
-    }]);
-
-    btn.parentElement.remove();
-    showToast(`✅ ${amount} ⭐ отправлено продавцу!`, '#43b581');
-
-    // Открываем модалку оценки
-    openReviewModal(orderId, order.seller_id, amount);
-}
-
-function openReviewModal(orderId, sellerId, amount) {
-    const old = document.getElementById('reviewModal');
-    if (old) old.remove();
-
-    let selectedRating = 0;
-
-    const modal = document.createElement('div');
-    modal.id = 'reviewModal';
-    modal.style.cssText = `
-        position:fixed; top:0; left:0; width:100vw; height:100vh;
-        background:rgba(0,0,0,0.75); z-index:9999;
-        display:flex; align-items:center; justify-content:center;
-    `;
-
-    modal.innerHTML = `
-        <div style="background:#2c2f33; border-radius:20px; width:420px; padding:30px;
-                    box-shadow:0 20px 60px rgba(0,0,0,0.6); border:1px solid #40444b;">
-            <div style="text-align:center; margin-bottom:20px;">
-                <div style="font-size:40px;">⭐</div>
-                <h2 style="color:white; font-size:20px; margin-top:8px;">Оцените продавца</h2>
-                <p style="color:#72767d; font-size:13px; margin-top:5px;">Ваш отзыв поможет другим покупателям</p>
-            </div>
-
-            <!-- Звёзды -->
-            <div id="starRow" style="display:flex; justify-content:center; gap:10px; margin-bottom:20px;">
-                ${[1,2,3,4,5].map(i => `
-                    <span data-star="${i}"
-                        style="font-size:40px; cursor:pointer; transition:transform 0.15s; filter:grayscale(1);"
-                        onmouseover="hoverStars(${i})"
-                        onmouseout="resetStars()"
-                        onclick="selectStar(${i})">★</span>
-                `).join('')}
-            </div>
-
-            <div id="ratingLabel" style="text-align:center; color:#eab308; font-size:14px; font-weight:bold; margin-bottom:15px; min-height:20px;"></div>
-
-            <!-- Комментарий -->
-            <textarea id="reviewComment" placeholder="Напишите отзыв (необязательно)..."
-                style="width:100%; padding:14px; border-radius:12px; border:none;
-                       background:#36393f; color:white; font-size:14px; outline:none;
-                       resize:none; height:90px; font-family:inherit; margin-bottom:20px;"></textarea>
-
-            <div style="display:flex; gap:10px;">
-                <button onclick="document.getElementById('reviewModal').remove()"
-                    style="flex:1; background:#40444b; color:#b9bbbe; border:none;
-                           border-radius:12px; padding:13px; cursor:pointer; font-size:14px;">
-                    Пропустить
-                </button>
-                <button id="submitReviewBtn" onclick="submitReview('${orderId}', '${sellerId}')"
-                    style="flex:2; background:linear-gradient(135deg,#eab308,#f59e0b);
-                           color:black; border:none; border-radius:12px; padding:13px;
-                           cursor:pointer; font-weight:900; font-size:15px;">
-                    Отправить оценку
-                </button>
-            </div>
-        </div>
-    `;
-
-    document.body.appendChild(modal);
-    modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
-}
-
-const ratingLabels = ['', 'Ужасно 😤', 'Плохо 😕', 'Нормально 😐', 'Хорошо 😊', 'Отлично! 🔥'];
-
-function hoverStars(n) {
-    document.querySelectorAll('#starRow span').forEach(s => {
-        const v = parseInt(s.dataset.star);
-        s.style.filter = v <= n ? 'grayscale(0)' : 'grayscale(1)';
-        s.style.transform = v <= n ? 'scale(1.2)' : 'scale(1)';
-        s.style.color = v <= n ? '#eab308' : '';
-    });
-    document.getElementById('ratingLabel').textContent = ratingLabels[n];
-}
-
-function resetStars() {
-    const selected = parseInt(document.querySelector('#starRow span.selected')?.dataset.star || 0);
-    document.querySelectorAll('#starRow span').forEach(s => {
-        const v = parseInt(s.dataset.star);
-        s.style.filter = v <= selected ? 'grayscale(0)' : 'grayscale(1)';
-        s.style.transform = 'scale(1)';
-        s.style.color = v <= selected ? '#eab308' : '';
-    });
-    document.getElementById('ratingLabel').textContent = selected ? ratingLabels[selected] : '';
-}
-
-function selectStar(n) {
-    document.querySelectorAll('#starRow span').forEach(s => s.classList.remove('selected'));
-    document.querySelectorAll('#starRow span').forEach(s => {
-        const v = parseInt(s.dataset.star);
-        if (v <= n) s.classList.add('selected');
-        s.style.filter = v <= n ? 'grayscale(0)' : 'grayscale(1)';
-        s.style.color = v <= n ? '#eab308' : '';
-    });
-    document.getElementById('ratingLabel').textContent = ratingLabels[n];
-}
-
-
+    const ratingLabels = ['','Ужасно 😤','Плохо 😕','Нормально 😐','Хорошо 😊','Отлично! 🔥'];
+    function hoverStars(n) { document.querySelectorAll('#starRow span').forEach(s => { const v=parseInt(s.dataset.star); s.style.filter=v<=n?'grayscale(0)':'grayscale(1)'; s.style.transform=v<=n?'scale(1.2)':'scale(1)'; s.style.color=v<=n?'#eab308':''; }); document.getElementById('ratingLabel').textContent=ratingLabels[n]; }
+    function resetStars() { const sel=parseInt(document.querySelector('#starRow span.selected')?.dataset.star||0); document.querySelectorAll('#starRow span').forEach(s=>{const v=parseInt(s.dataset.star);s.style.filter=v<=sel?'grayscale(0)':'grayscale(1)';s.style.transform='scale(1)';s.style.color=v<=sel?'#eab308':'';});document.getElementById('ratingLabel').textContent=sel?ratingLabels[sel]:''; }
+    function selectStar(n) { document.querySelectorAll('#starRow span').forEach(s=>{s.classList.remove('selected');const v=parseInt(s.dataset.star);if(v<=n)s.classList.add('selected');s.style.filter=v<=n?'grayscale(0)':'grayscale(1)';s.style.color=v<=n?'#eab308':'';});document.getElementById('ratingLabel').textContent=ratingLabels[n]; }
 
     async function quickAddMember(userId, userName, pickerEl) {
-        const { error } = await _supabase.from('room_members').insert([{
-            room_id: currentRoomId,
-            user_id: userId,
-            role: 'member',
-            added_by: myId
-        }]);
-
+        const { error } = await _supabase.from('room_members').insert([{ room_id: currentRoomId, user_id: userId, role: 'member', added_by: myId }]);
         if (error) { showToast('Ошибка!', '#f04747'); return; }
-
         pickerEl?.remove();
         document.removeEventListener('click', closePicker);
-
-        await _supabase.from('messages').insert([{
-            content: `👋 ${userName} добавлен в группу`,
-            user_id: myId,
-            sender_name: 'Система',
-            room_id: currentRoomId,
-            recipient_id: null
-        }]);
-
+        await _supabase.from('messages').insert([{ content: `👋 ${userName} добавлен в группу`, user_id: myId, sender_name: 'Система', room_id: currentRoomId, recipient_id: null }]);
         showToast(`${userName} добавлен!`, '#43b581');
         await openMembersPanel();
     }
 
-</script>
-<script>
-// 1. Функция, которая рисует сообщение в чате
-function appendMessage(text, type = 'sent') {
-    const chatMessages = document.querySelector('.chat-messages');
-    if (!chatMessages) return;
+    function updateMyPresence(isOnline) {
+        const dot = document.getElementById('my-sdot');
+        const txt = document.getElementById('my-status-txt');
+        if (isOnline) { dot.className='sdot online'; txt.textContent='В сети'; txt.style.color='#43b581'; }
+        else { dot.className='sdot offline'; txt.textContent='Не в сети'; txt.style.color='#747f8d'; }
+    }
+    window.addEventListener('focus', () => updateMyPresence(true));
+    window.addEventListener('blur',  () => updateMyPresence(false));
+    document.addEventListener('visibilitychange', () => updateMyPresence(document.visibilityState === 'visible'));
 
-    const messageDiv = document.createElement('div');
-    // У вас в CSS скорее всего классы message-sent и message-received
-    messageDiv.className = `message ${type === 'sent' ? 'sent' : 'received'}`;
-    
-    // Формируем внутренности сообщения
-    messageDiv.innerHTML = `
-        <div class="message-text">${text}</div>
-        <div class="message-time">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
-    `;
-    
-    chatMessages.appendChild(messageDiv);
-    
-    // Скроллим чат вниз, чтобы видеть новое сообщение
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-}
+    function setPartnerStatus(isOnline) {
+        const container = document.getElementById('partnerStatus');
+        const dot = document.getElementById('partner-sdot');
+        const txt = document.getElementById('partner-status-txt');
+        container.style.visibility = 'visible';
+        if (isOnline) { dot.className='sdot online'; txt.textContent='в сети'; }
+        else { dot.className='sdot offline'; txt.textContent='был(а) недавно'; }
+    }
 
-// 2. Логика отправки
-// Находим элементы интерфейса
-const sendBtn = document.querySelector('.send-btn');
-const messageInput = document.querySelector('.message-input');
-const chatMessages = document.querySelector('.chat-messages');
-
-// 1. Функция отрисовки (чтобы сразу видеть сообщение)
-function appendMessage(text, type = 'sent') {
-    if (!chatMessages) return;
-
-    const messageDiv = document.createElement('div');
-    // Проверь в своем CSS: если там .message-sent, замени 'sent' на 'message-sent'
-    messageDiv.className = `message ${type === 'sent' ? 'sent' : 'received'}`;
-    
-    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-    messageDiv.innerHTML = `
-        <div class="message-text">${text}</div>
-        <div class="message-time">${time}</div>
-    `;
-    
-    chatMessages.appendChild(messageDiv);
-    chatMessages.scrollTop = chatMessages.scrollHeight; // Скролл вниз
-}
-
-// 2. Логика отправки
-if (sendBtn) {
-    sendBtn.onclick = async () => {
-        const text = messageInput.value.trim();
-        if (!text) return;
-
-        // МГНОВЕННО показываем в чате
-        appendMessage(text, 'sent');
-        
-        // Очищаем поле ввода сразу, не дожидаясь базы
-        messageInput.value = "";
-
-        // ОТПРАВЛЯЕМ в Supabase (в фоновом режиме)
-        const { error } = await _supabase
-            .from('messages')
-            .insert([{ 
-                content: text, 
-                sender_id: myId, 
-                room_id: currentRoomId,
-                recipient_id: currentRecipientId 
-            }]);
-
-        if (error) {
-            console.error("Ошибка базы данных:", error.message);
-        }
-    };
-}
+    const chatBadge = document.getElementById('chatBadge');
+    let unreadCount = parseInt(localStorage.getItem('chat_unread') || '0');
+    function setUnread(n) {
+        unreadCount = Math.max(0, n);
+        localStorage.setItem('chat_unread', unreadCount);
+        chatBadge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+        chatBadge.classList.toggle('hidden', unreadCount === 0);
+    }
+    document.getElementById('chat-widget-button').addEventListener('click', () => setUnread(0));
+    setUnread(unreadCount);
 </script>
 
+<div id="chat-widget-button">
+    <svg viewBox="0 0 24 24" width="32" height="32" fill="white">
+        <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+    </svg>
+    <span class="chat-badge hidden" id="chatBadge">0</span>
+</div>
 </body>
 </html>

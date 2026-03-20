@@ -4,9 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stars Market | Главная</title>
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .tab-btn.active { background: #1e40af; color: #fff; }
+        .history-item { animation: fadeIn .3s ease; }
+        @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+        .badge-new   { background:#1e3a5f; color:#60a5fa; }
+        .badge-done  { background:#14432a; color:#4ade80; }
+        .badge-wait  { background:#3b2a00; color:#fbbf24; }
+    </style>
 </head>
 <body class="bg-[#0f172a] text-white min-h-screen">
 
@@ -29,7 +37,7 @@
         <div id="posts-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
     </main>
 
-    <!-- Модалка просмотра (без ошибочного рейтинга) -->
+    <!-- Модалка просмотра -->
     <div id="view-modal" class="hidden fixed inset-0 bg-black/95 backdrop-blur-md flex items-center justify-center p-4 z-[1000]">
         <div class="bg-slate-900 border border-slate-800 rounded-[2.5rem] max-w-2xl w-full overflow-hidden shadow-2xl max-h-[90vh] overflow-y-auto">
             <div id="view-gallery" class="relative bg-slate-800">
@@ -53,7 +61,6 @@
                     <div>
                         <p class="text-[10px] text-slate-500 uppercase">Исполнитель</p>
                         <p id="view-author" class="font-bold"></p>
-                        <!-- Рейтинг добавим динамически в JS -->
                         <div id="view-rating" class="mt-2 flex items-center gap-1.5 text-yellow-400 text-lg font-bold"></div>
                     </div>
                 </div>
@@ -71,7 +78,6 @@
             <input type="text" id="p-title" placeholder="Название (например: Монтаж видео)" class="w-full mb-4 bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-blue-500">
             <textarea id="p-desc" placeholder="Опишите детально: что входит в стоимость, сроки и т.д." class="w-full mb-4 bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 h-32 text-white outline-none focus:border-blue-500"></textarea>
             <input type="number" id="p-price" placeholder="Цена в ⭐" class="w-full mb-4 bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none">
-
             <div class="mb-6">
                 <p class="text-xs text-slate-400 uppercase font-bold mb-3">📸 Фото работ (до 5 штук)</p>
                 <div id="photo-preview" class="grid grid-cols-5 gap-2 mb-3"></div>
@@ -82,7 +88,6 @@
                 </label>
                 <input type="file" id="p-photos" multiple accept="image/*" class="hidden" onchange="handlePhotoSelect(this)">
             </div>
-
             <div class="flex gap-4">
                 <button onclick="closePostModal()" class="flex-1 bg-slate-800 py-3 rounded-xl font-bold">Отмена</button>
                 <button onclick="publish()" id="pub-btn" class="flex-1 bg-blue-600 py-3 rounded-xl font-bold">Опубликовать</button>
@@ -91,23 +96,66 @@
     </div>
 
     <!-- Сайдбар -->
-    <div id="profile-sidebar" class="fixed top-0 right-0 h-full w-80 bg-slate-900 border-l border-slate-800 translate-x-full transition-transform duration-300 z-[200] p-6">
-        <div class="flex justify-between items-center mb-8">
-            <h2 class="text-xl font-bold">Профиль</h2>
-            <button onclick="toggleSidebar()" class="text-2xl">&times;</button>
+    <div id="profile-sidebar" class="fixed top-0 right-0 h-full w-96 bg-slate-900 border-l border-slate-800 translate-x-full transition-transform duration-300 z-[200] flex flex-col">
+        <!-- Шапка сайдбара -->
+        <div class="p-6 border-b border-slate-800">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">Профиль</h2>
+                <button onclick="toggleSidebar()" class="text-2xl text-slate-400 hover:text-white">&times;</button>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-xl">👤</div>
+                <div>
+                    <h3 id="side-username" class="font-bold">@username</h3>
+                    <p class="text-yellow-400 font-black"><span id="side-balance">0</span> ⭐</p>
+                </div>
+                <a href="topup.html" class="ml-auto px-3 py-2 bg-yellow-500 hover:bg-yellow-400 text-black font-black rounded-xl text-xs transition">+ Пополнить</a>
+            </div>
         </div>
-        <div class="space-y-4">
-            <div class="text-center">
-                <div class="w-20 h-20 bg-blue-600 rounded-full mx-auto mb-3 flex items-center justify-center text-3xl">👤</div>
-                <h3 id="side-username" class="font-bold">@username</h3>
+
+        <!-- Табы -->
+        <div class="flex gap-1 p-3 bg-slate-800/50 border-b border-slate-800">
+            <button onclick="switchTab('profile')" id="tab-profile" class="tab-btn flex-1 py-2 text-xs font-bold rounded-lg text-slate-400 transition active">
+                👤 Профиль
+            </button>
+            <button onclick="switchTab('seller')" id="tab-seller" class="tab-btn flex-1 py-2 text-xs font-bold rounded-lg text-slate-400 transition">
+                🛍 Продавец
+            </button>
+            <button onclick="switchTab('buyer')" id="tab-buyer" class="tab-btn flex-1 py-2 text-xs font-bold rounded-lg text-slate-400 transition">
+                🛒 Покупатель
+            </button>
+        </div>
+
+        <!-- Контент табов (скролл) -->
+        <div class="flex-1 overflow-y-auto p-4">
+
+            <!-- Вкладка: Профиль -->
+            <div id="panel-profile" class="space-y-3">
+                <button onclick="location.href='index.html'" class="w-full py-3 border border-slate-700 rounded-xl text-sm hover:bg-slate-800 transition">На главную</button>
+                <a href="seller-settings.html" class="w-full py-3 border border-blue-700 rounded-xl text-sm text-blue-400 text-center block hover:bg-blue-900/30 transition">🤖 Настроить ИИ-ассистента</a>
             </div>
-            <div class="bg-slate-800 p-4 rounded-2xl">
-                <p class="text-[10px] text-slate-500 uppercase">Баланс</p>
-                <p class="text-2xl font-black text-yellow-400"><span id="side-balance">0</span> ⭐</p>
-                <a href="topup.html" class="w-full py-3 bg-yellow-500 hover:bg-yellow-400 text-black font-black rounded-xl text-sm text-center block transition">⭐ Пополнить баланс</a>
+
+            <!-- Вкладка: История продавца -->
+            <div id="panel-seller" class="hidden">
+                <div class="flex items-center justify-between mb-4">
+                    <p class="text-xs text-slate-500 uppercase font-bold">Мои объявления</p>
+                    <span id="seller-count" class="text-xs bg-slate-800 px-2 py-1 rounded-lg text-slate-400">0</span>
+                </div>
+                <div id="seller-history" class="space-y-3">
+                    <div class="text-center text-slate-600 text-sm py-8">Загрузка...</div>
+                </div>
             </div>
-            <button onclick="location.href='index.html'" class="w-full py-3 border border-slate-700 rounded-xl text-sm">На главную</button>
-            <a href="seller-settings.html" class="w-full py-3 border border-blue-700 rounded-xl text-sm text-blue-400 text-center block">🤖 Настроить ИИ-ассистента</a>
+
+            <!-- Вкладка: История покупателя -->
+            <div id="panel-buyer" class="hidden">
+                <div class="flex items-center justify-between mb-4">
+                    <p class="text-xs text-slate-500 uppercase font-bold">Мои переписки / заказы</p>
+                    <span id="buyer-count" class="text-xs bg-slate-800 px-2 py-1 rounded-lg text-slate-400">0</span>
+                </div>
+                <div id="buyer-history" class="space-y-3">
+                    <div class="text-center text-slate-600 text-sm py-8">Загрузка...</div>
+                </div>
+            </div>
         </div>
     </div>
     <div id="sidebar-overlay" onclick="toggleSidebar()" class="hidden fixed inset-0 bg-black/60 z-[150]"></div>
@@ -115,60 +163,225 @@
     <script>
         const SB_URL = 'https://dvwegmdyhjyihrxqvoiw.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2d2VnbWR5aGp5aWhyeHF2b2l3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0MDYwOTAsImV4cCI6MjA4Mzk4MjA5MH0.HrG5GijHH4Lj7mO3SorbG0kKfnl5FLtSCWp6aONYxJ8';
-        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+        let supabaseClient;
 
         let globalProfile = null;
         let allPosts = [];
         let selectedPhotos = [];
         let currentSlide = 0;
         let currentImages = [];
+        let activeTab = 'profile';
+        let sellerLoaded = false;
+        let buyerLoaded = false;
 
+        // ─── Сайдбар и табы ───────────────────────────────────────────
         function toggleSidebar() {
-            document.getElementById('profile-sidebar').classList.toggle('translate-x-full');
-            document.getElementById('sidebar-overlay').classList.toggle('hidden');
+            const sidebar = document.getElementById('profile-sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            const isOpen = !sidebar.classList.contains('translate-x-full');
+            sidebar.classList.toggle('translate-x-full');
+            overlay.classList.toggle('hidden');
+            if (!isOpen && globalProfile) {
+                // При открытии подгружаем историю активного таба
+                if (activeTab === 'seller' && !sellerLoaded) loadSellerHistory();
+                if (activeTab === 'buyer'  && !buyerLoaded)  loadBuyerHistory();
+            }
         }
 
-        function closePostModal() {
-            document.getElementById('post-modal').classList.add('hidden');
-            selectedPhotos = [];
-            document.getElementById('photo-preview').innerHTML = '';
-            document.getElementById('photo-count').textContent = '0/5';
-            document.getElementById('photo-label').style.display = 'flex';
-            document.getElementById('p-title').value = '';
-            document.getElementById('p-desc').value = '';
-            document.getElementById('p-price').value = '';
-        }
-
-        function handlePhotoSelect(input) {
-            const files = Array.from(input.files);
-            const remaining = 5 - selectedPhotos.length;
-            selectedPhotos = [...selectedPhotos, ...files.slice(0, remaining)];
-            updatePhotoPreview();
-            input.value = '';
-        }
-
-        function updatePhotoPreview() {
-            const preview = document.getElementById('photo-preview');
-            document.getElementById('photo-count').textContent = `${selectedPhotos.length}/5`;
-            preview.innerHTML = '';
-            selectedPhotos.forEach((file, i) => {
-                const url = URL.createObjectURL(file);
-                const div = document.createElement('div');
-                div.className = 'relative';
-                div.innerHTML = `
-                    <img src="${url}" class="w-full aspect-square object-cover rounded-lg">
-                    <button onclick="removePhoto(${i})" class="absolute -top-1 -right-1 bg-red-500 w-5 h-5 rounded-full text-xs flex items-center justify-center text-white">×</button>
-                `;
-                preview.appendChild(div);
+        function switchTab(tab) {
+            activeTab = tab;
+            ['profile','seller','buyer'].forEach(t => {
+                document.getElementById('panel-' + t).classList.toggle('hidden', t !== tab);
+                const btn = document.getElementById('tab-' + t);
+                btn.classList.toggle('active', t === tab);
             });
-            document.getElementById('photo-label').style.display = selectedPhotos.length >= 5 ? 'none' : 'flex';
+            if (tab === 'seller' && !sellerLoaded && globalProfile) loadSellerHistory();
+            if (tab === 'buyer'  && !buyerLoaded  && globalProfile) loadBuyerHistory();
         }
 
-        function removePhoto(index) {
-            selectedPhotos.splice(index, 1);
-            updatePhotoPreview();
+        // ─── ИСТОРИЯ ПРОДАВЦА ─────────────────────────────────────────
+        async function loadSellerHistory() {
+            if (!globalProfile) return;
+            const container = document.getElementById('seller-history');
+            container.innerHTML = '<div class="text-center text-slate-600 text-sm py-8">Загрузка...</div>';
+
+            // Загружаем посты этого пользователя
+            const { data: posts, error } = await supabaseClient
+                .from('posts')
+                .select('*')
+                .eq('author_id', globalProfile.id)
+                .order('created_at', { ascending: false });
+
+            if (error || !posts || posts.length === 0) {
+                container.innerHTML = '<div class="text-center text-slate-600 text-sm py-8">У вас пока нет объявлений</div>';
+                document.getElementById('seller-count').textContent = '0';
+                sellerLoaded = true;
+                return;
+            }
+
+            document.getElementById('seller-count').textContent = posts.length;
+
+            // Для каждого поста считаем количество чатов (входящие переписки)
+            // Пробуем загрузить из таблицы messages или conversations
+            let chatCounts = {};
+            try {
+                const { data: msgs } = await supabaseClient
+                    .from('messages')
+                    .select('post_id, sender_id')
+                    .in('post_id', posts.map(p => p.id))
+                    .neq('sender_id', globalProfile.id);
+
+                if (msgs) {
+                    msgs.forEach(m => {
+                        if (m.post_id) {
+                            if (!chatCounts[m.post_id]) chatCounts[m.post_id] = new Set();
+                            chatCounts[m.post_id].add(m.sender_id);
+                        }
+                    });
+                }
+            } catch(e) { /* таблица может называться иначе — пропускаем */ }
+
+            container.innerHTML = posts.map(post => {
+                const img = (post.images && post.images[0]) || post.image_url;
+                const date = new Date(post.created_at).toLocaleDateString('ru-RU', { day:'numeric', month:'short' });
+                const buyers = chatCounts[post.id] ? chatCounts[post.id].size : 0;
+                const ratingHtml = post.rating > 0
+                    ? `<span class="text-yellow-400 text-xs">★ ${post.rating.toFixed(1)}</span>`
+                    : `<span class="text-slate-600 text-xs">Нет оценок</span>`;
+
+                return `
+                <div class="history-item bg-slate-800/60 border border-slate-700/50 rounded-2xl p-3 hover:border-blue-500/40 transition cursor-pointer" onclick="openViewModal('${post.id}'); toggleSidebar();">
+                    <div class="flex gap-3 items-start">
+                        <div class="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 bg-slate-700">
+                            ${img ? `<img src="${img}" class="w-full h-full object-cover">` : '<div class="w-full h-full flex items-center justify-center text-slate-500 text-lg">📷</div>'}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="font-bold text-sm truncate">${post.title}</p>
+                            <p class="text-blue-400 font-black text-sm">${post.price} ⭐</p>
+                            <div class="flex items-center gap-2 mt-1 flex-wrap">
+                                ${ratingHtml}
+                                ${post.review_count > 0 ? `<span class="text-slate-500 text-xs">(${post.review_count})</span>` : ''}
+                                ${buyers > 0 ? `<span class="text-xs badge-new px-2 py-0.5 rounded-lg">💬 ${buyers} ${buyers === 1 ? 'покупатель' : 'покупателей'}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="text-right flex-shrink-0">
+                            <p class="text-slate-500 text-xs">${date}</p>
+                            <button onclick="event.stopPropagation(); deletePost('${post.id}')" class="mt-2 text-xs text-red-500 hover:text-red-400 transition">🗑 Удалить</button>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+
+            sellerLoaded = true;
         }
 
+        // ─── ИСТОРИЯ ПОКУПАТЕЛЯ ───────────────────────────────────────
+        async function loadBuyerHistory() {
+            if (!globalProfile) return;
+            const container = document.getElementById('buyer-history');
+            container.innerHTML = '<div class="text-center text-slate-600 text-sm py-8">Загрузка...</div>';
+
+            // Загружаем все чаты где текущий юзер — отправитель (покупатель)
+            // Пробуем таблицу messages с уникальными собеседниками
+            let chats = [];
+            try {
+                const { data: msgs } = await supabaseClient
+                    .from('messages')
+                    .select('*')
+                    .eq('sender_id', globalProfile.id)
+                    .order('created_at', { ascending: false });
+
+                if (msgs && msgs.length > 0) {
+                    // Группируем по получателю (receiver_id или room_id)
+                    const seen = new Map();
+                    msgs.forEach(m => {
+                        const key = m.receiver_id || m.room_id || m.chat_id;
+                        if (key && !seen.has(key)) seen.set(key, m);
+                    });
+                    chats = Array.from(seen.values());
+                }
+            } catch(e) { /* пробуем альтернативную таблицу */ }
+
+            // Если таблица messages не подошла — пробуем conversations
+            if (chats.length === 0) {
+                try {
+                    const { data: convs } = await supabaseClient
+                        .from('conversations')
+                        .select('*')
+                        .or(`user1_id.eq.${globalProfile.id},user2_id.eq.${globalProfile.id}`)
+                        .order('updated_at', { ascending: false });
+
+                    if (convs && convs.length > 0) chats = convs;
+                } catch(e) {}
+            }
+
+            if (chats.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8">
+                        <p class="text-slate-500 text-sm mb-2">Вы ещё не писали продавцам</p>
+                        <p class="text-slate-600 text-xs">Нажмите «💬 Chat» на любом объявлении</p>
+                    </div>`;
+                document.getElementById('buyer-count').textContent = '0';
+                buyerLoaded = true;
+                return;
+            }
+
+            document.getElementById('buyer-count').textContent = chats.length;
+
+            // Рендерим список переписок
+            const rendered = await Promise.all(chats.map(async (chat) => {
+                // Определяем ID собеседника
+                const otherId = chat.receiver_id
+                    || (chat.user1_id === globalProfile.id ? chat.user2_id : chat.user1_id)
+                    || null;
+
+                let otherName = chat.receiver_name || chat.other_name || 'Продавец';
+                let postTitle = chat.post_title || '';
+                let postPrice = chat.post_price || '';
+
+                // Пробуем подтянуть имя и пост
+                if (otherId && (!otherName || otherName === 'Продавец')) {
+                    try {
+                        const { data: prof } = await supabaseClient.from('profiles').select('username').eq('id', otherId).single();
+                        if (prof) otherName = prof.username;
+                    } catch(e) {}
+                }
+                if (chat.post_id && !postTitle) {
+                    const post = allPosts.find(p => p.id === chat.post_id);
+                    if (post) { postTitle = post.title; postPrice = post.price + ' ⭐'; }
+                }
+
+                const date = new Date(chat.created_at || chat.updated_at || Date.now())
+                    .toLocaleDateString('ru-RU', { day:'numeric', month:'short' });
+
+                const chatUrl = otherId
+                    ? `chat.html?user_id=${otherId}&name=${encodeURIComponent(otherName)}`
+                    : 'chat.html';
+
+                return `
+                <div class="history-item bg-slate-800/60 border border-slate-700/50 rounded-2xl p-3 hover:border-blue-500/40 transition">
+                    <div class="flex gap-3 items-center">
+                        <div class="w-10 h-10 bg-blue-700 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0">
+                            ${otherName[0]?.toUpperCase() || '?'}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="font-bold text-sm">@${otherName}</p>
+                            ${postTitle ? `<p class="text-slate-400 text-xs truncate">${postTitle}</p>` : ''}
+                            ${postPrice ? `<p class="text-blue-400 text-xs font-bold">${postPrice}</p>` : ''}
+                        </div>
+                        <div class="text-right flex-shrink-0">
+                            <p class="text-slate-500 text-xs">${date}</p>
+                            <a href="${chatUrl}" onclick="toggleSidebar()" class="mt-1 text-xs text-blue-400 hover:text-blue-300 transition block">Открыть →</a>
+                        </div>
+                    </div>
+                </div>`;
+            }));
+
+            container.innerHTML = rendered.join('') || '<div class="text-center text-slate-600 text-sm py-8">Нет переписок</div>';
+            buyerLoaded = true;
+        }
+
+        // ─── Галерея ──────────────────────────────────────────────────
         function openGallery(images) {
             currentImages = images || [];
             currentSlide = 0;
@@ -183,19 +396,16 @@
                 document.getElementById('gallery-next').classList.add('hidden');
                 return;
             }
-
             currentImages.forEach((url, i) => {
                 const slide = document.createElement('div');
                 slide.className = `absolute inset-0 transition-opacity duration-300 ${i === 0 ? 'opacity-100' : 'opacity-0'}`;
                 slide.innerHTML = `<img src="${url}" class="w-full h-full object-cover">`;
                 slides.appendChild(slide);
-
                 const dot = document.createElement('div');
                 dot.className = `w-2 h-2 rounded-full cursor-pointer transition ${i === 0 ? 'bg-white' : 'bg-white/40'}`;
                 dot.onclick = () => goToSlide(i);
                 dots.appendChild(dot);
             });
-
             const showNav = currentImages.length > 1;
             document.getElementById('gallery-prev').classList.toggle('hidden', !showNav);
             document.getElementById('gallery-next').classList.toggle('hidden', !showNav);
@@ -217,43 +427,72 @@
             if (dots[currentSlide]) dots[currentSlide].classList.replace('bg-white/40', 'bg-white');
         }
 
+        // ─── Модалки ──────────────────────────────────────────────────
         function openViewModal(postId) {
             const post = allPosts.find(p => p.id === postId);
             if (!post) return;
-
             document.getElementById('view-title').innerText = post.title;
             document.getElementById('view-desc').innerText = post.description || "Автор не оставил описания.";
             document.getElementById('view-price').innerText = `${post.price} ⭐`;
             document.getElementById('view-author').innerText = `@${post.author_name}`;
             document.getElementById('view-avatar-letter').innerText = post.author_name[0].toUpperCase();
-
-            // Динамически добавляем рейтинг в модалку просмотра
             const ratingDiv = document.getElementById('view-rating');
-            ratingDiv.innerHTML = post.rating > 0 
+            ratingDiv.innerHTML = post.rating > 0
                 ? `<i class="fas fa-star"></i> ${post.rating.toFixed(1)} <span class="text-slate-400 text-sm">(${post.review_count || 0})</span>`
                 : '<span class="text-slate-500 text-sm">Новый пост</span>';
-
             const images = post.images || (post.image_url ? [post.image_url] : []);
             openGallery(images);
-
             document.getElementById('view-chat-btn').href = `chat.html?user_id=${post.author_id}&name=${encodeURIComponent(post.author_name)}`;
             document.getElementById('view-modal').classList.remove('hidden');
         }
 
-        function closeViewModal() {
-            document.getElementById('view-modal').classList.add('hidden');
+        function closeViewModal() { document.getElementById('view-modal').classList.add('hidden'); }
+
+        function closePostModal() {
+            document.getElementById('post-modal').classList.add('hidden');
+            selectedPhotos = [];
+            document.getElementById('photo-preview').innerHTML = '';
+            document.getElementById('photo-count').textContent = '0/5';
+            document.getElementById('photo-label').style.display = 'flex';
+            document.getElementById('p-title').value = '';
+            document.getElementById('p-desc').value = '';
+            document.getElementById('p-price').value = '';
         }
 
+        // ─── Фото ─────────────────────────────────────────────────────
+        function handlePhotoSelect(input) {
+            const files = Array.from(input.files);
+            const remaining = 5 - selectedPhotos.length;
+            selectedPhotos = [...selectedPhotos, ...files.slice(0, remaining)];
+            updatePhotoPreview();
+            input.value = '';
+        }
+
+        function updatePhotoPreview() {
+            const preview = document.getElementById('photo-preview');
+            document.getElementById('photo-count').textContent = `${selectedPhotos.length}/5`;
+            preview.innerHTML = '';
+            selectedPhotos.forEach((file, i) => {
+                const url = URL.createObjectURL(file);
+                const div = document.createElement('div');
+                div.className = 'relative';
+                div.innerHTML = `<img src="${url}" class="w-full aspect-square object-cover rounded-lg"><button onclick="removePhoto(${i})" class="absolute -top-1 -right-1 bg-red-500 w-5 h-5 rounded-full text-xs flex items-center justify-center text-white">×</button>`;
+                preview.appendChild(div);
+            });
+            document.getElementById('photo-label').style.display = selectedPhotos.length >= 5 ? 'none' : 'flex';
+        }
+
+        function removePhoto(index) { selectedPhotos.splice(index, 1); updatePhotoPreview(); }
+
+        // ─── Посты ────────────────────────────────────────────────────
         async function loadPosts() {
             const { data: posts } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
             allPosts = posts || [];
             const container = document.getElementById('posts-list');
-
             if (allPosts.length === 0) {
                 container.innerHTML = '<p class="col-span-full text-center text-slate-600 py-10">Объявлений пока нет.</p>';
                 return;
             }
-
             container.innerHTML = allPosts.map(post => {
                 const images = post.images || (post.image_url ? [post.image_url] : []);
                 const firstImg = images[0];
@@ -272,7 +511,7 @@
                             <span class="text-slate-500 text-xs">@${post.author_name}</span>
                         </div>
                         <div class="mt-2 flex items-center gap-1.5 text-yellow-400 text-sm font-bold">
-                            ${post.rating > 0 
+                            ${post.rating > 0
                                 ? `<i class="fas fa-star"></i> ${post.rating.toFixed(1)} <span class="text-slate-400 text-xs">(${post.review_count || 0})</span>`
                                 : '<span class="text-slate-500 text-xs italic">Новый</span>'}
                         </div>
@@ -297,45 +536,9 @@
             if (!confirm('Удалить этот пост?')) return;
             const { error } = await supabaseClient.from('posts').delete().eq('id', postId);
             if (error) alert('Ошибка: ' + error.message);
-            else loadPosts();
-        }
-
-        async function init() {
-            const { data: { user } } = await supabaseClient.auth.getUser();
-            if (user) {
-                const { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', user.id).single();
-                if (profile) {
-                    globalProfile = profile;
-                    document.getElementById('user-name-nav').innerText = profile.username || 'Гость';
-                    document.getElementById('user-balance-nav').innerText = profile.wallet_balance || 0;
-                    document.getElementById('side-username').innerText = `@${profile.username || 'Гость'}`;
-                    document.getElementById('side-balance').innerText = profile.wallet_balance || 0;
-                }
-            }
-            loadPosts();
-
-            // Realtime обновление постов
-            supabaseClient
-                .channel('posts-changes')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, () => {
-                    loadPosts();
-                })
-                .subscribe();
-
-            // Realtime обновление баланса (когда звёзды переводятся)
-            if (user) {
-                supabaseClient
-                    .channel('balance-market')
-                    .on('postgres_changes', {
-                        event: 'UPDATE', schema: 'public', table: 'profiles',
-                        filter: `id=eq.${user.id}`
-                    }, payload => {
-                        const newBalance = payload.new.wallet_balance || 0;
-                        document.getElementById('user-balance-nav').innerText = newBalance;
-                        document.getElementById('side-balance').innerText = newBalance;
-                        if (globalProfile) globalProfile.wallet_balance = newBalance;
-                    })
-                    .subscribe();
+            else {
+                sellerLoaded = false; // сбрасываем кэш истории продавца
+                loadPosts();
             }
         }
 
@@ -349,9 +552,7 @@
             const desc = document.getElementById('p-desc').value.trim();
             const price = document.getElementById('p-price').value;
             const btn = document.getElementById('pub-btn');
-
             if (!title || !price) return alert("Заполни название и цену!");
-
             btn.innerText = "Публикация...";
             btn.disabled = true;
 
@@ -367,28 +568,67 @@
             }
 
             const { error } = await supabaseClient.from('posts').insert([{
-                title, 
-                description: desc, 
-                price: parseInt(price),
-                author_id: globalProfile.id,
-                author_name: globalProfile.username,
+                title, description: desc, price: parseInt(price),
+                author_id: globalProfile.id, author_name: globalProfile.username,
                 images: imageUrls.length > 0 ? imageUrls : null,
-                image_url: imageUrls[0] || null,
-                rating: 0,
-                review_count: 0
+                image_url: imageUrls[0] || null, rating: 0, review_count: 0
             }]);
 
             btn.innerText = "Опубликовать";
             btn.disabled = false;
 
             if (error) alert(error.message);
-            else { 
-                closePostModal(); 
-                loadPosts(); 
+            else {
+                sellerLoaded = false; // сбрасываем кэш
+                closePostModal();
+                loadPosts();
             }
         }
 
-        init();
+        // ─── Init ─────────────────────────────────────────────────────
+        async function init() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (user) {
+                const { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', user.id).single();
+                if (profile) {
+                    globalProfile = profile;
+                    document.getElementById('user-name-nav').innerText = profile.username || 'Гость';
+                    document.getElementById('user-balance-nav').innerText = profile.wallet_balance || 0;
+                    document.getElementById('side-username').innerText = `@${profile.username || 'Гость'}`;
+                    document.getElementById('side-balance').innerText = profile.wallet_balance || 0;
+                }
+            }
+            loadPosts();
+
+            supabaseClient.channel('posts-changes')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, () => {
+                    sellerLoaded = false;
+                    loadPosts();
+                }).subscribe();
+
+            if (user) {
+                supabaseClient.channel('balance-market')
+                    .on('postgres_changes', {
+                        event: 'UPDATE', schema: 'public', table: 'profiles',
+                        filter: `id=eq.${user.id}`
+                    }, payload => {
+                        const newBalance = payload.new.wallet_balance || 0;
+                        document.getElementById('user-balance-nav').innerText = newBalance;
+                        document.getElementById('side-balance').innerText = newBalance;
+                        if (globalProfile) globalProfile.wallet_balance = newBalance;
+                    }).subscribe();
+            }
+        }
+
+        window.onload = function() {
+            const _supabase = window.supabase || window.Supabase;
+            if (!_supabase) {
+                alert('Ошибка: библиотека Supabase не загрузилась. Проверьте интернет-соединение.');
+                return;
+            }
+            supabaseClient = _supabase.createClient(SB_URL, SB_KEY);
+            init();
+        };
     </script>
 </body>
 </html>
