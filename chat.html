@@ -90,7 +90,7 @@
             --border-color: #202225;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; height: 100vh; overflow: hidden; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: transparent; height: 100vh; overflow: hidden; }
 
         #chat-widget-button {
             position: fixed; bottom: 30px; left: 30px;
@@ -466,7 +466,7 @@
                     onmouseover="this.style.color='white'" onmouseout="this.style.color='#8e9297'">
                     ☰
                 </button>
-                <button onclick="toggleChat()" style="background:none; border:none; color:white; font-size:35px; cursor:pointer; line-height:1;">&times;</button>
+                
             </div>
         </div>
 
@@ -1761,11 +1761,5 @@
     setUnread(unreadCount);
 </script>
 
-<div id="chat-widget-button">
-    <svg viewBox="0 0 24 24" width="32" height="32" fill="white">
-        <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
-    </svg>
-    <span class="chat-badge hidden" id="chatBadge">0</span>
-</div>
 </body>
 </html>
