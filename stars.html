@@ -17,8 +17,6 @@
         .pkg-card.selected { border-color: #eab308; background: rgba(234,179,8,0.1); }
         .step-num { width: 28px; height: 28px; border-radius: 50%; background: #eab308; color: #000; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 13px; }
         .code-box { background: rgba(234,179,8,0.1); border: 2px dashed #eab308; border-radius: 16px; }
-        .upload-area { border: 2px dashed rgba(148,163,184,0.3); transition: all 0.2s; }
-        .upload-area:hover, .upload-area.dragover { border-color: #eab308; background: rgba(234,179,8,0.05); }
         .pulse { animation: pulse 2s infinite; }
         @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
     </style>
@@ -100,39 +98,20 @@
 
                 <div class="text-slate-500 text-xs">Скопируй код → открой Kaspi → переведи → вставь код в комментарий</div>
             </div>
-        </div>
 
-        <!-- Step 3: Загрузка скриншота -->
-        <div class="mb-8" id="step3" style="display:none">
-            <div class="flex items-center gap-3 mb-4">
-                <div class="step-num">3</div>
-                <h2 class="font-bold text-lg">Загрузи скриншот перевода</h2>
-            </div>
-
-            <div class="upload-area rounded-2xl p-8 text-center cursor-pointer" id="upload-area" onclick="document.getElementById('file-input').click()">
-                <div id="upload-placeholder">
-                    <i class="fas fa-cloud-upload-alt text-4xl text-slate-500 mb-3"></i>
-                    <p class="text-slate-400 font-bold">Нажми или перетащи скриншот сюда</p>
-                    <p class="text-slate-600 text-sm mt-1">JPG, PNG до 10MB</p>
+            <!-- Step 3: Кнопка подтверждения (без скриншота) -->
+            <div class="mt-6">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="step-num">3</div>
+                    <h2 class="font-bold text-lg">Подтверди отправку</h2>
                 </div>
-                <div id="upload-preview" class="hidden">
-                    <img id="preview-img" class="max-h-48 mx-auto rounded-xl mb-3" src="" alt="">
-                    <p class="text-green-400 font-bold text-sm">✅ Скриншот загружен</p>
+                <div class="bg-slate-800/60 rounded-2xl p-4 mb-4 border border-slate-700">
+                    <p class="text-slate-300 text-sm">Нажми кнопку ниже после того, как отправил перевод. Мы проверим платёж по коду и зачислим звёзды вручную — обычно до 15 минут.</p>
                 </div>
+                <button onclick="submitPayment()" id="submit-btn" class="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-black py-4 rounded-2xl text-lg transition shadow-lg shadow-yellow-500/20">
+                    ✅ Я оплатил — отправить заявку
+                </button>
             </div>
-            <input type="file" id="file-input" accept="image/*" class="hidden" onchange="handleFile(this)">
-
-            <button onclick="submitPayment()" id="submit-btn" class="w-full mt-4 bg-yellow-500 hover:bg-yellow-400 text-black font-black py-4 rounded-2xl text-lg transition shadow-lg shadow-yellow-500/20 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                📤 Отправить на проверку
-            </button>
-        </div>
-
-        <!-- Успех -->
-        <div id="success-block" class="hidden text-center py-10">
-            <div class="text-6xl mb-4">🎉</div>
-            <h2 class="text-2xl font-black mb-2">Заявка отправлена!</h2>
-            <p class="text-slate-400 mb-6">Обычно подтверждение занимает до 15 минут.<br>Звёзды зачислятся автоматически.</p>
-            <a href="home.html" class="bg-blue-600 hover:bg-blue-500 px-8 py-3 rounded-2xl font-bold transition inline-block">На главную</a>
         </div>
 
     </main>
@@ -151,7 +130,6 @@
 
         let selectedPkg = null;
         let uniqueCode = null;
-        let selectedFile = null;
         let globalProfile = null;
 
         function genCode() {
@@ -171,7 +149,6 @@
             document.getElementById('unique-code').textContent = uniqueCode;
             document.getElementById('price-display').textContent = `${selectedPkg.price} ₸`;
             document.getElementById('step2').style.display = 'block';
-            document.getElementById('step3').style.display = 'block';
             document.getElementById('step2').scrollIntoView({ behavior: 'smooth' });
         }
 
@@ -182,51 +159,12 @@
             setTimeout(() => el.textContent = uniqueCode, 1500);
         }
 
-        function handleFile(input) {
-            const file = input.files[0];
-            if (!file) return;
-            selectedFile = file;
-            const url = URL.createObjectURL(file);
-            document.getElementById('preview-img').src = url;
-            document.getElementById('upload-placeholder').classList.add('hidden');
-            document.getElementById('upload-preview').classList.remove('hidden');
-            document.getElementById('submit-btn').disabled = false;
-        }
-
-        // Drag & drop
-        const uploadArea = document.getElementById('upload-area');
-        uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('dragover'); });
-        uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
-        uploadArea.addEventListener('drop', e => {
-            e.preventDefault();
-            uploadArea.classList.remove('dragover');
-            const file = e.dataTransfer.files[0];
-            if (file && file.type.startsWith('image/')) {
-                selectedFile = file;
-                const url = URL.createObjectURL(file);
-                document.getElementById('preview-img').src = url;
-                document.getElementById('upload-placeholder').classList.add('hidden');
-                document.getElementById('upload-preview').classList.remove('hidden');
-                document.getElementById('submit-btn').disabled = false;
-            }
-        });
-
         async function submitPayment() {
-            if (!selectedFile || !selectedPkg || !globalProfile) return;
+            if (!selectedPkg || !globalProfile) return;
 
             const btn = document.getElementById('submit-btn');
             btn.textContent = '⏳ Отправляем...';
             btn.disabled = true;
-
-            // Загружаем скриншот в Supabase Storage
-            const ext = selectedFile.name.split('.').pop();
-            const path = `topup/${globalProfile.id}/${Date.now()}.${ext}`;
-            const { error: upErr } = await sb.storage.from('chat-media').upload(path, selectedFile);
-            let screenshotUrl = '';
-            if (!upErr) {
-                const { data } = sb.storage.from('chat-media').getPublicUrl(path);
-                screenshotUrl = data.publicUrl;
-            }
 
             // Сохраняем заявку в Supabase
             const { error } = await sb.from('topup_requests').insert([{
@@ -235,22 +173,23 @@
                 stars: selectedPkg.stars,
                 price: selectedPkg.price,
                 code: uniqueCode,
-                screenshot_url: screenshotUrl,
+                screenshot_url: '',
                 status: 'pending'
             }]);
-            // Уведомление тебе в Telegram
-await fetch(`https://api.telegram.org/bot8728268737:AAEUQMvYE-tEFkJNgA294kmW9MHSCtN2A1U/sendMessage`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-        chat_id: 5468411126,
-        text: `💳 Новая заявка на пополнение!\n\n👤 @${globalProfile.username}\n⭐ ${selectedPkg.stars} звёзд\n💰 ${selectedPkg.price} ₸\n🔑 Код: ${uniqueCode}\n\nПроверь админку!`,
-    })
-});
+
+            // Уведомление в Telegram
+            await fetch(`https://api.telegram.org/bot8728268737:AAEUQMvYE-tEFkJNgA294kmW9MHSCtN2A1U/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: 5468411126,
+                    text: `💳 Новая заявка на пополнение!\n\n👤 @${globalProfile.username}\n⭐ ${selectedPkg.stars} звёзд\n💰 ${selectedPkg.price} ₸\n🔑 Код: ${uniqueCode}\n\nПроверь админку!`,
+                })
+            });
 
             if (error) {
                 alert('Ошибка: ' + error.message);
-                btn.textContent = '📤 Отправить на проверку';
+                btn.textContent = '✅ Я оплатил — отправить заявку';
                 btn.disabled = false;
                 return;
             }

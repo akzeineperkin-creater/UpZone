@@ -23,6 +23,10 @@
             <button onclick="window.location.href='chat.html'" class="w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-slate-800 transition">
                 <span>💬</span><span>Сообщество</span>
             </button>
+            <!-- Кнопка только для админа -->
+            <button id="admin-btn" onclick="window.location.href='admin.html'" class="hidden w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-yellow-500/20 transition text-yellow-400 border border-yellow-500/30">
+                <span>⚙️</span><span>Админ</span>
+            </button>
         </nav>
         <div class="p-4 border-t border-slate-700 text-xs text-slate-400">Статус: Активен</div>
     </aside>
@@ -104,17 +108,16 @@
                     <p id="view-direction" class="text-slate-400 text-sm mt-1">Направление</p>
                 </div>
 
-    <div class="bg-gradient-to-br from-slate-800 to-slate-900 p-5 rounded-2xl border border-slate-700">
-        <p class="text-[10px] text-slate-500 uppercase font-bold mb-1">Баланс</p>
-        <p class="text-3xl font-black text-yellow-400 mb-4"><span id="side-balance">0</span> ⭐</p>
-        <a href="topup.html" class="flex items-center justify-center gap-2 w-full py-3 bg-gradient-to-r from-yellow-500 to-yellow-400 hover:from-yellow-400 hover:to-yellow-300 text-black font-black rounded-xl text-sm transition shadow-lg shadow-yellow-500/30 active:scale-95">
-            ⭐ Пополнить баланс
-        </a>
-    </div>
-</a>
+                <div class="bg-gradient-to-br from-slate-800 to-slate-900 p-5 rounded-2xl border border-slate-700">
+                    <p class="text-[10px] text-slate-500 uppercase font-bold mb-1">Баланс</p>
+                    <p class="text-3xl font-black text-yellow-400 mb-4"><span id="side-balance">0</span> ⭐</p>
+                    <a href="topup.html" class="flex items-center justify-center gap-2 w-full py-3 bg-gradient-to-r from-yellow-500 to-yellow-400 hover:from-yellow-400 hover:to-yellow-300 text-black font-black rounded-xl text-sm transition shadow-lg shadow-yellow-500/30 active:scale-95">
+                        ⭐ Пополнить баланс
+                    </a>
+                </div>
 
                 <!-- Просмотр -->
-                <div id="profile-view-mode" class="space-y-4">
+                <div id="profile-view-mode" class="space-y-4 mt-4">
                     <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
                         <p class="text-xs text-slate-500 uppercase font-bold mb-1">Email</p>
                         <p id="view-email" class="text-white">—</p>
@@ -150,23 +153,22 @@
                     <div>
                         <label class="text-xs font-bold text-slate-400 uppercase">Направление</label>
                         <select id="edit-direction" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-white outline-none focus:border-blue-500 mt-1">
-                    
-    <option value="none">Выберите вариант</option>
-    <option value="hr">HRTech</option>
-    <option value="ai">AI & Data</option>
-    <option value="health">HealthTech</option>
-    <option value="ecommerce">🛒 E-commerce</option>
-    <option value="mobile">📱 Mobile Dev</option>
-    <option value="design">🎨 Design & Creative</option>
-    <option value="marketing">📈 Marketing & SMM</option>
-    <option value="fintech">💰 FinTech</option>
-    <option value="edtech">🎓 EdTech</option>
-    <option value="proptech">🏗 PropTech</option>
-    <option value="greentech">🌱 GreenTech</option>
-    <option value="gamedev">🎮 GameDev</option>
-    <option value="saas">🤝 B2B SaaS</option>
-    <option value="other">Другое</option>
-</select>
+                            <option value="none">Выберите вариант</option>
+                            <option value="hr">HRTech</option>
+                            <option value="ai">AI & Data</option>
+                            <option value="health">HealthTech</option>
+                            <option value="ecommerce">🛒 E-commerce</option>
+                            <option value="mobile">📱 Mobile Dev</option>
+                            <option value="design">🎨 Design & Creative</option>
+                            <option value="marketing">📈 Marketing & SMM</option>
+                            <option value="fintech">💰 FinTech</option>
+                            <option value="edtech">🎓 EdTech</option>
+                            <option value="proptech">🏗 PropTech</option>
+                            <option value="greentech">🌱 GreenTech</option>
+                            <option value="gamedev">🎮 GameDev</option>
+                            <option value="saas">🤝 B2B SaaS</option>
+                            <option value="other">Другое</option>
+                        </select>
                     </div>
                     <div>
                         <label class="text-xs font-bold text-slate-400 uppercase">О себе</label>
@@ -185,6 +187,8 @@
     const SUPABASE_URL = 'https://dvwegmdyhjyihrxqvoiw.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2d2VnbWR5aGp5aWhyeHF2b2l3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0MDYwOTAsImV4cCI6MjA4Mzk4MjA5MH0.HrG5GijHH4Lj7mO3SorbG0kKfnl5FLtSCWp6aONYxJ8';
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const ADMIN_ID = 'e6b5286c-7fb8-4eb3-88af-034c6387a9bf';
 
     const directionNames = {
         'none':       'Не выбрано',
@@ -206,7 +210,6 @@
 
     function updateDisplay(data) {
         if (!data) return;
-
         document.getElementById('view-email').innerText     = data.email || '—';
         document.getElementById('view-username').innerText = `@${data.username || '—'}`;
         document.getElementById('view-lastName').innerText = data.lastName || '—';
@@ -214,11 +217,8 @@
         document.getElementById('view-bio').innerText      = data.bio || '—';
         document.getElementById('side-balance').innerText  = data.balance || 0;
         document.getElementById('userGreeting').innerText  = data.username || 'Студент';
-
-        // Направление — самое надёжное отображение
         const directionText = directionNames[data.direction] || data.direction || 'Не выбрано';
         document.getElementById('view-direction').innerText = directionText;
-
         if (data.avatar_url) {
             const preview = document.getElementById('imagePreview');
             preview.style.backgroundImage = `url('${data.avatar_url}')`;
@@ -231,58 +231,57 @@
     }
 
     async function loadUserData() {
-    const { data: { user }, error: authError } = await _supabase.auth.getUser();
-    if (authError || !user) {
-        window.location.href = 'signup.html';
-        return;
-    }
-
-    const { data: profile, error: profileError } = await _supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-
-    if (profileError && profileError.code !== 'PGRST116') {
-        console.error('Ошибка загрузки профиля:', profileError);
-    }
-
-    const usernameFromAuth = user.user_metadata?.username || user.email?.split('@')[0] || 'Студент';
-
-    updateDisplay({
-        email: user.email || '—',
-        username: profile?.username || usernameFromAuth,
-        lastName: profile?.last_name || '—',
-        insta: profile?.insta || '—',
-        direction: profile?.direction || 'none',
-        bio: profile?.bio || '—',
-        balance: profile?.wallet_balance || 0,
-        avatar_url: profile?.avatar_url || null
-    });
-
-    // ✅ Realtime — баланс обновляется мгновенно когда админ подтверждает
-    _supabase.channel('balance-dashboard')
-        .on('postgres_changes', {
-            event: 'UPDATE',
-            schema: 'public',
-            table: 'profiles',
-            filter: `id=eq.${user.id}`
-        }, (payload) => {
-            const newBalance = payload.new.wallet_balance || 0;
-            document.getElementById('side-balance').textContent = newBalance;
-        })
-        .subscribe();
-}
-
-    document.getElementById('profile-edit-form').onsubmit = async function(e) {
-        e.preventDefault();
-
-        const { data: { user } } = await _supabase.auth.getUser();
-        if (!user) {
-            alert("Вы не авторизованы!");
+        const { data: { user }, error: authError } = await _supabase.auth.getUser();
+        if (authError || !user) {
+            window.location.href = 'signup.html';
             return;
         }
 
+        // Показываем кнопку Админ только тебе
+        if (user.id === ADMIN_ID) {
+            document.getElementById('admin-btn').classList.remove('hidden');
+        }
+
+        const { data: profile, error: profileError } = await _supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', user.id)
+            .single();
+
+        if (profileError && profileError.code !== 'PGRST116') {
+            console.error('Ошибка загрузки профиля:', profileError);
+        }
+
+        const usernameFromAuth = user.user_metadata?.username || user.email?.split('@')[0] || 'Студент';
+
+        updateDisplay({
+            email: user.email || '—',
+            username: profile?.username || usernameFromAuth,
+            lastName: profile?.last_name || '—',
+            insta: profile?.insta || '—',
+            direction: profile?.direction || 'none',
+            bio: profile?.bio || '—',
+            balance: profile?.wallet_balance || 0,
+            avatar_url: profile?.avatar_url || null
+        });
+
+        _supabase.channel('balance-dashboard')
+            .on('postgres_changes', {
+                event: 'UPDATE',
+                schema: 'public',
+                table: 'profiles',
+                filter: `id=eq.${user.id}`
+            }, (payload) => {
+                const newBalance = payload.new.wallet_balance || 0;
+                document.getElementById('side-balance').textContent = newBalance;
+            })
+            .subscribe();
+    }
+
+    document.getElementById('profile-edit-form').onsubmit = async function(e) {
+        e.preventDefault();
+        const { data: { user } } = await _supabase.auth.getUser();
+        if (!user) { alert("Вы не авторизованы!"); return; }
         const updatedData = {
             id: user.id,
             username: document.getElementById('edit-username').value.trim(),
@@ -292,16 +291,8 @@
             bio: document.getElementById('edit-bio').value.trim(),
             updated_at: new Date().toISOString()
         };
-
         const { error } = await _supabase.from('profiles').upsert(updatedData);
-
-        if (error) {
-            alert('Ошибка сохранения: ' + error.message);
-            console.error(error);
-            return;
-        }
-
-        // Самый надёжный способ — перезагружаем данные с сервера
+        if (error) { alert('Ошибка сохранения: ' + error.message); return; }
         await loadUserData();
         toggleEditMode();
         alert('Профиль сохранён!');
@@ -314,7 +305,6 @@
             if (section) section.classList.add('hidden');
             if (nav) nav.classList.remove('bg-slate-800');
         });
-
         const targetSection = document.getElementById(id + '-section');
         const targetNav = document.getElementById('nav-' + id);
         if (targetSection) targetSection.classList.remove('hidden');
@@ -324,13 +314,10 @@
     let isEditMode = false;
     function toggleEditMode() {
         isEditMode = !isEditMode;
-
         document.getElementById('profile-view-mode').classList.toggle('hidden', isEditMode);
         document.getElementById('profile-edit-form').classList.toggle('hidden', !isEditMode);
-
         document.getElementById('toggleBtn').innerText = isEditMode ? 'Отмена' : 'Редактировать';
         document.getElementById('plusLabel').classList.toggle('hidden', !isEditMode);
-
         if (isEditMode) {
             document.getElementById('edit-username').value   = document.getElementById('view-username').innerText.replace('@', '').trim();
             document.getElementById('edit-lastName').value   = document.getElementById('view-lastName').innerText.trim();
@@ -349,33 +336,23 @@
     async function uploadAvatar(input) {
         const file = input.files[0];
         if (!file) return;
-
         const { data: { user } } = await _supabase.auth.getUser();
         if (!user) return alert("Не удалось определить пользователя");
-
         const ext = file.name.split('.').pop().toLowerCase();
         const path = `avatars/${user.id}.${ext}`;
-
         const { error: uploadError } = await _supabase.storage
             .from('chat-media')
             .upload(path, file, { upsert: true });
-
-        if (uploadError) {
-            alert('Ошибка загрузки аватара: ' + uploadError.message);
-            return;
-        }
-
+        if (uploadError) { alert('Ошибка загрузки аватара: ' + uploadError.message); return; }
         const { data: urlData } = _supabase.storage.from('chat-media').getPublicUrl(path);
         const avatarUrl = urlData.publicUrl + '?t=' + Date.now();
-
         await _supabase.from('profiles').update({ avatar_url: avatarUrl }).eq('id', user.id);
-
         const preview = document.getElementById('imagePreview');
         preview.style.backgroundImage = `url('${avatarUrl}')`;
         preview.innerHTML = '';
     }
 
     window.addEventListener('load', loadUserData);
-</script>
+    </script>
 </body>
 </html>
