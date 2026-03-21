@@ -1,0 +1,213 @@
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stars Market | Админка</title>
+
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0a0f1e">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SM Admin">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&display=swap');
+        * { font-family: 'Space Grotesk', sans-serif; }
+        #install-banner { display: none; }
+    </style>
+</head>
+<body class="bg-[#0a0f1e] text-white min-h-screen">
+
+    <!-- Экран загрузки -->
+    <div id="loading-screen" class="fixed inset-0 bg-[#0a0f1e] flex items-center justify-center z-50">
+        <div class="text-center">
+            <div class="text-5xl mb-4">⭐</div>
+            <p class="text-slate-500 text-sm">Проверка доступа...</p>
+        </div>
+    </div>
+
+    <!-- Экран отказа -->
+    <div id="denied-screen" class="hidden fixed inset-0 bg-[#0a0f1e] flex items-center justify-center z-50 px-4">
+        <div class="text-center">
+            <div class="text-5xl mb-4">🚫</div>
+            <h1 class="text-xl font-black text-red-400 mb-2">Нет доступа</h1>
+            <p class="text-slate-500 text-sm mb-6">Эта страница только для администратора</p>
+            <a href="home.html" class="bg-slate-800 hover:bg-slate-700 px-6 py-3 rounded-xl font-bold transition text-sm">← На главную</a>
+        </div>
+    </div>
+
+    <!-- Основной контент -->
+    <div id="main-content" class="hidden">
+
+        <!-- Install PWA Banner -->
+        <div id="install-banner" class="bg-yellow-500 text-black px-4 py-3 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2 text-sm font-bold">
+                <span>📲</span>
+                <span>Добавь админку на рабочий стол!</span>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="installPWA()" class="bg-black text-yellow-400 font-black text-xs px-3 py-1.5 rounded-lg">Установить</button>
+                <button onclick="dismissBanner()" class="text-black/60 text-xs font-bold px-2">✕</button>
+            </div>
+        </div>
+
+        <nav class="border-b border-slate-800 px-6 py-4 flex justify-between items-center bg-slate-900">
+            <h1 class="text-xl font-black text-yellow-400">⭐ Админка</h1>
+            <a href="home.html" class="text-slate-400 text-sm hover:text-white transition">← На сайт</a>
+        </nav>
+
+        <main class="max-w-4xl mx-auto p-6">
+            <div class="flex gap-3 mb-6 overflow-x-auto pb-1">
+                <button onclick="loadRequests('pending')" id="btn-pending" class="px-4 py-2 bg-yellow-500 text-black font-bold rounded-xl text-sm whitespace-nowrap">⏳ Ожидают</button>
+                <button onclick="loadRequests('confirmed')" id="btn-confirmed" class="px-4 py-2 bg-slate-800 text-slate-300 font-bold rounded-xl text-sm hover:bg-slate-700 transition whitespace-nowrap">✅ Подтверждённые</button>
+                <button onclick="loadRequests('rejected')" id="btn-rejected" class="px-4 py-2 bg-slate-800 text-slate-300 font-bold rounded-xl text-sm hover:bg-slate-700 transition whitespace-nowrap">❌ Отклонённые</button>
+            </div>
+            <div id="requests-list" class="space-y-4"></div>
+        </main>
+
+    </div>
+
+    <!-- Модалка скриншота -->
+    <div id="img-modal" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4" onclick="this.classList.add('hidden')">
+        <img id="modal-img" src="" class="max-w-full max-h-full rounded-2xl">
+    </div>
+
+    <script>
+        const ADMIN_ID = 'e6b5286c-7fb8-4eb3-88af-034c6387a9bf';
+
+        const SB_URL = 'https://dvwegmdyhjyihrxqvoiw.supabase.co';
+        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2d2VnbWR5aGp5aWhyeHF2b2l3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0MDYwOTAsImV4cCI6MjA4Mzk4MjA5MH0.HrG5GijHH4Lj7mO3SorbG0kKfnl5FLtSCWp6aONYxJ8';
+        const sb = supabase.createClient(SB_URL, SB_KEY);
+
+        async function init() {
+            const { data: { user } } = await sb.auth.getUser();
+
+            document.getElementById('loading-screen').style.display = 'none';
+
+            if (!user || user.id !== ADMIN_ID) {
+                // Не залогинен или не админ — отказ
+                document.getElementById('denied-screen').classList.remove('hidden');
+                return;
+            }
+
+            // Это ты — показываем админку
+            document.getElementById('main-content').classList.remove('hidden');
+            loadRequests('pending');
+        }
+
+        // --- PWA Install ---
+        let deferredPrompt = null;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('install-banner').style.display = 'flex';
+        });
+        async function installPWA() {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            await deferredPrompt.userChoice;
+            deferredPrompt = null;
+            document.getElementById('install-banner').style.display = 'none';
+        }
+        function dismissBanner() {
+            document.getElementById('install-banner').style.display = 'none';
+        }
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(() => {});
+        }
+
+        async function loadRequests(status = 'pending') {
+            ['pending','confirmed','rejected'].forEach(s => {
+                const btn = document.getElementById(`btn-${s}`);
+                btn.className = s === status
+                    ? 'px-4 py-2 bg-yellow-500 text-black font-bold rounded-xl text-sm whitespace-nowrap'
+                    : 'px-4 py-2 bg-slate-800 text-slate-300 font-bold rounded-xl text-sm hover:bg-slate-700 transition whitespace-nowrap';
+            });
+
+            const { data: reqs } = await sb.from('topup_requests')
+                .select('*')
+                .eq('status', status)
+                .order('created_at', { ascending: false });
+
+            const container = document.getElementById('requests-list');
+
+            if (!reqs || reqs.length === 0) {
+                container.innerHTML = '<p class="text-slate-500 text-center py-10">Заявок нет</p>';
+                return;
+            }
+
+            container.innerHTML = reqs.map(r => `
+                <div class="bg-slate-800/60 border border-slate-700 rounded-2xl p-5">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <p class="font-black text-lg">@${r.username}</p>
+                            <p class="text-slate-400 text-sm">${new Date(r.created_at).toLocaleString('ru')}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-yellow-400 font-black text-xl">${r.stars} ⭐</p>
+                            <p class="text-slate-400 text-sm">${r.price} ₸</p>
+                        </div>
+                    </div>
+                    <div class="bg-black/30 rounded-xl p-3 mb-4 flex items-center justify-between">
+                        <div>
+                            <p class="text-slate-500 text-xs uppercase font-bold mb-1">Код платежа</p>
+                            <p class="text-yellow-400 font-black text-xl tracking-widest">${r.code}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-slate-500 text-xs uppercase font-bold mb-1">Статус</p>
+                            <p class="font-bold ${r.status === 'pending' ? 'text-yellow-400' : r.status === 'confirmed' ? 'text-green-400' : 'text-red-400'}">
+                                ${r.status === 'pending' ? '⏳ Ожидает' : r.status === 'confirmed' ? '✅ Подтверждён' : '❌ Отклонён'}
+                            </p>
+                        </div>
+                    </div>
+                    ${r.screenshot_url ? `
+                    <img src="${r.screenshot_url}" onclick="openImg('${r.screenshot_url}')"
+                        class="w-full max-h-48 object-cover rounded-xl cursor-pointer hover:opacity-80 transition mb-4">
+                    ` : ''}
+                    ${r.status === 'pending' ? `
+                    <div class="flex gap-3">
+                        <button onclick="confirmPayment('${r.id}', '${r.user_id}', ${r.stars})"
+                            class="flex-1 bg-green-600 hover:bg-green-500 py-3 rounded-xl font-bold transition">
+                            ✅ Подтвердить и зачислить ${r.stars} ⭐
+                        </button>
+                        <button onclick="reject('${r.id}')"
+                            class="bg-red-600/30 hover:bg-red-600 border border-red-600/50 px-4 py-3 rounded-xl font-bold transition text-red-400 hover:text-white">
+                            ❌
+                        </button>
+                    </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        function openImg(url) {
+            document.getElementById('modal-img').src = url;
+            document.getElementById('img-modal').classList.remove('hidden');
+        }
+
+        async function confirmPayment(reqId, userId, stars) {
+            if (!window.confirm(`Подтвердить и зачислить ${stars} ⭐?`)) return;
+            const { data: profile } = await sb.from('profiles').select('wallet_balance').eq('id', userId).single();
+            const newBalance = (profile?.wallet_balance || 0) + stars;
+            await sb.from('profiles').update({ wallet_balance: newBalance }).eq('id', userId);
+            await sb.from('topup_requests').update({ status: 'confirmed' }).eq('id', reqId);
+            loadRequests('pending');
+        }
+
+        async function reject(reqId) {
+            if (!window.confirm('Отклонить заявку?')) return;
+            await sb.from('topup_requests').update({ status: 'rejected' }).eq('id', reqId);
+            loadRequests('pending');
+        }
+
+        init();
+    </script>
+</body>
+</html>
