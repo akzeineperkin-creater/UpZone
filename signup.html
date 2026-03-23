@@ -9,38 +9,55 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
 
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    
+    html, body {
+      height: 100%;
+    }
+
     body {
-      min-height: 100vh;
+      min-height: 100%;
+      background: #0a0e17;
       background: linear-gradient(to bottom, #0a0e17 0%, #00040f 100%);
       font-family: 'Roboto', sans-serif;
       color: #d0d8e0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
+      padding: 20px 16px;
+      overflow-x: hidden;
     }
+
     body::before {
       content: '';
-      position: absolute;
+      position: fixed; 
       inset: 0;
-      background: radial-gradient(circle at 50% 20%, rgba(0,170,255,0.10) 0%, transparent 70%);
+      background: radial-gradient(circle at 50% 20%, rgba(0, 170, 255, 0.10) 0%, transparent 70%);
       pointer-events: none;
+      z-index: 0;
     }
+
+    
     .container {
       position: relative;
       width: 100%;
       max-width: 800px;
+      margin: 0 auto; 
       display: flex;
       flex-direction: row;
-      background: rgba(12,18,28,0.92);
+      background: rgba(12, 18, 28, 0.92);
       border-radius: 20px;
-      border: 1px solid rgba(0,170,255,0.18);
-      box-shadow: 0 15px 50px rgba(0,0,0,0.75), inset 0 0 25px rgba(0,170,255,0.06);
+      border: 1px solid rgba(0, 170, 255, 0.18);
+      box-shadow: 
+        0 15px 50px rgba(0,0,0,0.75),
+        inset 0 0 25px rgba(0,170,255,0.06);
       backdrop-filter: blur(10px);
       overflow: hidden;
       z-index: 2;
     }
+
     .form-side {
       flex: 1;
       padding: 50px 40px;
@@ -48,42 +65,51 @@
       flex-direction: column;
       justify-content: center;
     }
+
     .logo-side {
       flex: 1;
-      background: rgba(0,170,255,0.05);
+      background: rgba(0, 170, 255, 0.05);
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 20px;
     }
+
     .logo {
       max-width: 80%;
       max-height: 80%;
       object-fit: contain;
-      filter: drop-shadow(0 0 18px rgba(80,180,255,0.55));
+      filter: drop-shadow(0 0 18px rgba(80, 180, 255, 0.55));
     }
+
     h1 {
       font-family: 'Orbitron', sans-serif;
       font-size: 32px;
       text-align: center;
       color: #ffffff;
       letter-spacing: 2.5px;
-      text-shadow: 0 0 12px rgba(0,170,255,0.45);
+      text-shadow: 0 0 12px rgba(0, 170, 255, 0.45);
       margin-bottom: 10px;
     }
+
     .subtitle {
       text-align: center;
       font-size: 15px;
       color: #8899aa;
       margin-bottom: 35px;
     }
-    .form-group { margin-bottom: 20px; }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
     label {
       display: block;
       margin-bottom: 8px;
       font-size: 14px;
       color: #c0d0e0;
     }
+
     input {
       width: 100%;
       padding: 14px 16px;
@@ -91,15 +117,17 @@
       border: 1px solid #1e2f45;
       border-radius: 10px;
       color: #f0f4f8;
-      font-size: 16px;
+      font-size: 16px; 
       transition: all 0.3s ease;
     }
+
     input:focus {
       outline: none;
       border-color: #00aaff;
       box-shadow: 0 0 0 4px rgba(0,170,255,0.20);
     }
-    button[type="submit"] {
+
+    button {
       width: 100%;
       padding: 15px;
       background: linear-gradient(90deg, #0077cc, #00aaff);
@@ -113,162 +141,145 @@
       box-shadow: 0 6px 18px rgba(0,170,255,0.35);
       margin-top: 8px;
     }
-    button[type="submit"]:hover {
+
+    button:hover {
       transform: translateY(-2px);
       box-shadow: 0 12px 30px rgba(0,170,255,0.5);
       background: linear-gradient(90deg, #00aaff, #40c0ff);
     }
+
     .toggle-auth {
       text-align: center;
       margin-top: 28px;
       font-size: 14px;
       color: #8899aa;
     }
+
     .toggle-auth a {
       color: #00aaff;
       text-decoration: none;
       font-weight: 500;
     }
-    .toggle-auth a:hover { text-decoration: underline; }
-    .error-msg {
-      background: rgba(255,60,60,0.1);
-      border: 1px solid rgba(255,60,60,0.3);
-      border-radius: 8px;
-      padding: 10px 14px;
-      font-size: 13px;
-      color: #ff6b6b;
-      margin-bottom: 16px;
-      display: none;
+
+    .toggle-auth a:hover {
+      text-decoration: underline;
     }
-    .success-msg {
-      background: rgba(0,200,100,0.1);
-      border: 1px solid rgba(0,200,100,0.3);
-      border-radius: 8px;
-      padding: 10px 14px;
-      font-size: 13px;
-      color: #4dff9e;
-      margin-bottom: 16px;
-      display: none;
-    }
+
     @media (max-width: 768px) {
-      .container { flex-direction: column; max-width: 420px; }
-      .logo-side { order: -1; padding: 40px 20px; background: transparent; }
-      .form-side { padding: 30px 25px; }
+      body {
+        padding: 16px;
+      }
+
+      .container {
+        flex-direction: column;
+        max-width: 100%;
+        width: 100%;
+      }
+
+      .logo-side {
+        order: -1;
+        padding: 20px 20px 10px;
+        background: transparent;
+      }
+
+      .logo {
+        max-height: 120px;
+      }
+
+      .form-side {
+        padding: 20px 20px 30px;
+      }
+
+      h1 {
+        font-size: 22px;
+      }
     }
   </style>
 </head>
 <body>
+
   <div class="container">
+
     <div class="form-side">
       <h1>CREATE ACCOUNT</h1>
       <p class="subtitle">Upzone — от идеи до первых заработков</p>
 
-      <div class="error-msg" id="errorMsg"></div>
-      <div class="success-msg" id="successMsg"></div>
-
       <form id="signupForm">
         <div class="form-group">
           <label>Username</label>
-          <input type="text" id="usernameInput" placeholder="yourname" required>
+          <input type="text" placeholder="yourname" required>
         </div>
+
         <div class="form-group">
           <label>Email</label>
-          <input type="email" id="emailInput" placeholder="email@example.com" required>
+          <input type="email" placeholder="example@gmail.com" required>
         </div>
+
         <div class="form-group">
           <label>Пароль</label>
-          <div style="position: relative;">
-            <input type="password" id="passwordInput" placeholder="минимум 6 символов" required style="padding-right: 48px;">
-            <button type="button" onclick="togglePassword()" id="eyeBtn"
-              style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
-                     background: none; border: none; cursor: pointer; padding: 0;
-                     width: auto; box-shadow: none; color: #8899aa; font-size: 20px;
-                     display: flex; align-items: center; justify-content: center;
-                     transition: color 0.2s;">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            </button>
-          </div>
+          <input type="password" placeholder="••••••••" required>
         </div>
-        <button type="submit" id="submitBtn">Sign Up</button>
+
+        <button type="submit">Sign Up</button>
       </form>
 
       <div class="toggle-auth">
         <span>Уже есть аккаунт? </span>
-        <a href="index.html">Sign in</a>
+        <a href="login.html">Sign in</a>
       </div>
     </div>
 
     <div class="logo-side">
       <img src="logo.jpg" alt="Upzone Logo" class="logo">
     </div>
+
   </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
-  const supabaseUrl = 'https://dvwegmdyhjyihrxqvoiw.supabase.co';
-  const supabaseKey = 'sb_publishable_hDqX9KkG5m38yourV2K43w_PYB7ktXI';
-  const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+    const supabaseUrl = 'https://dvwegmdyhjyihrxqvoiw.supabase.co';
+    const supabaseKey = 'sb_publishable_hDqX9KkG5m38yourV2K43w_PYB7ktXI'; 
+    const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
-  document.getElementById('signupForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
+    document.getElementById('signupForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-    const usernameValue = document.getElementById('usernameInput').value.trim();
-    const emailValue = document.getElementById('emailInput').value.trim();
-    const passwordValue = document.getElementById('passwordInput').value;
+        const usernameValue = e.target.querySelector('input[placeholder="yourname"]').value;
+        const emailValue = e.target.querySelector('input[type="email"]').value;
+        const passwordValue = e.target.querySelector('input[type="password"]').value;
 
-    const errorMsg = document.getElementById('errorMsg');
-    const successMsg = document.getElementById('successMsg');
-    const submitBtn = document.getElementById('submitBtn');
+        const { data, error: authError } = await supabaseClient.auth.signUp({
+            email: emailValue,
+            password: passwordValue,
+            options: {
+                data: { username: usernameValue }
+            }
+        });
 
-    errorMsg.style.display = 'none';
-    successMsg.style.display = 'none';
-    submitBtn.textContent = 'Загрузка...';
-    submitBtn.disabled = true;
+        if (authError) {
+            return alert('Ошибка регистрации: ' + authError.message);
+        }
 
-    const { data, error: authError } = await supabaseClient.auth.signUp({
-      email: emailValue,
-      password: passwordValue,
-      options: {
-        data: { username: usernameValue }
-      }
+        if (data.user) {
+            const { error: profileError } = await supabaseClient
+                .from('profiles')
+                .upsert([{ 
+                    id: data.user.id, 
+                    username: usernameValue, 
+                    email: emailValue 
+                }]);
+
+            if (profileError) {
+                console.error("Ошибка записи в таблицу profiles:", profileError.message);
+                alert("Аккаунт создан, но данные профиля не сохранились. Проверьте RLS!");
+            } else {
+                alert('Регистрация успешна!');
+                window.location.href = 'index.html';
+            }
+        }
     });
-
-    if (authError) {
-      errorMsg.textContent = 'Ошибка: ' + authError.message;
-      errorMsg.style.display = 'block';
-      submitBtn.textContent = 'Sign Up';
-      submitBtn.disabled = false;
-      return;
-    }
-
-    if (data.user) {
-      const { error: profileError } = await supabaseClient
-        .from('profiles')
-        .upsert([{ id: data.user.id, username: usernameValue, email: emailValue }]);
-
-      if (profileError) {
-        console.error('Ошибка profiles:', profileError.message);
-      }
-
-      successMsg.textContent = 'Аккаунт создан! Проверь email для подтверждения.';
-      successMsg.style.display = 'block';
-      setTimeout(() => { window.location.href = 'home.html'; }, 2000);
-    }
-
-    submitBtn.textContent = 'Sign Up';
-    submitBtn.disabled = false;
-  });
-
-  function togglePassword() {
-    const input = document.getElementById('passwordInput');
-    const btn = document.getElementById('eyeBtn');
-    const isHidden = input.type === 'password';
-    input.type = isHidden ? 'text' : 'password';
-    btn.innerHTML = isHidden
-      ? `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`
-      : `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
-    btn.style.color = isHidden ? '#00aaff' : '#8899aa';
-  }
 </script>
+
 </body>
 </html>
