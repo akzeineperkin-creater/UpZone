@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+\<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -106,6 +106,116 @@
             border-color: #f97316 !important;
             color: #fed7aa;
         }
+
+        /* ── AI Chat ── */
+        #chat-window {
+            display: none;
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            width: 380px;
+            max-height: 560px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 24px;
+            z-index: 999;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+        }
+        #chat-window.open { display: flex; }
+
+        #chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            scroll-behavior: smooth;
+        }
+        #chat-messages::-webkit-scrollbar { width: 4px; }
+        #chat-messages::-webkit-scrollbar-track { background: transparent; }
+        #chat-messages::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+
+        .msg-user {
+            align-self: flex-end;
+            background: #d97706;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 18px 18px 4px 18px;
+            max-width: 80%;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .msg-ai {
+            align-self: flex-start;
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 10px 16px;
+            border-radius: 18px 18px 18px 4px;
+            max-width: 85%;
+            font-size: 14px;
+            line-height: 1.5;
+            border: 1px solid #334155;
+        }
+        .msg-ai strong { color: #fbbf24; }
+        .msg-ai code {
+            background: #0f172a;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Fira Code', monospace;
+            font-size: 12px;
+            color: #fde68a;
+        }
+
+        .typing-dot {
+            display: inline-block;
+            width: 6px; height: 6px;
+            background: #fbbf24;
+            border-radius: 50%;
+            animation: blink 1.2s infinite;
+        }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes blink {
+            0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
+            40% { opacity: 1; transform: scale(1); }
+        }
+
+        #chat-input-area {
+            display: flex;
+            gap: 8px;
+            padding: 14px 16px;
+            border-top: 1px solid #1e293b;
+            background: #0f172a;
+        }
+        #chat-input {
+            flex: 1;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            color: white;
+            padding: 10px 14px;
+            font-size: 14px;
+            outline: none;
+            resize: none;
+            font-family: inherit;
+        }
+        #chat-input:focus { border-color: #f59e0b; }
+        #chat-send {
+            background: #d97706;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 10px 16px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+        #chat-send:hover { background: #b45309; }
+        #chat-send:disabled { background: #334155; cursor: not-allowed; }
     </style>
 </head>
 <body class="bg-gradient-to-b from-slate-950 to-slate-900 text-slate-100 min-h-screen font-sans">
@@ -364,37 +474,42 @@ element.textContent = <span class="text-green-400">"Задание выполн�
 
     </main>
 
-    <script type="text/javascript">
-    (function(d, t) {
-        var v = d.createElement(t), s = d.getElementsByTagName(t)[0];
-        v.onload = function() {
-          window.voiceflow.chat.load({
-            verify: { projectID: '69691a2a690bb46ec57a9014' },
-            url: 'https://general-runtime.voiceflow.com',
-            versionID: 'production',
-            voice: {
-              url: "https://runtime-api.voiceflow.com"
-            }
-          });
-        }
-        v.src = "https://cdn.voiceflow.com/widget-next/bundle.mjs"; v.type = "text/javascript"; s.parentNode.insertBefore(v, s);
-    })(document, 'script');
-    </script>
+    <!-- AI Chat Window -->
+    <div id="chat-window">
+        <div style="padding: 16px 20px; border-bottom: 1px solid #1e293b; display:flex; align-items:center; justify-content:space-between; background:#0f172a;">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <div style="width:36px;height:36px;background:#d97706;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;">🤖</div>
+                <div>
+                    <div style="font-weight:700;font-size:14px;color:white;">JS-ментор</div>
+                    <div style="font-size:11px;color:#fbbf24;">● онлайн</div>
+                </div>
+            </div>
+            <button onclick="toggleChat()" style="background:none;border:none;color:#94a3b8;font-size:22px;cursor:pointer;line-height:1;">×</button>
+        </div>
+        <div id="chat-messages"></div>
+        <div id="chat-input-area">
+            <textarea id="chat-input" rows="1" placeholder="Спроси про JS..." onkeydown="handleKey(event)"></textarea>
+            <button id="chat-send" onclick="sendMessage()">➤</button>
+        </div>
+    </div>
 
+    <!-- Floating Button -->
+    <div onclick="toggleChat()" style="position:fixed;bottom:30px;right:30px;background:#d97706;color:white;padding:16px 24px;border-radius:100px;cursor:pointer;z-index:1000;box-shadow:0 10px 30px rgba(217,119,6,0.5);font-weight:700;font-size:15px;transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+        🤖 JS-Ментор
+    </div>
 
     <div class="text-center pb-20">
-    <a href="js_cats.html"
-       style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"
-       class="inline-flex items-center gap-3 bg-yellow-400 hover:bg-yellow-300 text-black font-black py-5 px-12 rounded-2xl text-2xl transition-all transform hover:scale-105 shadow-xl shadow-yellow-900/20">
-        🐾 котики ждут тебя!
-    </a>
-    
-    <p class="mt-6 text-slate-400 text-lg animate-pulse" 
-       style="font-family: 'Courier New', Courier, monospace;">
-        Нажми, чтобы открыть секретный уровень с пушистыми задачами...
-    </p>
-</div>
-
+        <a href="js_cats.html"
+           style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"
+           class="inline-flex items-center gap-3 bg-yellow-400 hover:bg-yellow-300 text-black font-black py-5 px-12 rounded-2xl text-2xl transition-all transform hover:scale-105 shadow-xl shadow-yellow-900/20">
+            🐾 котики ждут тебя!
+        </a>
+        
+        <p class="mt-6 text-slate-400 text-lg animate-pulse" 
+           style="font-family: 'Courier New', Courier, monospace;">
+            Нажми, чтобы открыть секретный уровень с пушистыми задачами...
+        </p>
+    </div>
 
     <script>
         // Флешкарты JS
@@ -417,7 +532,6 @@ element.textContent = <span class="text-green-400">"Задание выполн�
         ];
 
         const container = document.getElementById('js-cards-container');
-
         jsCards.forEach((data, index) => {
             const card = document.createElement('div');
             card.className = 'flashcard-container';
@@ -444,57 +558,31 @@ element.textContent = <span class="text-green-400">"Задание выполн�
                 alert("Пожалуйста, сначала напиши код!");
                 return;
             }
-
             document.getElementById('solution-block').classList.remove('hidden');
-       
             const status = document.getElementById('status');
             status.textContent = "Задание выполнено!";
             status.classList.remove('text-slate-600');
             status.classList.add('text-green-400');
-       
             document.getElementById('solution-block').scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
         // Проверка теста JS с подсветкой вариантов
         function checkJsQuiz() {
             const form = document.getElementById('js-quiz-form');
-            if (!form) {
-                alert("Форма теста не найдена!");
-                return;
-            }
+            if (!form) { alert("Форма теста не найдена!"); return; }
 
             const resultDiv = document.getElementById('js-quiz-result');
             const scoreText = document.getElementById('js-score-text');
 
-            const correctAnswers = {
-                q1: 'B',
-                q2: 'C',
-                q3: 'B',
-                q4: 'A',
-                q5: 'A',
-                q6: 'B',
-                q7: 'C',
-                q8: 'A',
-                q9: 'B',
-                q10: 'A'
-            };
-
+            const correctAnswers = { q1:'B', q2:'C', q3:'B', q4:'A', q5:'A', q6:'B', q7:'C', q8:'A', q9:'B', q10:'A' };
             let score = 0;
 
             for (let i = 1; i <= 10; i++) {
                 const name = `q${i}`;
                 const radios = form.querySelectorAll(`input[name="${name}"]`);
                 let selectedValue = null;
-
-                // Сбрасываем стили
-                radios.forEach(r => {
-                    r.parentElement.classList.remove('correct', 'incorrect', 'missed');
-                });
-
-                // Находим выбранный ответ
-                radios.forEach(r => {
-                    if (r.checked) selectedValue = r.value;
-                });
+                radios.forEach(r => { r.parentElement.classList.remove('correct', 'incorrect', 'missed'); });
+                radios.forEach(r => { if (r.checked) selectedValue = r.value; });
 
                 const correctVal = correctAnswers[name];
                 const correctLabel = Array.from(radios).find(r => r.value === correctVal)?.parentElement;
@@ -507,21 +595,140 @@ element.textContent = <span class="text-green-400">"Задание выполн�
                     if (correctLabel) correctLabel.classList.add('correct');
                     if (selectedLabel) selectedLabel.classList.add('incorrect');
                 }
-
-                if (!selectedValue && correctLabel) {
-                    correctLabel.classList.add('missed');
-                }
+                if (!selectedValue && correctLabel) correctLabel.classList.add('missed');
             }
 
             scoreText.innerHTML = `Ты набрал <span class="text-amber-400 font-black">${score}/10</span>`;
             resultDiv.classList.remove('hidden');
             resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-            // Меняем кнопку
             const btn = form.querySelector('button');
-            if (btn) {
-                btn.textContent = "Пройти тест ещё раз";
-                btn.onclick = () => location.reload();
+            if (btn) { btn.textContent = "Пройти тест ещё раз"; btn.onclick = () => location.reload(); }
+
+            // Автоматически открываем чат с результатом
+            setTimeout(() => {
+                openChatWithResult(score);
+            }, 800);
+        }
+
+        // ── AI Chat ──
+        let chatHistory = [];
+        let isLoading = false;
+
+        const SYSTEM_PROMPT = `Ты — ИИ-ментор по JavaScript для школьников и студентов.
+Объясняй просто, с примерами кода. Говори по-русски, дружелюбно и с энтузиазмом.
+Когда приводишь код — оборачивай его в обратные кавычки. 
+Отвечай коротко (3-5 предложений), по делу. Используй эмодзи для живости.
+Если ученик допустил ошибку в тесте — объясни правильный ответ понятно.`;
+
+        function toggleChat() {
+            const win = document.getElementById('chat-window');
+            win.classList.toggle('open');
+            if (win.classList.contains('open') && chatHistory.length === 0) {
+                setTimeout(() => {
+                    addMessage('ai', 'Привет! Я твой JS-ментор 🤖\nЗадавай любые вопросы по JavaScript — объясню просто и с примерами!');
+                }, 300);
+            }
+        }
+
+        function openChatWithResult(score) {
+            const win = document.getElementById('chat-window');
+            win.classList.add('open');
+            const msg = `Я только что прошёл тест по JavaScript и набрал ${score}/10. Можешь разобрать самые частые ошибки и дать совет, что повторить?`;
+            chatHistory.push({ role: 'user', content: msg });
+            addMessage('user', msg);
+            isLoading = true;
+            document.getElementById('chat-send').disabled = true;
+            addTyping();
+
+            fetch('https://api.anthropic.com/v1/messages', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: 'claude-sonnet-4-20250514',
+                    max_tokens: 1000,
+                    system: SYSTEM_PROMPT,
+                    messages: chatHistory
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                const reply = data.content?.[0]?.text || 'Отличная работа! Давай разберём ошибки.';
+                removeTyping();
+                addMessage('ai', reply);
+                chatHistory.push({ role: 'assistant', content: reply });
+            })
+            .catch(() => { removeTyping(); addMessage('ai', '⚠️ Ошибка соединения. Попробуй написать вручную!'); })
+            .finally(() => { isLoading = false; document.getElementById('chat-send').disabled = false; });
+        }
+
+        function addMessage(role, text) {
+            const msgs = document.getElementById('chat-messages');
+            const div = document.createElement('div');
+            div.className = role === 'user' ? 'msg-user' : 'msg-ai';
+            div.innerHTML = text.replace(/\n/g, '<br>');
+            msgs.appendChild(div);
+            msgs.scrollTop = msgs.scrollHeight;
+        }
+
+        function addTyping() {
+            const msgs = document.getElementById('chat-messages');
+            const div = document.createElement('div');
+            div.className = 'msg-ai';
+            div.id = 'typing-indicator';
+            div.innerHTML = '<span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>';
+            msgs.appendChild(div);
+            msgs.scrollTop = msgs.scrollHeight;
+        }
+
+        function removeTyping() {
+            const el = document.getElementById('typing-indicator');
+            if (el) el.remove();
+        }
+
+        async function sendMessage() {
+            if (isLoading) return;
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            input.value = '';
+            addMessage('user', text);
+            chatHistory.push({ role: 'user', content: text });
+
+            isLoading = true;
+            document.getElementById('chat-send').disabled = true;
+            addTyping();
+
+            try {
+                const response = await fetch('https://api.anthropic.com/v1/messages', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: 'claude-sonnet-4-20250514',
+                        max_tokens: 1000,
+                        system: SYSTEM_PROMPT,
+                        messages: chatHistory
+                    })
+                });
+                const data = await response.json();
+                const reply = data.content?.[0]?.text || 'Что-то пошло не так. Попробуй ещё раз!';
+                removeTyping();
+                addMessage('ai', reply);
+                chatHistory.push({ role: 'assistant', content: reply });
+            } catch (err) {
+                removeTyping();
+                addMessage('ai', '⚠️ Ошибка соединения. Проверь интернет и попробуй снова.');
+            }
+
+            isLoading = false;
+            document.getElementById('chat-send').disabled = false;
+        }
+
+        function handleKey(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
             }
         }
     </script>
