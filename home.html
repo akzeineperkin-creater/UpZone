@@ -23,16 +23,36 @@
             <button onclick="window.location.href='chat.html'" class="w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-slate-800 transition">
                 <span>💬</span><span>Сообщество</span>
             </button>
-           <!-- Кнопка только для админа -->
-<button id="admin-btn" onclick="window.location.href='admin.html'" class="hidden w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-yellow-500/20 transition text-yellow-400 border border-yellow-500/30">
-    <span>⚙️</span><span>Админ</span>
-</button>
-<!-- Кнопка для модераторов споров -->
-<button id="disputes-btn" onclick="window.location.href='spori.html'" class="hidden w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-red-500/20 transition text-red-400 border border-red-500/30">
-    <span>⚖️</span><span>Споры</span>
-</button>
+            <button id="admin-btn" onclick="window.location.href='admin.html'" class="hidden w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-yellow-500/20 transition text-yellow-400 border border-yellow-500/30">
+                <span>⚙️</span><span>Админ</span>
+            </button>
+            <button id="disputes-btn" onclick="window.location.href='spori.html'" class="hidden w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-red-500/20 transition text-red-400 border border-red-500/30">
+                <span>⚖️</span><span>Споры</span>
+            </button>
         </nav>
-        <div class="p-4 border-t border-slate-700 text-xs text-slate-400">Статус: Активен</div>
+
+        <!-- Соцсети + статус внизу сайдбара -->
+        <div class="p-4 border-t border-slate-700">
+            <p class="text-xs text-slate-500 mb-2">Мы в соцсетях</p>
+            <div class="flex gap-2">
+                <a href="https://www.instagram.com/upzone.ai?igsh=MWYxMzN1MnBzYmw4cA==" target="_blank"
+                   class="flex items-center gap-1.5 text-xs text-slate-400 hover:text-pink-400 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                    </svg>
+                    Instagram
+                </a>
+                <span class="text-slate-700">|</span>
+                <a href="https://t.me/upzoneai" target="_blank"
+                   class="flex items-center gap-1.5 text-xs text-slate-400 hover:text-blue-400 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                    </svg>
+                    Telegram
+                </a>
+            </div>
+            <p class="text-xs text-slate-500 mt-3">Статус: Активен</p>
+        </div>
     </aside>
 
     <div class="flex-1 ml-64 p-8">
@@ -77,13 +97,31 @@
                     <a href="stage3.html" class="block text-center w-full bg-blue-600 text-white font-semibold py-2 rounded-xl hover:bg-blue-700 transition">Перейти к уроку</a>
                 </div>
             </main>
+
+            <!-- Футер внизу основного контента -->
+            <footer class="max-w-6xl mx-auto mt-16 pt-6 border-t border-gray-200 flex items-center justify-center gap-6 text-xs text-gray-400">
+                <span>© 2025 UpZone.ai</span>
+                <a href="https://www.instagram.com/upzone.ai?igsh=MWYxMzN1MnBzYmw4cA==" target="_blank"
+                   class="flex items-center gap-1 hover:text-pink-500 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                    </svg>
+                    @upzone.ai
+                </a>
+                <a href="https://t.me/upzoneai" target="_blank"
+                   class="flex items-center gap-1 hover:text-blue-500 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                    </svg>
+                    @upzoneai
+                </a>
+            </footer>
         </section>
 
         <!-- Профиль -->
         <section id="profile-section" class="hidden max-w-2xl mx-auto">
             <div class="bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl">
 
-                <!-- Шапка -->
                 <div class="flex justify-between items-center mb-8">
                     <h2 class="text-2xl font-bold text-white">Мой профиль</h2>
                     <div class="flex gap-3">
@@ -98,7 +136,6 @@
                     </div>
                 </div>
 
-                <!-- Аватар -->
                 <div class="flex flex-col items-center mb-8">
                     <div class="relative mb-4">
                         <div id="imagePreview"
@@ -120,7 +157,6 @@
                     </a>
                 </div>
 
-                <!-- Просмотр -->
                 <div id="profile-view-mode" class="space-y-4 mt-4">
                     <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
                         <p class="text-xs text-slate-500 uppercase font-bold mb-1">Email</p>
@@ -140,7 +176,6 @@
                     </div>
                 </div>
 
-                <!-- Форма редактирования -->
                 <form id="profile-edit-form" class="hidden space-y-4 mt-4">
                     <div>
                         <label class="text-xs font-bold text-slate-400 uppercase">Никнейм</label>
@@ -183,6 +218,25 @@
                     </button>
                 </form>
             </div>
+
+            <!-- Футер под профилем -->
+            <footer class="mt-8 flex items-center justify-center gap-6 text-xs text-gray-400">
+                <span>© 2025 UpZone.ai</span>
+                <a href="https://www.instagram.com/upzone.ai?igsh=MWYxMzN1MnBzYmw4cA==" target="_blank"
+                   class="flex items-center gap-1 hover:text-pink-500 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                    </svg>
+                    @upzone.ai
+                </a>
+                <a href="https://t.me/upzoneai" target="_blank"
+                   class="flex items-center gap-1 hover:text-blue-500 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                    </svg>
+                    @upzoneai
+                </a>
+            </footer>
         </section>
 
     </div>
@@ -241,20 +295,18 @@
             return;
         }
 
-        // Показываем кнопку Админ только тебе
         if (user.id === ADMIN_ID) {
             document.getElementById('admin-btn').classList.remove('hidden');
         }
-        
-// Показываем кнопку Споры только двум модераторам
-const MODERATOR_IDS = [
-    'e6b5286c-7fb8-4eb3-88af-034c6387a9bf',
-    '7ed0170b-f1c0-47d1-a81f-91d83f34b4ac'
-];
 
-if (MODERATOR_IDS.includes(user.id)) {
-    document.getElementById('disputes-btn').classList.remove('hidden');
-}
+        const MODERATOR_IDS = [
+            'e6b5286c-7fb8-4eb3-88af-034c6387a9bf',
+            '7ed0170b-f1c0-47d1-a81f-91d83f34b4ac'
+        ];
+
+        if (MODERATOR_IDS.includes(user.id)) {
+            document.getElementById('disputes-btn').classList.remove('hidden');
+        }
 
         const { data: profile, error: profileError } = await _supabase
             .from('profiles')
@@ -269,15 +321,15 @@ if (MODERATOR_IDS.includes(user.id)) {
         const usernameFromAuth = user.user_metadata?.username || user.email?.split('@')[0] || 'Студент';
 
         updateDisplay({
-    email: user.email || '—',
-    username: profile?.username || usernameFromAuth,
-    lastName: profile?.last_name || '—',
-    insta: profile?.insta || '—',
-    direction: profile?.direction || 'none',
-    bio: profile?.bio || '—',
-    wallet_balance: profile?.wallet_balance || 0,  // ✅ правильное имя
-    avatar_url: profile?.avatar_url || null
-});
+            email: user.email || '—',
+            username: profile?.username || usernameFromAuth,
+            lastName: profile?.last_name || '—',
+            insta: profile?.insta || '—',
+            direction: profile?.direction || 'none',
+            bio: profile?.bio || '—',
+            wallet_balance: profile?.wallet_balance || 0,
+            avatar_url: profile?.avatar_url || null
+        });
 
         _supabase.channel('balance-dashboard')
             .on('postgres_changes', {
