@@ -9,15 +9,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
 
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       min-height: 100vh;
-      background: #0a0e17;
       background: linear-gradient(to bottom, #0a0e17 0%, #00040f 100%);
       font-family: 'Roboto', sans-serif;
       color: #d0d8e0;
@@ -31,7 +26,7 @@
       content: '';
       position: absolute;
       inset: 0;
-      background: radial-gradient(circle at 50% 20%, rgba(0, 170, 255, 0.10) 0%, transparent 70%);
+      background: radial-gradient(circle at 50% 20%, rgba(0,170,255,0.10) 0%, transparent 70%);
       pointer-events: none;
     }
 
@@ -41,12 +36,10 @@
       max-width: 800px;
       display: flex;
       flex-direction: row;
-      background: rgba(12, 18, 28, 0.92);
+      background: rgba(12,18,28,0.92);
       border-radius: 20px;
-      border: 1px solid rgba(0, 170, 255, 0.18);
-      box-shadow: 
-        0 15px 50px rgba(0,0,0,0.75),
-        inset 0 0 25px rgba(0,170,255,0.06);
+      border: 1px solid rgba(0,170,255,0.18);
+      box-shadow: 0 15px 50px rgba(0,0,0,0.75), inset 0 0 25px rgba(0,170,255,0.06);
       backdrop-filter: blur(10px);
       overflow: hidden;
       z-index: 2;
@@ -62,7 +55,7 @@
 
     .logo-side {
       flex: 1;
-      background: rgba(0, 170, 255, 0.05);
+      background: rgba(0,170,255,0.05);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -73,7 +66,7 @@
       max-width: 80%;
       max-height: 80%;
       object-fit: contain;
-      filter: drop-shadow(0 0 18px rgba(80, 180, 255, 0.55));
+      filter: drop-shadow(0 0 18px rgba(80,180,255,0.55));
     }
 
     h1 {
@@ -82,7 +75,7 @@
       text-align: center;
       color: #ffffff;
       letter-spacing: 2.5px;
-      text-shadow: 0 0 12px rgba(0, 170, 255, 0.45);
+      text-shadow: 0 0 12px rgba(0,170,255,0.45);
       margin-bottom: 10px;
     }
 
@@ -93,9 +86,7 @@
       margin-bottom: 35px;
     }
 
-    .form-group {
-      margin-bottom: 24px;
-    }
+    .form-group { margin-bottom: 24px; }
 
     label {
       display: block;
@@ -143,16 +134,8 @@
       accent-color: #00aaff;
     }
 
-    .forgot {
-      color: #00aaff;
-      text-decoration: none;
-      font-size: 14px;
-    }
-
-    .forgot:hover {
-      text-decoration: underline;
-      color: #40c0ff;
-    }
+    .forgot { color: #00aaff; text-decoration: none; font-size: 14px; }
+    .forgot:hover { text-decoration: underline; color: #40c0ff; }
 
     button {
       width: 100%;
@@ -181,36 +164,19 @@
       color: #8899aa;
     }
 
-    .toggle-auth a {
-      color: #00aaff;
-      text-decoration: none;
-      font-weight: 500;
-    }
-
-    .toggle-auth a:hover {
-      text-decoration: underline;
-    }
+    .toggle-auth a { color: #00aaff; text-decoration: none; font-weight: 500; }
+    .toggle-auth a:hover { text-decoration: underline; }
 
     @media (max-width: 768px) {
-      .container {
-        flex-direction: column;
-        max-width: 420px;
-      }
-      .logo-side {
-        order: -1;
-        padding: 40px 20px;
-        background: transparent;
-      }
-      .form-side {
-        padding: 30px 25px;
-      }
+      .container { flex-direction: column; max-width: 420px; }
+      .logo-side { order: -1; padding: 40px 20px; background: transparent; }
+      .form-side { padding: 30px 25px; }
     }
   </style>
 </head>
 <body>
 
   <div class="container" id="auth-container">
-
     <div class="form-side">
       <h1>WELCOME BACK!</h1>
       <p class="subtitle">Upzone — от идеи до первых заработков</p>
@@ -218,17 +184,28 @@
       <form class="login-form" id="loginForm">
         <div class="form-group">
           <label>Username или email</label>
-          <input type="text" placeholder="example@gmail.com" required>
+          <input type="text" id="emailInput" placeholder=" " required>
         </div>
 
         <div class="form-group">
           <label>Пароль</label>
-          <input type="password" placeholder="••••••••" required>
+          <div style="position: relative;">
+            <input type="password" id="passwordInput" placeholder=" " required style="padding-right: 48px;">
+            <button type="button" onclick="togglePassword()" id="eyeBtn"
+              style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+                     background: none; border: none; cursor: pointer; padding: 0;
+                     width: auto; box-shadow: none; color: #8899aa;
+                     display: flex; align-items: center; justify-content: center;
+                     transition: color 0.2s;">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
         </div>
 
         <div class="checkbox-group">
           <label><input type="checkbox"> Запомнить меня</label>
-          <a href="#" class="forgot">Забыли пароль?</a>
+          <!-- ✅ Открывает модалку OTP -->
+          <a href="#" class="forgot" onclick="showForgotModal(event)">Забыли пароль?</a>
         </div>
 
         <button type="submit">Sign In</button>
@@ -243,34 +220,321 @@
     <div class="logo-side">
       <img src="logo.jpg" alt="Upzone Logo" class="logo">
     </div>
-
   </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- ✅ МОДАЛКА — перед скриптами, после .container -->
+  <div id="forgotModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75);
+       z-index:9999; align-items:center; justify-content:center;">
+    <div style="background:#0c121c; border:1px solid rgba(0,170,255,0.25); border-radius:20px;
+                padding:40px; width:100%; max-width:400px; position:relative;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.8); margin: 16px;">
 
-<script>
+      <button onclick="closeForgotModal()" style="position:absolute; top:16px; right:20px;
+        background:none; border:none; color:#8899aa; font-size:24px; cursor:pointer;
+        width:auto; box-shadow:none; padding:0; line-height:1;">×</button>
+
+      <!-- Шаг 1: ввод email -->
+      <div id="step-email">
+        <h2 style="font-family:'Orbitron',sans-serif; font-size:18px; color:white;
+                   text-align:center; margin-bottom:8px; letter-spacing:2px;">ВОССТАНОВЛЕНИЕ</h2>
+        <p style="text-align:center; color:#8899aa; font-size:13px; margin-bottom:28px;">
+          Введите ваш email — пришлём 6-значный код
+        </p>
+        <label style="font-size:13px; color:#c0d0e0; display:block; margin-bottom:8px;">Email</label>
+        <input type="email" id="forgot-email" placeholder="example@gmail.com"
+          style="width:100%; padding:13px 16px; background:#0e1622; border:1px solid #1e2f45;
+                 border-radius:10px; color:#f0f4f8; font-size:15px; outline:none; margin-bottom:16px;">
+        <button onclick="sendOtpCode()" id="sendCodeBtn"
+          style="width:100%; padding:14px; background:linear-gradient(90deg,#0077cc,#00aaff);
+                 border:none; border-radius:10px; color:white; font-size:15px;
+                 font-weight:500; cursor:pointer; box-shadow:0 6px 18px rgba(0,170,255,0.35);">
+          Отправить код
+        </button>
+        <div id="step1-msg" style="text-align:center; margin-top:12px; font-size:13px;"></div>
+      </div>
+
+      <!-- Шаг 2: ввод кода и нового пароля -->
+      <div id="step-code" style="display:none;">
+        <h2 style="font-family:'Orbitron',sans-serif; font-size:18px; color:white;
+                   text-align:center; margin-bottom:8px; letter-spacing:2px;">ВВЕДИТЕ КОД</h2>
+        <p id="code-hint" style="text-align:center; color:#8899aa; font-size:13px; margin-bottom:28px;"></p>
+
+        <!-- 6 полей для цифр -->
+        <div style="display:flex; gap:8px; justify-content:center; margin-bottom:20px;">
+          <input class="otp-box" maxlength="1" type="text" inputmode="numeric"
+            style="width:46px; height:54px; text-align:center; font-size:22px; font-weight:bold;
+                   background:#0e1622; border:1px solid #1e2f45; border-radius:10px;
+                   color:#00aaff; outline:none; transition:border-color 0.2s; padding:0;">
+          <input class="otp-box" maxlength="1" type="text" inputmode="numeric"
+            style="width:46px; height:54px; text-align:center; font-size:22px; font-weight:bold;
+                   background:#0e1622; border:1px solid #1e2f45; border-radius:10px;
+                   color:#00aaff; outline:none; transition:border-color 0.2s; padding:0;">
+          <input class="otp-box" maxlength="1" type="text" inputmode="numeric"
+            style="width:46px; height:54px; text-align:center; font-size:22px; font-weight:bold;
+                   background:#0e1622; border:1px solid #1e2f45; border-radius:10px;
+                   color:#00aaff; outline:none; transition:border-color 0.2s; padding:0;">
+          <input class="otp-box" maxlength="1" type="text" inputmode="numeric"
+            style="width:46px; height:54px; text-align:center; font-size:22px; font-weight:bold;
+                   background:#0e1622; border:1px solid #1e2f45; border-radius:10px;
+                   color:#00aaff; outline:none; transition:border-color 0.2s; padding:0;">
+          <input class="otp-box" maxlength="1" type="text" inputmode="numeric"
+            style="width:46px; height:54px; text-align:center; font-size:22px; font-weight:bold;
+                   background:#0e1622; border:1px solid #1e2f45; border-radius:10px;
+                   color:#00aaff; outline:none; transition:border-color 0.2s; padding:0;">
+          <input class="otp-box" maxlength="1" type="text" inputmode="numeric"
+            style="width:46px; height:54px; text-align:center; font-size:22px; font-weight:bold;
+                   background:#0e1622; border:1px solid #1e2f45; border-radius:10px;
+                   color:#00aaff; outline:none; transition:border-color 0.2s; padding:0;">
+        </div>
+
+        <label style="font-size:13px; color:#c0d0e0; display:block; margin-bottom:8px;">Новый пароль</label>
+        <div style="position:relative; margin-bottom:16px;">
+          <input type="password" id="new-pass" placeholder="••••••••"
+            style="width:100%; padding:13px 48px 13px 16px; background:#0e1622;
+                   border:1px solid #1e2f45; border-radius:10px; color:#f0f4f8;
+                   font-size:15px; outline:none;">
+          <button type="button" onclick="toggleNewPass()" id="newPassEye"
+            style="position:absolute; right:12px; top:50%; transform:translateY(-50%);
+                   background:none; border:none; cursor:pointer; color:#8899aa;
+                   width:auto; box-shadow:none; padding:0;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+
+        <button onclick="verifyOtpAndReset()" id="verifyBtn"
+          style="width:100%; padding:14px; background:linear-gradient(90deg,#0077cc,#00aaff);
+                 border:none; border-radius:10px; color:white; font-size:15px;
+                 font-weight:500; cursor:pointer; box-shadow:0 6px 18px rgba(0,170,255,0.35);">
+          Подтвердить и сменить пароль
+        </button>
+
+        <div style="text-align:center; margin-top:12px;">
+          <a href="#" onclick="resendCode(event)" id="resendLink"
+            style="color:#8899aa; font-size:13px; text-decoration:none;">
+            Отправить код повторно
+          </a>
+        </div>
+        <div id="step2-msg" style="text-align:center; margin-top:10px; font-size:13px;"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
     const supabaseUrl = 'https://dvwegmdyhjyihrxqvoiw.supabase.co';
-    const supabaseKey = 'sb_publishable_hDqX9KkG5m38yourV2K43w_PYB7ktXI'; 
+    const supabaseKey = 'sb_publishable_hDqX9KkG5m38yourV2K43w_PYB7ktXI';
     const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
+    // ── Вход ─────────────────────────────────────────────────────
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = e.target.querySelector('input[type="text"]').value;
-        const password = e.target.querySelector('input[type="password"]').value;
+      e.preventDefault();
+      const email    = document.getElementById('emailInput').value;
+      const password = document.getElementById('passwordInput').value;
 
-        const { data, error } = await supabaseClient.auth.signInWithPassword({ 
-            email: email, 
-            password: password 
-        });
+      const { data, error } = await supabaseClient.auth.signInWithPassword({
+        email, password
+      });
 
-        if (error) {
-            alert('Ошибка входа: ' + error.message);
-        } else {
-            alert('Вы успешно вошли!');
-            window.location.href = 'home.html'; 
-        }
+      if (error) {
+        alert('Ошибка входа: ' + error.message);
+      } else {
+        window.location.href = 'home.html';
+      }
     });
-</script>
+
+    // ── Глаз на основном поле пароля ─────────────────────────────
+    function togglePassword() {
+      const input = document.getElementById('passwordInput');
+      const btn   = document.getElementById('eyeBtn');
+      const hide  = input.type === 'password';
+      input.type  = hide ? 'text' : 'password';
+      btn.style.color = hide ? '#00aaff' : '#8899aa';
+      btn.innerHTML = hide
+        ? `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`
+        : `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+    }
+
+    // ── OTP восстановление пароля ─────────────────────────────────
+    let otpEmail   = '';
+    let resendTimer = null;
+
+    function showForgotModal(e) {
+      e.preventDefault();
+      document.getElementById('forgotModal').style.display = 'flex';
+      document.getElementById('forgot-email').focus();
+    }
+
+    function closeForgotModal() {
+      document.getElementById('forgotModal').style.display = 'none';
+      document.getElementById('step-email').style.display = 'block';
+      document.getElementById('step-code').style.display  = 'none';
+      document.getElementById('forgot-email').value = '';
+      document.getElementById('new-pass').value     = '';
+      document.querySelectorAll('.otp-box').forEach(b => b.value = '');
+      document.getElementById('step1-msg').textContent = '';
+      document.getElementById('step2-msg').textContent = '';
+      if (resendTimer) clearInterval(resendTimer);
+    }
+
+    async function sendOtpCode() {
+      const email = document.getElementById('forgot-email').value.trim();
+      const msg   = document.getElementById('step1-msg');
+      const btn   = document.getElementById('sendCodeBtn');
+
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        msg.style.color   = '#f87171';
+        msg.textContent   = '❌ Введите корректный email';
+        return;
+      }
+
+      btn.disabled    = true;
+      btn.textContent = 'Отправка...';
+
+      const { error } = await supabaseClient.auth.signInWithOtp({
+        email,
+        options: { shouldCreateUser: false }
+      });
+
+      btn.disabled    = false;
+      btn.textContent = 'Отправить код';
+
+      msg.style.color = '#4ade80';
+      msg.textContent = '✅ Если email зарегистрирован — код отправлен';
+
+      if (!error) {
+        otpEmail = email;
+        setTimeout(() => {
+          document.getElementById('step-email').style.display = 'none';
+          document.getElementById('step-code').style.display  = 'block';
+          document.getElementById('code-hint').textContent    = `Код отправлен на ${email}`;
+          setupOtpBoxes();
+          startResendTimer();
+        }, 1000);
+      }
+    }
+
+    function setupOtpBoxes() {
+      const boxes = document.querySelectorAll('.otp-box');
+      boxes.forEach((box, i) => {
+        box.value = '';
+        box.style.borderColor = '#1e2f45';
+        // убираем старые слушатели через clone
+        const fresh = box.cloneNode(true);
+        box.parentNode.replaceChild(fresh, box);
+        boxes[i] = fresh;
+      });
+      // переназначаем после clone
+      document.querySelectorAll('.otp-box').forEach((box, i, all) => {
+        box.addEventListener('input', () => {
+          box.value = box.value.replace(/\D/g, '');
+          if (box.value && i < all.length - 1) all[i + 1].focus();
+        });
+        box.addEventListener('keydown', (e) => {
+          if (e.key === 'Backspace' && !box.value && i > 0) all[i - 1].focus();
+        });
+        box.addEventListener('focus', () => box.style.borderColor = '#00aaff');
+        box.addEventListener('blur',  () => box.style.borderColor = box.value ? '#00aaff' : '#1e2f45');
+      });
+      document.querySelectorAll('.otp-box')[0].focus();
+    }
+
+    function startResendTimer() {
+      const link = document.getElementById('resendLink');
+      let seconds = 60;
+      link.style.pointerEvents = 'none';
+      link.style.color         = '#4f5f70';
+      if (resendTimer) clearInterval(resendTimer);
+      resendTimer = setInterval(() => {
+        seconds--;
+        link.textContent = `Отправить повторно (${seconds}s)`;
+        if (seconds <= 0) {
+          clearInterval(resendTimer);
+          link.textContent         = 'Отправить код повторно';
+          link.style.pointerEvents = 'auto';
+          link.style.color         = '#00aaff';
+        }
+      }, 1000);
+    }
+
+    async function resendCode(e) {
+      e.preventDefault();
+      await supabaseClient.auth.signInWithOtp({ email: otpEmail, options: { shouldCreateUser: false } });
+      startResendTimer();
+    }
+
+    async function verifyOtpAndReset() {
+      const boxes   = document.querySelectorAll('.otp-box');
+      const code    = Array.from(boxes).map(b => b.value).join('');
+      const newPass = document.getElementById('new-pass').value;
+      const msg     = document.getElementById('step2-msg');
+      const btn     = document.getElementById('verifyBtn');
+
+      if (code.length < 6) {
+        msg.style.color = '#f87171';
+        msg.textContent = '❌ Введите все 6 цифр кода';
+        return;
+      }
+      if (newPass.length < 6) {
+        msg.style.color = '#f87171';
+        msg.textContent = '❌ Пароль должен быть не менее 6 символов';
+        return;
+      }
+
+      btn.disabled    = true;
+      btn.textContent = 'Проверка...';
+
+      const { error: otpError } = await supabaseClient.auth.verifyOtp({
+        email: otpEmail,
+        token: code,
+        type:  'email'
+      });
+
+      if (otpError) {
+        msg.style.color = '#f87171';
+        msg.textContent = '❌ Неверный или устаревший код';
+        btn.disabled    = false;
+        btn.textContent = 'Подтвердить и сменить пароль';
+        document.querySelectorAll('.otp-box').forEach(b => b.style.borderColor = '#f87171');
+        return;
+      }
+
+      const { error: passError } = await supabaseClient.auth.updateUser({ password: newPass });
+
+      if (passError) {
+        msg.style.color = '#f87171';
+        msg.textContent = '❌ ' + passError.message;
+        btn.disabled    = false;
+        btn.textContent = 'Подтвердить и сменить пароль';
+        return;
+      }
+
+      msg.style.color = '#4ade80';
+      msg.textContent = '✅ Пароль изменён! Входим...';
+      if (resendTimer) clearInterval(resendTimer);
+      setTimeout(() => {
+        closeForgotModal();
+        window.location.href = 'home.html';
+      }, 1500);
+    }
+
+    function toggleNewPass() {
+      const input = document.getElementById('new-pass');
+      const btn   = document.getElementById('newPassEye');
+      const hide  = input.type === 'password';
+      input.type  = hide ? 'text' : 'password';
+      btn.style.color = hide ? '#00aaff' : '#8899aa';
+      btn.innerHTML = hide
+        ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`
+        : `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+    }
+
+    // Закрытие модалки по клику на фон
+    document.getElementById('forgotModal').addEventListener('click', function(e) {
+      if (e.target === this) closeForgotModal();
+    });
+  </script>
 
 </body>
 </html>

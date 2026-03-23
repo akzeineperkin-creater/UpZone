@@ -892,6 +892,19 @@
         currentRecipientId = sellerId;
         currentRoomId = null;
         openChat(decodeURIComponent(sellerName));
+        // ── ДОБАВЛЯЕМ ПРОДАВЦА В СПИСОК СЛЕВА ──────────────────────────
+    if (!recentChats.find(u => u.id === sellerId)) {
+        const { data: sellerProfile } = await _supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', sellerId)
+            .single();
+        if (sellerProfile) {
+            recentChats.unshift(sellerProfile);
+            saveRecentChats();
+            loadUsers(); // перерисовываем список
+        }
+    }
         const { data } = await _supabase.from('messages').select('id').or(`and(user_id.eq.${myId},recipient_id.eq.${sellerId}),and(user_id.eq.${sellerId},recipient_id.eq.${myId})`).limit(1);
         if (!data?.length) {
             const { data: sellerInfo } = await _supabase.from('seller_info').select('*').eq('user_id', sellerId).maybeSingle();

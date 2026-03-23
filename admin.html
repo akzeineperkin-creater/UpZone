@@ -3,8 +3,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stars Market | Админка</title>
-
-    <!-- PWA -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0a0f1e">
     <meta name="mobile-web-app-capable" content="yes">
@@ -12,7 +10,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="SM Admin">
     <link rel="apple-touch-icon" href="icon-192.png">
-
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -24,7 +21,6 @@
 </head>
 <body class="bg-[#0a0f1e] text-white min-h-screen">
 
-    <!-- Экран загрузки -->
     <div id="loading-screen" class="fixed inset-0 bg-[#0a0f1e] flex items-center justify-center z-50">
         <div class="text-center">
             <div class="text-5xl mb-4">⭐</div>
@@ -32,7 +28,6 @@
         </div>
     </div>
 
-    <!-- Экран отказа -->
     <div id="denied-screen" class="hidden fixed inset-0 bg-[#0a0f1e] flex items-center justify-center z-50 px-4">
         <div class="text-center">
             <div class="text-5xl mb-4">🚫</div>
@@ -42,10 +37,7 @@
         </div>
     </div>
 
-    <!-- Основной контент -->
     <div id="main-content" class="hidden">
-
-        <!-- Install PWA Banner -->
         <div id="install-banner" class="bg-yellow-500 text-black px-4 py-3 flex items-center justify-between gap-3">
             <div class="flex items-center gap-2 text-sm font-bold">
                 <span>📲</span>
@@ -70,38 +62,29 @@
             </div>
             <div id="requests-list" class="space-y-4"></div>
         </main>
-
     </div>
 
-    <!-- Модалка скриншота -->
     <div id="img-modal" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4" onclick="this.classList.add('hidden')">
         <img id="modal-img" src="" class="max-w-full max-h-full rounded-2xl">
     </div>
 
     <script>
         const ADMIN_ID = 'e6b5286c-7fb8-4eb3-88af-034c6387a9bf';
-
         const SB_URL = 'https://dvwegmdyhjyihrxqvoiw.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2d2VnbWR5aGp5aWhyeHF2b2l3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0MDYwOTAsImV4cCI6MjA4Mzk4MjA5MH0.HrG5GijHH4Lj7mO3SorbG0kKfnl5FLtSCWp6aONYxJ8';
         const sb = supabase.createClient(SB_URL, SB_KEY);
 
         async function init() {
             const { data: { user } } = await sb.auth.getUser();
-
             document.getElementById('loading-screen').style.display = 'none';
-
             if (!user || user.id !== ADMIN_ID) {
-                // Не залогинен или не админ — отказ
                 document.getElementById('denied-screen').classList.remove('hidden');
                 return;
             }
-
-            // Это ты — показываем админку
             document.getElementById('main-content').classList.remove('hidden');
             loadRequests('pending');
         }
 
-        // --- PWA Install ---
         let deferredPrompt = null;
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
@@ -194,10 +177,41 @@
 
         async function confirmPayment(reqId, userId, stars) {
             if (!window.confirm(`Подтвердить и зачислить ${stars} ⭐?`)) return;
-            const { data: profile } = await sb.from('profiles').select('wallet_balance').eq('id', userId).single();
+
+            const { data: profile, error: fetchError } = await sb
+                .from('profiles')
+                .select('wallet_balance')
+                .eq('id', userId)
+                .single();
+
+            if (fetchError) {
+                alert('Ошибка получения профиля: ' + fetchError.message);
+                return;
+            }
+
             const newBalance = (profile?.wallet_balance || 0) + stars;
-            await sb.from('profiles').update({ wallet_balance: newBalance }).eq('id', userId);
-            await sb.from('topup_requests').update({ status: 'confirmed' }).eq('id', reqId);
+
+            const { error: updateError } = await sb
+                .from('profiles')
+                .update({ wallet_balance: newBalance })
+                .eq('id', userId);
+
+            if (updateError) {
+                alert('Ошибка обновления баланса: ' + updateError.message);
+                return;
+            }
+
+            const { error: reqError } = await sb
+                .from('topup_requests')
+                .update({ status: 'confirmed' })
+                .eq('id', reqId);
+
+            if (reqError) {
+                alert('Ошибка обновления заявки: ' + reqError.message);
+                return;
+            }
+
+            alert(`✅ Зачислено ${stars} ⭐! Новый баланс: ${newBalance}`);
             loadRequests('pending');
         }
 

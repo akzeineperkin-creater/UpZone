@@ -23,10 +23,14 @@
             <button onclick="window.location.href='chat.html'" class="w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-slate-800 transition">
                 <span>💬</span><span>Сообщество</span>
             </button>
-            <!-- Кнопка только для админа -->
-            <button id="admin-btn" onclick="window.location.href='admin.html'" class="hidden w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-yellow-500/20 transition text-yellow-400 border border-yellow-500/30">
-                <span>⚙️</span><span>Админ</span>
-            </button>
+           <!-- Кнопка только для админа -->
+<button id="admin-btn" onclick="window.location.href='admin.html'" class="hidden w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-yellow-500/20 transition text-yellow-400 border border-yellow-500/30">
+    <span>⚙️</span><span>Админ</span>
+</button>
+<!-- Кнопка для модераторов споров -->
+<button id="disputes-btn" onclick="window.location.href='споры.html'" class="hidden w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-red-500/20 transition text-red-400 border border-red-500/30">
+    <span>⚖️</span><span>Споры</span>
+</button>
         </nav>
         <div class="p-4 border-t border-slate-700 text-xs text-slate-400">Статус: Активен</div>
     </aside>
@@ -215,7 +219,7 @@
         document.getElementById('view-lastName').innerText = data.lastName || '—';
         document.getElementById('view-insta').innerText    = data.insta || '—';
         document.getElementById('view-bio').innerText      = data.bio || '—';
-        document.getElementById('side-balance').innerText  = data.balance || 0;
+        document.getElementById('side-balance').innerText = data.wallet_balance || 0;
         document.getElementById('userGreeting').innerText  = data.username || 'Студент';
         const directionText = directionNames[data.direction] || data.direction || 'Не выбрано';
         document.getElementById('view-direction').innerText = directionText;
@@ -241,6 +245,16 @@
         if (user.id === ADMIN_ID) {
             document.getElementById('admin-btn').classList.remove('hidden');
         }
+        
+// Показываем кнопку Споры только двум модераторам
+const MODERATOR_IDS = [
+    'e6b5286c-7fb8-4eb3-88af-034c6387a9bf',
+    '7ed0170b-f1c0-47d1-a81f-91d83f34b4ac'
+];
+
+if (MODERATOR_IDS.includes(user.id)) {
+    document.getElementById('disputes-btn').classList.remove('hidden');
+}
 
         const { data: profile, error: profileError } = await _supabase
             .from('profiles')
@@ -255,15 +269,15 @@
         const usernameFromAuth = user.user_metadata?.username || user.email?.split('@')[0] || 'Студент';
 
         updateDisplay({
-            email: user.email || '—',
-            username: profile?.username || usernameFromAuth,
-            lastName: profile?.last_name || '—',
-            insta: profile?.insta || '—',
-            direction: profile?.direction || 'none',
-            bio: profile?.bio || '—',
-            balance: profile?.wallet_balance || 0,
-            avatar_url: profile?.avatar_url || null
-        });
+    email: user.email || '—',
+    username: profile?.username || usernameFromAuth,
+    lastName: profile?.last_name || '—',
+    insta: profile?.insta || '—',
+    direction: profile?.direction || 'none',
+    bio: profile?.bio || '—',
+    wallet_balance: profile?.wallet_balance || 0,  // ✅ правильное имя
+    avatar_url: profile?.avatar_url || null
+});
 
         _supabase.channel('balance-dashboard')
             .on('postgres_changes', {
