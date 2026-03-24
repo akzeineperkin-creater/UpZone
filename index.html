@@ -2,32 +2,39 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>Upzone — Вход</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
 
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    html, body {
+      min-height: 100%;
+      height: 100%;
+    }
 
     body {
-      min-height: 100vh;
       background: linear-gradient(to bottom, #0a0e17 0%, #00040f 100%);
       font-family: 'Roboto', sans-serif;
       color: #d0d8e0;
       display: flex;
       align-items: center;
       justify-content: center;
-      overflow: hidden;
+      overflow-x: hidden;
+      overflow-y: auto;
+      padding: 16px;
     }
 
     body::before {
       content: '';
-      position: absolute;
+      position: fixed;
       inset: 0;
       background: radial-gradient(circle at 50% 20%, rgba(0,170,255,0.10) 0%, transparent 70%);
       pointer-events: none;
+      z-index: 0;
     }
 
     .container {
@@ -36,7 +43,7 @@
       max-width: 800px;
       display: flex;
       flex-direction: row;
-      background: rgba(12,18,28,0.92);
+      background: rgba(12,18,28,0.95);
       border-radius: 20px;
       border: 1px solid rgba(0,170,255,0.18);
       box-shadow: 0 15px 50px rgba(0,0,0,0.75), inset 0 0 25px rgba(0,170,255,0.06);
@@ -71,22 +78,23 @@
 
     h1 {
       font-family: 'Orbitron', sans-serif;
-      font-size: 32px;
+      font-size: 28px;
       text-align: center;
       color: #ffffff;
       letter-spacing: 2.5px;
       text-shadow: 0 0 12px rgba(0,170,255,0.45);
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
 
     .subtitle {
       text-align: center;
-      font-size: 15px;
+      font-size: 14px;
       color: #8899aa;
-      margin-bottom: 35px;
+      margin-bottom: 30px;
+      line-height: 1.4;
     }
 
-    .form-group { margin-bottom: 24px; }
+    .form-group { margin-bottom: 20px; }
 
     label {
       display: block;
@@ -102,44 +110,59 @@
       border: 1px solid #1e2f45;
       border-radius: 10px;
       color: #f0f4f8;
-      font-size: 16px;
+      font-size: 16px; /* 16px prevents iOS zoom */
       transition: all 0.3s ease;
+      -webkit-appearance: none;
+      appearance: none;
     }
 
     input:focus {
       outline: none;
       border-color: #00aaff;
-      box-shadow: 0 0 0 4px rgba(0,170,255,0.20);
+      box-shadow: 0 0 0 3px rgba(0,170,255,0.18);
     }
 
     .checkbox-group {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin: 20px 0;
+      margin: 16px 0;
       font-size: 14px;
       color: #8899aa;
+      gap: 8px;
     }
 
     .checkbox-group label {
       display: flex;
       align-items: center;
       margin: 0;
+      cursor: pointer;
+      min-height: 44px;
     }
 
     .checkbox-group input[type="checkbox"] {
-      width: 18px;
-      height: 18px;
+      width: 20px;
+      height: 20px;
       margin-right: 10px;
       accent-color: #00aaff;
+      flex-shrink: 0;
+      padding: 0;
     }
 
-    .forgot { color: #00aaff; text-decoration: none; font-size: 14px; }
+    .forgot {
+      color: #00aaff;
+      text-decoration: none;
+      font-size: 14px;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      white-space: nowrap;
+    }
     .forgot:hover { text-decoration: underline; color: #40c0ff; }
 
-    button {
+    button[type="submit"], .btn-primary {
       width: 100%;
-      padding: 15px;
+      padding: 16px;
       background: linear-gradient(90deg, #0077cc, #00aaff);
       border: none;
       border-radius: 10px;
@@ -149,54 +172,328 @@
       cursor: pointer;
       transition: all 0.35s ease;
       box-shadow: 0 6px 18px rgba(0,170,255,0.35);
+      min-height: 52px;
+      -webkit-appearance: none;
     }
 
-    button:hover {
+    button[type="submit"]:hover, .btn-primary:hover {
       transform: translateY(-2px);
       box-shadow: 0 12px 30px rgba(0,170,255,0.5);
       background: linear-gradient(90deg, #00aaff, #40c0ff);
     }
+    button[type="submit"]:active, .btn-primary:active {
+      transform: translateY(0);
+    }
 
     .toggle-auth {
       text-align: center;
-      margin-top: 28px;
+      margin-top: 24px;
       font-size: 14px;
       color: #8899aa;
+      line-height: 2;
     }
 
     .toggle-auth a { color: #00aaff; text-decoration: none; font-weight: 500; }
     .toggle-auth a:hover { text-decoration: underline; }
 
-    @media (max-width: 768px) {
-      .container { flex-direction: column; max-width: 420px; }
-      .logo-side { order: -1; padding: 40px 20px; background: transparent; }
-      .form-side { padding: 30px 25px; }
+    /* ─── MOBILE ─── */
+    @media (max-width: 640px) {
+      body {
+        padding: 0;
+        align-items: flex-start;
+        background: #0a0e17;
+      }
+
+      .container {
+        flex-direction: column;
+        max-width: 100%;
+        width: 100%;
+        min-height: 100dvh;
+        border-radius: 0;
+        border: none;
+        box-shadow: none;
+      }
+
+      .logo-side {
+        order: -1;
+        padding: 28px 20px 16px;
+        background: rgba(0,170,255,0.04);
+        min-height: 140px;
+        border-bottom: 1px solid rgba(0,170,255,0.10);
+      }
+
+      .logo {
+        max-height: 90px;
+        max-width: 200px;
+      }
+
+      .form-side {
+        padding: 24px 20px 32px;
+        justify-content: flex-start;
+        flex: unset;
+      }
+
+      h1 { font-size: 22px; letter-spacing: 1.5px; }
+      .subtitle { font-size: 13px; margin-bottom: 24px; }
+
+      input {
+        padding: 15px 16px;
+        font-size: 16px;
+        border-radius: 12px;
+      }
+
+      .form-group { margin-bottom: 16px; }
+
+      .checkbox-group {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        margin: 12px 0;
+      }
+
+      button[type="submit"] {
+        padding: 17px;
+        font-size: 16px;
+        border-radius: 12px;
+        min-height: 54px;
+      }
+
+      .toggle-auth {
+        margin-top: 20px;
+        padding-bottom: 12px;
+      }
+    }
+
+    /* ─── MODAL ─── */
+    #forgotModal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.80);
+      z-index: 9999;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    @media (min-width: 641px) {
+      #forgotModal { align-items: center; }
+    }
+
+    .modal-inner {
+      background: #0c121c;
+      border: 1px solid rgba(0,170,255,0.25);
+      border-radius: 24px 24px 0 0;
+      padding: 32px 24px 36px;
+      width: 100%;
+      max-width: 420px;
+      position: relative;
+      box-shadow: 0 -8px 40px rgba(0,0,0,0.7);
+      animation: slideUp 0.3s ease;
+    }
+
+    @media (min-width: 641px) {
+      .modal-inner {
+        border-radius: 20px;
+        padding: 40px 36px;
+        margin: 16px;
+        animation: fadeScale 0.25s ease;
+      }
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); opacity: 0; }
+      to   { transform: translateY(0);   opacity: 1; }
+    }
+    @keyframes fadeScale {
+      from { transform: scale(0.94); opacity: 0; }
+      to   { transform: scale(1);    opacity: 1; }
+    }
+
+    .modal-handle {
+      width: 40px; height: 4px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 2px;
+      margin: 0 auto 20px;
+      display: block;
+    }
+
+    @media (min-width: 641px) {
+      .modal-handle { display: none; }
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 16px; right: 20px;
+      background: none;
+      border: none;
+      color: #8899aa;
+      font-size: 26px;
+      cursor: pointer;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: none;
+      padding: 0;
+      line-height: 1;
+      border-radius: 50%;
+    }
+    .modal-close:hover { color: #fff; background: rgba(255,255,255,0.06); }
+
+    .modal-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 17px;
+      color: white;
+      text-align: center;
+      margin-bottom: 6px;
+      letter-spacing: 2px;
+    }
+    .modal-sub {
+      text-align: center;
+      color: #8899aa;
+      font-size: 13px;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    .modal-label {
+      font-size: 13px;
+      color: #c0d0e0;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .modal-input {
+      width: 100%;
+      padding: 14px 16px;
+      background: #0e1622;
+      border: 1px solid #1e2f45;
+      border-radius: 12px;
+      color: #f0f4f8;
+      font-size: 16px;
+      outline: none;
+      margin-bottom: 16px;
+      -webkit-appearance: none;
+    }
+    .modal-input:focus {
+      border-color: #00aaff;
+      box-shadow: 0 0 0 3px rgba(0,170,255,0.15);
+    }
+
+    .modal-btn {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(90deg, #0077cc, #00aaff);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(0,170,255,0.35);
+      min-height: 52px;
+      -webkit-appearance: none;
+      transition: all 0.3s;
+    }
+    .modal-btn:active { transform: scale(0.98); }
+
+    /* OTP boxes */
+    .otp-row {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .otp-box {
+      width: 44px;
+      height: 52px;
+      text-align: center;
+      font-size: 22px;
+      font-weight: bold;
+      background: #0e1622;
+      border: 1px solid #1e2f45;
+      border-radius: 10px;
+      color: #00aaff;
+      outline: none;
+      transition: border-color 0.2s;
+      padding: 0;
+      -webkit-appearance: none;
+    }
+
+    @media (max-width: 380px) {
+      .otp-box { width: 38px; height: 48px; font-size: 20px; gap: 6px; }
+      .otp-row { gap: 6px; }
+    }
+
+    .otp-box:focus { border-color: #00aaff; box-shadow: 0 0 0 2px rgba(0,170,255,0.2); }
+
+    .resend-link {
+      color: #8899aa;
+      font-size: 13px;
+      text-decoration: none;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      margin-top: 10px;
+    }
+    .resend-link.active { color: #00aaff; }
+
+    .msg {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 13px;
+      min-height: 20px;
+    }
+
+    /* Eye button */
+    .eye-btn {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      width: 44px;
+      height: 44px;
+      box-shadow: none;
+      color: #8899aa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s;
     }
   </style>
 </head>
 <body>
 
   <div class="container" id="auth-container">
+    <!-- Logo side -->
+    <div class="logo-side">
+      <img src="logo.jpg" alt="Upzone Logo" class="logo">
+    </div>
+
+    <!-- Form side -->
     <div class="form-side">
       <h1>WELCOME BACK!</h1>
       <p class="subtitle">Upzone — от идеи до первых заработков</p>
 
-      <form class="login-form" id="loginForm">
+      <form id="loginForm">
         <div class="form-group">
           <label>Username или email</label>
-          <input type="text" id="emailInput" placeholder=" " required>
+          <input type="text" id="emailInput" placeholder="example@gmail.com" autocomplete="username" required>
         </div>
 
         <div class="form-group">
           <label>Пароль</label>
           <div style="position: relative;">
-            <input type="password" id="passwordInput" placeholder=" " required style="padding-right: 48px;">
-            <button type="button" onclick="togglePassword()" id="eyeBtn"
-              style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
-                     background: none; border: none; cursor: pointer; padding: 0;
-                     width: auto; box-shadow: none; color: #8899aa;
-                     display: flex; align-items: center; justify-content: center;
-                     transition: color 0.2s;">
+            <input type="password" id="passwordInput" placeholder="••••••••" autocomplete="current-password" required style="padding-right: 52px;">
+            <button type="button" onclick="togglePassword()" id="eyeBtn" class="eye-btn">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
             </button>
           </div>
@@ -204,7 +501,6 @@
 
         <div class="checkbox-group">
           <label><input type="checkbox"> Запомнить меня</label>
-          <!-- ✅ Открывает модалку OTP -->
           <a href="#" class="forgot" onclick="showForgotModal(event)">Забыли пароль?</a>
         </div>
 
@@ -216,127 +512,68 @@
         <a href="signup.html">Sign up</a>
       </div>
     </div>
-
-    <div class="logo-side">
-      <img src="logo.jpg" alt="Upzone Logo" class="logo">
-    </div>
   </div>
 
-  <!-- ✅ МОДАЛКА — перед скриптами, после .container -->
-  <div id="forgotModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75);
-       z-index:9999; align-items:center; justify-content:center;">
-    <div style="background:#0c121c; border:1px solid rgba(0,170,255,0.25); border-radius:20px;
-                padding:40px; width:100%; max-width:400px; position:relative;
-                box-shadow: 0 20px 60px rgba(0,0,0,0.8); margin: 16px;">
+  <!-- MODAL -->
+  <div id="forgotModal">
+    <div class="modal-inner" id="modalInner">
+      <span class="modal-handle"></span>
+      <button class="modal-close" onclick="closeForgotModal()">×</button>
 
-      <button onclick="closeForgotModal()" style="position:absolute; top:16px; right:20px;
-        background:none; border:none; color:#8899aa; font-size:24px; cursor:pointer;
-        width:auto; box-shadow:none; padding:0; line-height:1;">×</button>
-
-      <!-- Шаг 1: ввод email -->
+      <!-- Step 1: email -->
       <div id="step-email">
-        <h2 style="font-family:'Orbitron',sans-serif; font-size:18px; color:white;
-                   text-align:center; margin-bottom:8px; letter-spacing:2px;">ВОССТАНОВЛЕНИЕ</h2>
-        <p style="text-align:center; color:#8899aa; font-size:13px; margin-bottom:28px;">
-          Введите ваш email — пришлём 6-значный код
-        </p>
-        <label style="font-size:13px; color:#c0d0e0; display:block; margin-bottom:8px;">Email</label>
-        <input type="email" id="forgot-email" placeholder="example@gmail.com"
-          style="width:100%; padding:13px 16px; background:#0e1622; border:1px solid #1e2f45;
-                 border-radius:10px; color:#f0f4f8; font-size:15px; outline:none; margin-bottom:16px;">
-        <button onclick="sendOtpCode()" id="sendCodeBtn"
-          style="width:100%; padding:14px; background:linear-gradient(90deg,#0077cc,#00aaff);
-                 border:none; border-radius:10px; color:white; font-size:15px;
-                 font-weight:500; cursor:pointer; box-shadow:0 6px 18px rgba(0,170,255,0.35);">
-          Отправить код
-        </button>
-        <div id="step1-msg" style="text-align:center; margin-top:12px; font-size:13px;"></div>
+        <h2 class="modal-title">ВОССТАНОВЛЕНИЕ</h2>
+        <p class="modal-sub">Введите ваш email — пришлём 6-значный код</p>
+        <label class="modal-label">Email</label>
+        <input type="email" id="forgot-email" class="modal-input" placeholder="example@gmail.com" autocomplete="email">
+        <button class="modal-btn" onclick="sendOtpCode()" id="sendCodeBtn">Отправить код</button>
+        <div id="step1-msg" class="msg"></div>
       </div>
 
-      <!-- Шаг 2: ввод кода и нового пароля -->
+      <!-- Step 2: OTP + new password -->
       <div id="step-code" style="display:none;">
-        <h2 style="font-family:'Orbitron',sans-serif; font-size:18px; color:white;
-                   text-align:center; margin-bottom:8px; letter-spacing:2px;">ВВЕДИТЕ КОД</h2>
-        <p id="code-hint" style="text-align:center; color:#8899aa; font-size:13px; margin-bottom:28px;"></p>
+        <h2 class="modal-title">ВВЕДИТЕ КОД</h2>
+        <p id="code-hint" class="modal-sub"></p>
 
-        <!-- 6 полей для цифр -->
-        <div style="display:flex; gap:8px; justify-content:center; margin-bottom:20px;">
-          <input class="otp-box" maxlength="1" type="text" inputmode="numeric"
-            style="width:46px; height:54px; text-align:center; font-size:22px; font-weight:bold;
-                   background:#0e1622; border:1px solid #1e2f45; border-radius:10px;
-                   color:#00aaff; outline:none; transition:border-color 0.2s; padding:0;">
-          <input class="otp-box" maxlength="1" type="text" inputmode="numeric"
-            style="width:46px; height:54px; text-align:center; font-size:22px; font-weight:bold;
-                   background:#0e1622; border:1px solid #1e2f45; border-radius:10px;
-                   color:#00aaff; outline:none; transition:border-color 0.2s; padding:0;">
-          <input class="otp-box" maxlength="1" type="text" inputmode="numeric"
-            style="width:46px; height:54px; text-align:center; font-size:22px; font-weight:bold;
-                   background:#0e1622; border:1px solid #1e2f45; border-radius:10px;
-                   color:#00aaff; outline:none; transition:border-color 0.2s; padding:0;">
-          <input class="otp-box" maxlength="1" type="text" inputmode="numeric"
-            style="width:46px; height:54px; text-align:center; font-size:22px; font-weight:bold;
-                   background:#0e1622; border:1px solid #1e2f45; border-radius:10px;
-                   color:#00aaff; outline:none; transition:border-color 0.2s; padding:0;">
-          <input class="otp-box" maxlength="1" type="text" inputmode="numeric"
-            style="width:46px; height:54px; text-align:center; font-size:22px; font-weight:bold;
-                   background:#0e1622; border:1px solid #1e2f45; border-radius:10px;
-                   color:#00aaff; outline:none; transition:border-color 0.2s; padding:0;">
-          <input class="otp-box" maxlength="1" type="text" inputmode="numeric"
-            style="width:46px; height:54px; text-align:center; font-size:22px; font-weight:bold;
-                   background:#0e1622; border:1px solid #1e2f45; border-radius:10px;
-                   color:#00aaff; outline:none; transition:border-color 0.2s; padding:0;">
+        <div class="otp-row">
+          <input class="otp-box" maxlength="1" type="text" inputmode="numeric">
+          <input class="otp-box" maxlength="1" type="text" inputmode="numeric">
+          <input class="otp-box" maxlength="1" type="text" inputmode="numeric">
+          <input class="otp-box" maxlength="1" type="text" inputmode="numeric">
+          <input class="otp-box" maxlength="1" type="text" inputmode="numeric">
+          <input class="otp-box" maxlength="1" type="text" inputmode="numeric">
         </div>
 
-        <label style="font-size:13px; color:#c0d0e0; display:block; margin-bottom:8px;">Новый пароль</label>
+        <label class="modal-label">Новый пароль</label>
         <div style="position:relative; margin-bottom:16px;">
-          <input type="password" id="new-pass" placeholder="••••••••"
-            style="width:100%; padding:13px 48px 13px 16px; background:#0e1622;
-                   border:1px solid #1e2f45; border-radius:10px; color:#f0f4f8;
-                   font-size:15px; outline:none;">
-          <button type="button" onclick="toggleNewPass()" id="newPassEye"
-            style="position:absolute; right:12px; top:50%; transform:translateY(-50%);
-                   background:none; border:none; cursor:pointer; color:#8899aa;
-                   width:auto; box-shadow:none; padding:0;">
+          <input type="password" id="new-pass" class="modal-input" placeholder="••••••••" style="margin-bottom:0; padding-right:52px;" autocomplete="new-password">
+          <button type="button" onclick="toggleNewPass()" id="newPassEye" class="eye-btn">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
           </button>
         </div>
 
-        <button onclick="verifyOtpAndReset()" id="verifyBtn"
-          style="width:100%; padding:14px; background:linear-gradient(90deg,#0077cc,#00aaff);
-                 border:none; border-radius:10px; color:white; font-size:15px;
-                 font-weight:500; cursor:pointer; box-shadow:0 6px 18px rgba(0,170,255,0.35);">
-          Подтвердить и сменить пароль
-        </button>
+        <button class="modal-btn" onclick="verifyOtpAndReset()" id="verifyBtn">Подтвердить и сменить пароль</button>
 
-        <div style="text-align:center; margin-top:12px;">
-          <a href="#" onclick="resendCode(event)" id="resendLink"
-            style="color:#8899aa; font-size:13px; text-decoration:none;">
-            Отправить код повторно
-          </a>
+        <div style="text-align:center;">
+          <a href="#" onclick="resendCode(event)" id="resendLink" class="resend-link">Отправить код повторно</a>
         </div>
-        <div id="step2-msg" style="text-align:center; margin-top:10px; font-size:13px;"></div>
+        <div id="step2-msg" class="msg"></div>
       </div>
-
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
   <script>
     const supabaseUrl = 'https://dvwegmdyhjyihrxqvoiw.supabase.co';
     const supabaseKey = 'sb_publishable_hDqX9KkG5m38yourV2K43w_PYB7ktXI';
     const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
-    // ── Вход ─────────────────────────────────────────────────────
+    // Login
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const email    = document.getElementById('emailInput').value;
       const password = document.getElementById('passwordInput').value;
-
-      const { data, error } = await supabaseClient.auth.signInWithPassword({
-        email, password
-      });
-
+      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
       if (error) {
         alert('Ошибка входа: ' + error.message);
       } else {
@@ -344,7 +581,6 @@
       }
     });
 
-    // ── Глаз на основном поле пароля ─────────────────────────────
     function togglePassword() {
       const input = document.getElementById('passwordInput');
       const btn   = document.getElementById('eyeBtn');
@@ -356,14 +592,14 @@
         : `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
     }
 
-    // ── OTP восстановление пароля ─────────────────────────────────
-    let otpEmail   = '';
+    // Modal
+    let otpEmail = '';
     let resendTimer = null;
 
     function showForgotModal(e) {
       e.preventDefault();
       document.getElementById('forgotModal').style.display = 'flex';
-      document.getElementById('forgot-email').focus();
+      setTimeout(() => document.getElementById('forgot-email').focus(), 350);
     }
 
     function closeForgotModal() {
@@ -384,8 +620,8 @@
       const btn   = document.getElementById('sendCodeBtn');
 
       if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        msg.style.color   = '#f87171';
-        msg.textContent   = '❌ Введите корректный email';
+        msg.style.color = '#f87171';
+        msg.textContent = '❌ Введите корректный email';
         return;
       }
 
@@ -399,7 +635,6 @@
 
       btn.disabled    = false;
       btn.textContent = 'Отправить код';
-
       msg.style.color = '#4ade80';
       msg.textContent = '✅ Если email зарегистрирован — код отправлен';
 
@@ -420,12 +655,10 @@
       boxes.forEach((box, i) => {
         box.value = '';
         box.style.borderColor = '#1e2f45';
-        // убираем старые слушатели через clone
         const fresh = box.cloneNode(true);
         box.parentNode.replaceChild(fresh, box);
         boxes[i] = fresh;
       });
-      // переназначаем после clone
       document.querySelectorAll('.otp-box').forEach((box, i, all) => {
         box.addEventListener('input', () => {
           box.value = box.value.replace(/\D/g, '');
@@ -444,16 +677,16 @@
       const link = document.getElementById('resendLink');
       let seconds = 60;
       link.style.pointerEvents = 'none';
-      link.style.color         = '#4f5f70';
+      link.classList.remove('active');
       if (resendTimer) clearInterval(resendTimer);
       resendTimer = setInterval(() => {
         seconds--;
         link.textContent = `Отправить повторно (${seconds}s)`;
         if (seconds <= 0) {
           clearInterval(resendTimer);
-          link.textContent         = 'Отправить код повторно';
+          link.textContent = 'Отправить код повторно';
           link.style.pointerEvents = 'auto';
-          link.style.color         = '#00aaff';
+          link.classList.add('active');
         }
       }, 1000);
     }
@@ -486,9 +719,7 @@
       btn.textContent = 'Проверка...';
 
       const { error: otpError } = await supabaseClient.auth.verifyOtp({
-        email: otpEmail,
-        token: code,
-        type:  'email'
+        email: otpEmail, token: code, type: 'email'
       });
 
       if (otpError) {
@@ -530,11 +761,10 @@
         : `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
     }
 
-    // Закрытие модалки по клику на фон
+    // Close modal on backdrop click (not on swipe up)
     document.getElementById('forgotModal').addEventListener('click', function(e) {
       if (e.target === this) closeForgotModal();
     });
   </script>
-
 </body>
 </html>
