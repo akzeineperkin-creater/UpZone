@@ -1,770 +1,829 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>Upzone — Вход</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Upzone — от идеи до первых заработков</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --bg2: #111118;
+    --bg3: #16161f;
+    --accent: #7c5cfc;
+    --accent2: #a87cff;
+    --gold: #f5c842;
+    --text: #f0eeff;
+    --muted: #8a859e;
+    --border: rgba(124, 92, 252, 0.18);
+  }
 
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    html, body {
-      min-height: 100%;
-      height: 100%;
-    }
+  html { scroll-behavior: smooth; }
 
-    body {
-      background: linear-gradient(to bottom, #0a0e17 0%, #00040f 100%);
-      font-family: 'Roboto', sans-serif;
-      color: #d0d8e0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow-x: hidden;
-      overflow-y: auto;
-      padding: 16px;
-    }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
 
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background: radial-gradient(circle at 50% 20%, rgba(0,170,255,0.10) 0%, transparent 70%);
-      pointer-events: none;
-      z-index: 0;
-    }
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 48px;
+    background: rgba(10,10,15,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 0.5px solid var(--border);
+  }
 
-    .container {
-      position: relative;
-      width: 100%;
-      max-width: 800px;
-      display: flex;
-      flex-direction: row;
-      background: rgba(12,18,28,0.95);
-      border-radius: 20px;
-      border: 1px solid rgba(0,170,255,0.18);
-      box-shadow: 0 15px 50px rgba(0,0,0,0.75), inset 0 0 25px rgba(0,170,255,0.06);
-      backdrop-filter: blur(10px);
-      overflow: hidden;
-      z-index: 2;
-    }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    letter-spacing: -0.5px;
+    color: var(--text);
+    text-decoration: none;
+  }
 
-    .form-side {
-      flex: 1;
-      padding: 50px 40px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
+  .logo span { color: var(--accent2); }
 
-    .logo-side {
-      flex: 1;
-      background: rgba(0,170,255,0.05);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
+  .nav-cta {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
 
-    .logo {
-      max-width: 80%;
-      max-height: 80%;
-      object-fit: contain;
-      filter: drop-shadow(0 0 18px rgba(80,180,255,0.55));
-    }
+  .btn-ghost {
+    padding: 9px 20px;
+    border: 0.5px solid rgba(255,255,255,0.2);
+    border-radius: 8px;
+    color: var(--text);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 400;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .btn-ghost:hover { border-color: var(--accent2); background: rgba(124,92,252,0.08); }
 
-    h1 {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 28px;
-      text-align: center;
-      color: #ffffff;
-      letter-spacing: 2.5px;
-      text-shadow: 0 0 12px rgba(0,170,255,0.45);
-      margin-bottom: 8px;
-    }
+  .btn-primary {
+    padding: 9px 22px;
+    background: var(--accent);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.2s, transform 0.15s;
+    cursor: pointer;
+  }
+  .btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
 
-    .subtitle {
-      text-align: center;
-      font-size: 14px;
-      color: #8899aa;
-      margin-bottom: 30px;
-      line-height: 1.4;
-    }
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 120px 24px 80px;
+    position: relative;
+    overflow: hidden;
+  }
 
-    .form-group { margin-bottom: 20px; }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -200px; left: 50%;
+    transform: translateX(-50%);
+    width: 900px; height: 600px;
+    background: radial-gradient(ellipse at center, rgba(124,92,252,0.22) 0%, transparent 70%);
+    pointer-events: none;
+  }
 
-    label {
-      display: block;
-      margin-bottom: 8px;
-      font-size: 14px;
-      color: #c0d0e0;
-    }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(124,92,252,0.12);
+    border: 0.5px solid rgba(124,92,252,0.35);
+    border-radius: 100px;
+    padding: 6px 16px;
+    font-size: 13px;
+    color: var(--accent2);
+    margin-bottom: 32px;
+    animation: fadeUp 0.6s ease both;
+  }
 
-    input {
-      width: 100%;
-      padding: 14px 16px;
-      background: #0e1622;
-      border: 1px solid #1e2f45;
-      border-radius: 10px;
-      color: #f0f4f8;
-      font-size: 16px; /* 16px prevents iOS zoom */
-      transition: all 0.3s ease;
-      -webkit-appearance: none;
-      appearance: none;
-    }
+  .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent2);
+    animation: pulse 2s infinite;
+  }
 
-    input:focus {
-      outline: none;
-      border-color: #00aaff;
-      box-shadow: 0 0 0 3px rgba(0,170,255,0.18);
-    }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
 
-    .checkbox-group {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin: 16px 0;
-      font-size: 14px;
-      color: #8899aa;
-      gap: 8px;
-    }
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(42px, 7vw, 84px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -2px;
+    max-width: 900px;
+    animation: fadeUp 0.7s 0.1s ease both;
+  }
 
-    .checkbox-group label {
-      display: flex;
-      align-items: center;
-      margin: 0;
-      cursor: pointer;
-      min-height: 44px;
-    }
+  .hero h1 .highlight {
+    background: linear-gradient(135deg, var(--accent2), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
 
-    .checkbox-group input[type="checkbox"] {
-      width: 20px;
-      height: 20px;
-      margin-right: 10px;
-      accent-color: #00aaff;
-      flex-shrink: 0;
-      padding: 0;
-    }
+  .hero-sub {
+    margin-top: 24px;
+    font-size: clamp(16px, 2vw, 19px);
+    color: var(--muted);
+    max-width: 560px;
+    font-weight: 300;
+    animation: fadeUp 0.7s 0.2s ease both;
+  }
 
-    .forgot {
-      color: #00aaff;
-      text-decoration: none;
-      font-size: 14px;
-      min-height: 44px;
-      display: flex;
-      align-items: center;
-      white-space: nowrap;
-    }
-    .forgot:hover { text-decoration: underline; color: #40c0ff; }
+  .hero-actions {
+    margin-top: 40px;
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    justify-content: center;
+    animation: fadeUp 0.7s 0.3s ease both;
+  }
 
-    button[type="submit"], .btn-primary {
-      width: 100%;
-      padding: 16px;
-      background: linear-gradient(90deg, #0077cc, #00aaff);
-      border: none;
-      border-radius: 10px;
-      color: white;
-      font-size: 16px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.35s ease;
-      box-shadow: 0 6px 18px rgba(0,170,255,0.35);
-      min-height: 52px;
-      -webkit-appearance: none;
-    }
+  .btn-large {
+    padding: 14px 32px;
+    font-size: 16px;
+    border-radius: 10px;
+  }
 
-    button[type="submit"]:hover, .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 30px rgba(0,170,255,0.5);
-      background: linear-gradient(90deg, #00aaff, #40c0ff);
-    }
-    button[type="submit"]:active, .btn-primary:active {
-      transform: translateY(0);
-    }
+  .btn-outline {
+    padding: 14px 32px;
+    border: 0.5px solid rgba(255,255,255,0.2);
+    border-radius: 10px;
+    color: var(--text);
+    text-decoration: none;
+    font-size: 16px;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .btn-outline:hover { border-color: var(--accent2); background: rgba(124,92,252,0.06); }
 
-    .toggle-auth {
-      text-align: center;
-      margin-top: 24px;
-      font-size: 14px;
-      color: #8899aa;
-      line-height: 2;
-    }
+  .hero-stats {
+    margin-top: 64px;
+    display: flex;
+    gap: 48px;
+    flex-wrap: wrap;
+    justify-content: center;
+    animation: fadeUp 0.7s 0.4s ease both;
+  }
 
-    .toggle-auth a { color: #00aaff; text-decoration: none; font-weight: 500; }
-    .toggle-auth a:hover { text-decoration: underline; }
+  .stat {
+    text-align: center;
+  }
 
-    /* ─── MOBILE ─── */
-    @media (max-width: 640px) {
-      body {
-        padding: 0;
-        align-items: flex-start;
-        background: #0a0e17;
-      }
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--text);
+    display: block;
+  }
 
-      .container {
-        flex-direction: column;
-        max-width: 100%;
-        width: 100%;
-        min-height: 100dvh;
-        border-radius: 0;
-        border: none;
-        box-shadow: none;
-      }
+  .stat-num span { color: var(--accent2); }
 
-      .logo-side {
-        order: -1;
-        padding: 28px 20px 16px;
-        background: rgba(0,170,255,0.04);
-        min-height: 140px;
-        border-bottom: 1px solid rgba(0,170,255,0.10);
-      }
+  .stat-label {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
 
-      .logo {
-        max-height: 90px;
-        max-width: 200px;
-      }
+  /* SECTION */
+  section {
+    padding: 100px 24px;
+  }
 
-      .form-side {
-        padding: 24px 20px 32px;
-        justify-content: flex-start;
-        flex: unset;
-      }
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
 
-      h1 { font-size: 22px; letter-spacing: 1.5px; }
-      .subtitle { font-size: 13px; margin-bottom: 24px; }
+  .section-label {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 16px;
+  }
 
-      input {
-        padding: 15px 16px;
-        font-size: 16px;
-        border-radius: 12px;
-      }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(30px, 4vw, 48px);
+    font-weight: 700;
+    letter-spacing: -1px;
+    line-height: 1.1;
+    margin-bottom: 16px;
+  }
 
-      .form-group { margin-bottom: 16px; }
+  .section-sub {
+    font-size: 17px;
+    color: var(--muted);
+    max-width: 500px;
+    font-weight: 300;
+  }
 
-      .checkbox-group {
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-        margin: 12px 0;
-      }
+  /* FEATURES */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 56px;
+  }
 
-      button[type="submit"] {
-        padding: 17px;
-        font-size: 16px;
-        border-radius: 12px;
-        min-height: 54px;
-      }
+  .feature-card {
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: 16px;
+    padding: 28px 28px 32px;
+    transition: border-color 0.25s, transform 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
 
-      .toggle-auth {
-        margin-top: 20px;
-        padding-bottom: 12px;
-      }
-    }
+  .feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
 
-    /* ─── MODAL ─── */
-    #forgotModal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.80);
-      z-index: 9999;
-      align-items: flex-end;
-      justify-content: center;
-    }
+  .feature-card:hover { border-color: rgba(124,92,252,0.4); transform: translateY(-3px); }
+  .feature-card:hover::before { opacity: 1; }
 
-    @media (min-width: 641px) {
-      #forgotModal { align-items: center; }
-    }
+  .feature-icon {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    background: rgba(124,92,252,0.12);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    margin-bottom: 20px;
+    border: 0.5px solid rgba(124,92,252,0.2);
+  }
 
-    .modal-inner {
-      background: #0c121c;
-      border: 1px solid rgba(0,170,255,0.25);
-      border-radius: 24px 24px 0 0;
-      padding: 32px 24px 36px;
-      width: 100%;
-      max-width: 420px;
-      position: relative;
-      box-shadow: 0 -8px 40px rgba(0,0,0,0.7);
-      animation: slideUp 0.3s ease;
-    }
+  .feature-card h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    letter-spacing: -0.3px;
+  }
 
-    @media (min-width: 641px) {
-      .modal-inner {
-        border-radius: 20px;
-        padding: 40px 36px;
-        margin: 16px;
-        animation: fadeScale 0.25s ease;
-      }
-    }
+  .feature-card p {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.65;
+    font-weight: 300;
+  }
 
-    @keyframes slideUp {
-      from { transform: translateY(100%); opacity: 0; }
-      to   { transform: translateY(0);   opacity: 1; }
-    }
-    @keyframes fadeScale {
-      from { transform: scale(0.94); opacity: 0; }
-      to   { transform: scale(1);    opacity: 1; }
-    }
+  /* HOW IT WORKS */
+  .how-bg {
+    background: var(--bg2);
+    border-top: 0.5px solid var(--border);
+    border-bottom: 0.5px solid var(--border);
+  }
 
-    .modal-handle {
-      width: 40px; height: 4px;
-      background: rgba(255,255,255,0.15);
-      border-radius: 2px;
-      margin: 0 auto 20px;
-      display: block;
-    }
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 0;
+    margin-top: 56px;
+    position: relative;
+  }
 
-    @media (min-width: 641px) {
-      .modal-handle { display: none; }
-    }
+  .steps::before {
+    content: '';
+    position: absolute;
+    top: 28px;
+    left: 10%;
+    right: 10%;
+    height: 0.5px;
+    background: var(--border);
+  }
 
-    .modal-close {
-      position: absolute;
-      top: 16px; right: 20px;
-      background: none;
-      border: none;
-      color: #8899aa;
-      font-size: 26px;
-      cursor: pointer;
-      width: 44px;
-      height: 44px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: none;
-      padding: 0;
-      line-height: 1;
-      border-radius: 50%;
-    }
-    .modal-close:hover { color: #fff; background: rgba(255,255,255,0.06); }
+  .step {
+    text-align: center;
+    padding: 0 20px;
+    position: relative;
+  }
 
-    .modal-title {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 17px;
-      color: white;
-      text-align: center;
-      margin-bottom: 6px;
-      letter-spacing: 2px;
-    }
-    .modal-sub {
-      text-align: center;
-      color: #8899aa;
-      font-size: 13px;
-      margin-bottom: 24px;
-      line-height: 1.5;
-    }
+  .step-num {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    border: 0.5px solid rgba(124,92,252,0.4);
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent2);
+    margin: 0 auto 20px;
+    position: relative;
+    z-index: 1;
+  }
 
-    .modal-label {
-      font-size: 13px;
-      color: #c0d0e0;
-      display: block;
-      margin-bottom: 8px;
-    }
+  .step h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
 
-    .modal-input {
-      width: 100%;
-      padding: 14px 16px;
-      background: #0e1622;
-      border: 1px solid #1e2f45;
-      border-radius: 12px;
-      color: #f0f4f8;
-      font-size: 16px;
-      outline: none;
-      margin-bottom: 16px;
-      -webkit-appearance: none;
-    }
-    .modal-input:focus {
-      border-color: #00aaff;
-      box-shadow: 0 0 0 3px rgba(0,170,255,0.15);
-    }
+  .step p {
+    font-size: 14px;
+    color: var(--muted);
+    font-weight: 300;
+  }
 
-    .modal-btn {
-      width: 100%;
-      padding: 15px;
-      background: linear-gradient(90deg, #0077cc, #00aaff);
-      border: none;
-      border-radius: 12px;
-      color: white;
-      font-size: 15px;
-      font-weight: 500;
-      cursor: pointer;
-      box-shadow: 0 6px 18px rgba(0,170,255,0.35);
-      min-height: 52px;
-      -webkit-appearance: none;
-      transition: all 0.3s;
-    }
-    .modal-btn:active { transform: scale(0.98); }
+  /* CATEGORIES */
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 32px;
+  }
 
-    /* OTP boxes */
-    .otp-row {
-      display: flex;
-      gap: 8px;
-      justify-content: center;
-      margin-bottom: 20px;
-    }
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: var(--bg3);
+    border: 0.5px solid var(--border);
+    border-radius: 100px;
+    font-size: 14px;
+    color: var(--muted);
+    transition: border-color 0.2s, color 0.2s;
+    cursor: default;
+  }
 
-    .otp-box {
-      width: 44px;
-      height: 52px;
-      text-align: center;
-      font-size: 22px;
-      font-weight: bold;
-      background: #0e1622;
-      border: 1px solid #1e2f45;
-      border-radius: 10px;
-      color: #00aaff;
-      outline: none;
-      transition: border-color 0.2s;
-      padding: 0;
-      -webkit-appearance: none;
-    }
+  .tag:hover { border-color: var(--accent2); color: var(--accent2); }
 
-    @media (max-width: 380px) {
-      .otp-box { width: 38px; height: 48px; font-size: 20px; gap: 6px; }
-      .otp-row { gap: 6px; }
-    }
+  /* TESTIMONIALS */
+  .testimonials {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 56px;
+  }
 
-    .otp-box:focus { border-color: #00aaff; box-shadow: 0 0 0 2px rgba(0,170,255,0.2); }
+  .tcard {
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+  }
 
-    .resend-link {
-      color: #8899aa;
-      font-size: 13px;
-      text-decoration: none;
-      min-height: 44px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      margin-top: 10px;
-    }
-    .resend-link.active { color: #00aaff; }
+  .tcard-text {
+    font-size: 15px;
+    color: var(--text);
+    line-height: 1.7;
+    font-weight: 300;
+    margin-bottom: 20px;
+  }
 
-    .msg {
-      text-align: center;
-      margin-top: 10px;
-      font-size: 13px;
-      min-height: 20px;
-    }
+  .tcard-text::before { content: '"'; color: var(--accent2); font-size: 24px; line-height: 0; vertical-align: -6px; margin-right: 4px; }
 
-    /* Eye button */
-    .eye-btn {
-      position: absolute;
-      right: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 0;
-      width: 44px;
-      height: 44px;
-      box-shadow: none;
-      color: #8899aa;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: color 0.2s;
-    }
-  </style>
+  .tcard-author {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .avatar {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .avatar-1 { background: rgba(124,92,252,0.18); color: var(--accent2); }
+  .avatar-2 { background: rgba(245,200,66,0.15); color: var(--gold); }
+  .avatar-3 { background: rgba(99,206,135,0.15); color: #63ce87; }
+
+  .author-name { font-size: 14px; font-weight: 500; }
+  .author-role { font-size: 12px; color: var(--muted); margin-top: 1px; }
+
+  /* FAQ */
+  .faq-list {
+    margin-top: 56px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 720px;
+  }
+
+  .faq-item {
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .faq-item:hover { border-color: rgba(124,92,252,0.4); }
+
+  .faq-question {
+    width: 100%;
+    background: none;
+    border: none;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    text-align: left;
+    padding: 20px 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .faq-icon {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 0.5px solid rgba(124,92,252,0.4);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 16px;
+    color: var(--accent2);
+    transition: transform 0.3s;
+  }
+
+  .faq-item.open .faq-icon { transform: rotate(45deg); }
+
+  .faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease, padding 0.3s;
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+    font-weight: 300;
+    padding: 0 24px;
+  }
+
+  .faq-item.open .faq-answer {
+    max-height: 200px;
+    padding: 0 24px 20px;
+  }
+
+  /* CTA */
+  .cta-section {
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta-section::before {
+    content: '';
+    position: absolute;
+    bottom: -100px; left: 50%;
+    transform: translateX(-50%);
+    width: 700px; height: 400px;
+    background: radial-gradient(ellipse, rgba(124,92,252,0.18) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .cta-box {
+    background: var(--bg2);
+    border: 0.5px solid rgba(124,92,252,0.3);
+    border-radius: 24px;
+    padding: 72px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta-box::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  }
+
+  .cta-box h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(28px, 4vw, 48px);
+    font-weight: 700;
+    letter-spacing: -1px;
+    margin-bottom: 16px;
+  }
+
+  .cta-box p {
+    font-size: 17px;
+    color: var(--muted);
+    margin-bottom: 36px;
+    font-weight: 300;
+  }
+
+  /* FOOTER */
+  footer {
+    border-top: 0.5px solid var(--border);
+    padding: 32px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: gap;
+    gap: 16px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 700px) {
+    nav { padding: 16px 20px; }
+    .hero h1 { letter-spacing: -1px; }
+    .hero-stats { gap: 28px; }
+    footer { flex-direction: column; text-align: center; }
+    .steps::before { display: none; }
+    .cta-box { padding: 48px 24px; }
+  }
+</style>
 </head>
 <body>
 
-  <div class="container" id="auth-container">
-    <!-- Logo side -->
-    <div class="logo-side">
-      <img src="logo.jpg" alt="Upzone Logo" class="logo">
+<!-- NAV -->
+<nav>
+  <a href="#" class="logo">Up<span>zone</span></a>
+  <div class="nav-cta">
+    <a href="login.html" class="btn-ghost">Войти</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">
+    <span class="dot"></span>
+    Платформа для фрилансеров и стартапов
+  </div>
+  <h1>От идеи до<br><span class="highlight">первых заработков</span></h1>
+  <p class="hero-sub">Upzone — место, где идеи становятся проектами, проекты находят команду, а навыки превращаются в доход.</p>
+  <div class="hero-actions">
+    <a href="signup.html" class="btn-primary btn-large">Начать бесплатно</a>
+    <a href="#features" class="btn-outline">Узнать больше</a>
+  </div>
+  <div class="hero-stats">
+    <div class="stat">
+      <span class="stat-num">2.4<span>К+</span></span>
+      <div class="stat-label">Активных пользователей</div>
     </div>
+    <div class="stat">
+      <span class="stat-num">840<span>+</span></span>
+      <div class="stat-label">Проектов запущено</div>
+    </div>
+    <div class="stat">
+      <span class="stat-num">92<span>%</span></span>
+      <div class="stat-label">Довольных участников</div>
+    </div>
+  </div>
+</section>
 
-    <!-- Form side -->
-    <div class="form-side">
-      <h1>WELCOME BACK!</h1>
-      <p class="subtitle">Upzone — от идеи до первых заработков</p>
+<section id="features">
+  <div class="container">
+    <div class="section-label">Возможности</div>
+    <h2 class="section-title">Всё что нужно — в одном месте</h2>
+    <p class="section-sub">Инструменты для роста: от поиска заказов до монетизации знаний</p>
 
-      <form id="loginForm">
-        <div class="form-group">
-          <label>Username или email</label>
-          <input type="text" id="emailInput" placeholder="example@gmail.com" autocomplete="username" required>
-        </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">💼</div>
+        <h3>Биржа заданий</h3>
+        <p>Находите проекты под свои навыки или публикуйте задания и получайте заявки от специалистов со всей страны.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🚀</div>
+        <h3>Запуск проектов</h3>
+        <p>Превратите идею в реальный продукт. Соберите команду, выставьте задачи и отслеживайте прогресс в одном месте.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📚</div>
+        <h3>Курсы и обучение</h3>
+        <p>Прокачивайте скиллы через практические курсы от опытных участников. Учитесь — и сразу применяйте.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🤝</div>
+        <h3>Нетворкинг</h3>
+        <p>Находите партнёров, менторов и единомышленников. Развивайте профессиональные связи для совместного роста.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💰</div>
+        <h3>Монетизация</h3>
+        <p>Продавайте услуги, цифровые продукты и знания. Безопасные сделки и прозрачная система вознаграждения.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3>Аналитика</h3>
+        <p>Следите за своим ростом: статистика просмотров, заявок и доходов в наглядном личном кабинете.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-        <div class="form-group">
-          <label>Пароль</label>
-          <div style="position: relative;">
-            <input type="password" id="passwordInput" placeholder="••••••••" autocomplete="current-password" required style="padding-right: 52px;">
-            <button type="button" onclick="togglePassword()" id="eyeBtn" class="eye-btn">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            </button>
+<section class="how-bg">
+  <div class="container">
+    <div class="section-label">Как это работает</div>
+    <h2 class="section-title">Три шага до результата</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h3>Создайте профиль</h3>
+        <p>Расскажите о себе, укажите навыки и опыт. Это займёт 3 минуты.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h3>Найдите проект</h3>
+        <p>Откликайтесь на задания или публикуйте свои. Система сама подбирает подходящие варианты.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h3>Зарабатывайте</h3>
+        <p>Выполняйте задачи, растите в рейтинге и получайте стабильный доход от любимого дела.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section>
+  <div class="container">
+    <div class="section-label">Категории</div>
+    <h2 class="section-title">Любая сфера — найдёт своих</h2>
+    <p class="section-sub">Upzone объединяет специалистов из самых разных областей</p>
+    <div class="tags">
+      <span class="tag">💻 Разработка</span>
+      <span class="tag">🎨 Дизайн</span>
+      <span class="tag">📱 SMM &amp; Маркетинг</span>
+      <span class="tag">📊 Аналитика данных</span>
+      <span class="tag">🤖 ИИ и автоматизация</span>
+      <span class="tag">💼 Бизнес-консалтинг</span>
+    </div>
+  </div>
+</section>
+
+
+<section class="how-bg">
+  <div class="container">
+    <div class="section-label">Отзывы</div>
+    <h2 class="section-title">Что говорят участники</h2>
+    <div class="testimonials">
+      <div class="tcard">
+        <p class="tcard-text">Нашёл первый заказ уже через два дня после регистрации. Удобная платформа, быстрые выплаты — рекомендую всем начинающим фрилансерам.</p>
+        <div class="tcard-author">
+          <div class="avatar avatar-1">АК</div>
+          <div>
+            <div class="author-name">Артём К.</div>
+            <div class="author-role">Веб-разработчик</div>
           </div>
         </div>
-
-        <div class="checkbox-group">
-          <label><input type="checkbox"> Запомнить меня</label>
-          <a href="#" class="forgot" onclick="showForgotModal(event)">Забыли пароль?</a>
+      </div>
+      <div class="tcard">
+        <p class="tcard-text">Запустила свой онлайн-курс через Upzone. За первый месяц 37 подписчиков — для меня это был настоящий прорыв. Сервис реально работает.</p>
+        <div class="tcard-author">
+          <div class="avatar avatar-2">МС</div>
+          <div>
+            <div class="author-name">Мария С.</div>
+            <div class="author-role">UX-дизайнер &amp; преподаватель</div>
+          </div>
         </div>
-
-        <button type="submit">Sign In</button>
-      </form>
-
-      <div class="toggle-auth">
-        <span>Нет аккаунта? </span>
-        <a href="signup.html">Sign up</a>
+      </div>
+      <div class="tcard">
+        <p class="tcard-text">Искал команду для стартапа — нашёл за неделю. Все участники профессионалы, коммуникация простая. Upzone сэкономил мне кучу времени.</p>
+        <div class="tcard-author">
+          <div class="avatar avatar-3">ДМ</div>
+          <div>
+            <div class="author-name">Данияр М.</div>
+            <div class="author-role">Основатель стартапа</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
+</section>
 
-  <!-- MODAL -->
-  <div id="forgotModal">
-    <div class="modal-inner" id="modalInner">
-      <span class="modal-handle"></span>
-      <button class="modal-close" onclick="closeForgotModal()">×</button>
-
-      <!-- Step 1: email -->
-      <div id="step-email">
-        <h2 class="modal-title">ВОССТАНОВЛЕНИЕ</h2>
-        <p class="modal-sub">Введите ваш email — пришлём 6-значный код</p>
-        <label class="modal-label">Email</label>
-        <input type="email" id="forgot-email" class="modal-input" placeholder="example@gmail.com" autocomplete="email">
-        <button class="modal-btn" onclick="sendOtpCode()" id="sendCodeBtn">Отправить код</button>
-        <div id="step1-msg" class="msg"></div>
-      </div>
-
-      <!-- Step 2: OTP + new password -->
-      <div id="step-code" style="display:none;">
-        <h2 class="modal-title">ВВЕДИТЕ КОД</h2>
-        <p id="code-hint" class="modal-sub"></p>
-
-        <div class="otp-row">
-          <input class="otp-box" maxlength="1" type="text" inputmode="numeric">
-          <input class="otp-box" maxlength="1" type="text" inputmode="numeric">
-          <input class="otp-box" maxlength="1" type="text" inputmode="numeric">
-          <input class="otp-box" maxlength="1" type="text" inputmode="numeric">
-          <input class="otp-box" maxlength="1" type="text" inputmode="numeric">
-          <input class="otp-box" maxlength="1" type="text" inputmode="numeric">
-        </div>
-
-        <label class="modal-label">Новый пароль</label>
-        <div style="position:relative; margin-bottom:16px;">
-          <input type="password" id="new-pass" class="modal-input" placeholder="••••••••" style="margin-bottom:0; padding-right:52px;" autocomplete="new-password">
-          <button type="button" onclick="toggleNewPass()" id="newPassEye" class="eye-btn">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-          </button>
-        </div>
-
-        <button class="modal-btn" onclick="verifyOtpAndReset()" id="verifyBtn">Подтвердить и сменить пароль</button>
-
-        <div style="text-align:center;">
-          <a href="#" onclick="resendCode(event)" id="resendLink" class="resend-link">Отправить код повторно</a>
-        </div>
-        <div id="step2-msg" class="msg"></div>
-      </div>
+<section class="cta-section">
+  <div class="container">
+    <div class="cta-box">
+      <h2>Готов начать зарабатывать?</h2>
+      <p>Регистрация бесплатная. Первый заказ ближе, чем кажется.</p>
+      <a href="signup.html" class="btn-primary btn-large">Присоединиться бесплатно</a>
     </div>
   </div>
+</section>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    const supabaseUrl = 'https://dvwegmdyhjyihrxqvoiw.supabase.co';
-    const supabaseKey = 'sb_publishable_hDqX9KkG5m38yourV2K43w_PYB7ktXI';
-    const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
-    // Login
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email    = document.getElementById('emailInput').value;
-      const password = document.getElementById('passwordInput').value;
-      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-      if (error) {
-        alert('Ошибка входа: ' + error.message);
-      } else {
-        window.location.href = 'home.html';
-      }
-    });
+<section>
+  <div class="container">
+    <div class="section-label">FAQ</div>
+    <h2 class="section-title">Частые вопросы</h2>
+    <p class="section-sub">Ответы на то, что спрашивают чаще всего</p>
+    <div class="faq-list">
 
-    function togglePassword() {
-      const input = document.getElementById('passwordInput');
-      const btn   = document.getElementById('eyeBtn');
-      const hide  = input.type === 'password';
-      input.type  = hide ? 'text' : 'password';
-      btn.style.color = hide ? '#00aaff' : '#8899aa';
-      btn.innerHTML = hide
-        ? `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`
-        : `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
-    }
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          Upzone бесплатный?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">Да, регистрация и базовое использование полностью бесплатны. Вы можете искать проекты, откликаться на задания и общаться с другими участниками без каких-либо вложений.</div>
+      </div>
 
-    // Modal
-    let otpEmail = '';
-    let resendTimer = null;
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          Я новичок — смогу ли найти заказ?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">Конечно. На Upzone есть задания для специалистов любого уровня. Заполните профиль, добавьте примеры работ и начните откликаться — система помогает новым участникам быстрее найти первый проект.</div>
+      </div>
 
-    function showForgotModal(e) {
-      e.preventDefault();
-      document.getElementById('forgotModal').style.display = 'flex';
-      setTimeout(() => document.getElementById('forgot-email').focus(), 350);
-    }
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          Можно работать из любой страны?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">Да, Upzone доступен из любой точки мира. Платформа работает онлайн, все коммуникации и сделки проходят удалённо — без привязки к городу или стране.</div>
+      </div>
 
-    function closeForgotModal() {
-      document.getElementById('forgotModal').style.display = 'none';
-      document.getElementById('step-email').style.display = 'block';
-      document.getElementById('step-code').style.display  = 'none';
-      document.getElementById('forgot-email').value = '';
-      document.getElementById('new-pass').value     = '';
-      document.querySelectorAll('.otp-box').forEach(b => b.value = '');
-      document.getElementById('step1-msg').textContent = '';
-      document.getElementById('step2-msg').textContent = '';
-      if (resendTimer) clearInterval(resendTimer);
-    }
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          Как заказчик находит меня среди других специалистов?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">Заказчики ищут по навыкам, рейтингу и категории. Чем подробнее заполнен ваш профиль и чем больше выполненных проектов — тем выше вы в результатах поиска.</div>
+      </div>
 
-    async function sendOtpCode() {
-      const email = document.getElementById('forgot-email').value.trim();
-      const msg   = document.getElementById('step1-msg');
-      const btn   = document.getElementById('sendCodeBtn');
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          Что делать, если возник спор с заказчиком?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">На платформе есть встроенная система разрешения споров. Если стороны не могут договориться, модераторы Upzone рассматривают ситуацию и принимают решение в течение 48 часов.</div>
+      </div>
 
-      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        msg.style.color = '#f87171';
-        msg.textContent = '❌ Введите корректный email';
-        return;
-      }
+    </div>
+  </div>
+</section>
 
-      btn.disabled    = true;
-      btn.textContent = 'Отправка...';
+<footer>
+  <span class="logo" style="font-size:16px">Up<span style="color:var(--accent2)">zone</span></span>
+  <span>© 2025 Upzone. Все права защищены.</span>
+  <div style="display:flex;gap:20px;align-items:center;">
+    <a href="https://www.instagram.com/upzone.ai?igsh=MWYxMzN1MnBzYmw4cA==" target="_blank" style="display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:8px;border:0.5px solid rgba(124,92,252,0.25);color:var(--muted);text-decoration:none;font-size:13px;transition:border-color 0.2s,color 0.2s" onmouseover="this.style.borderColor='#a87cff';this.style.color='#a87cff'" onmouseout="this.style.borderColor='rgba(124,92,252,0.25)';this.style.color='var(--muted)'">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+      @upzone.ai
+    </a>
+    <a href="https://t.me/upzoneai" target="_blank" style="display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:8px;border:0.5px solid rgba(124,92,252,0.25);color:var(--muted);text-decoration:none;font-size:13px;transition:border-color 0.2s,color 0.2s" onmouseover="this.style.borderColor='#a87cff';this.style.color='#a87cff'" onmouseout="this.style.borderColor='rgba(124,92,252,0.25)';this.style.color='var(--muted)'">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 5L2 12.5l7 1M21 5l-2.5 14L9 13.5M21 5L9 13.5m0 0v5l3.5-3"/></svg>
+      @upzoneai
+    </a>
+  </div>
+</footer>
 
-      const { error } = await supabaseClient.auth.signInWithOtp({
-        email,
-        options: { shouldCreateUser: false }
-      });
-
-      btn.disabled    = false;
-      btn.textContent = 'Отправить код';
-      msg.style.color = '#4ade80';
-      msg.textContent = '✅ Если email зарегистрирован — код отправлен';
-
-      if (!error) {
-        otpEmail = email;
-        setTimeout(() => {
-          document.getElementById('step-email').style.display = 'none';
-          document.getElementById('step-code').style.display  = 'block';
-          document.getElementById('code-hint').textContent    = `Код отправлен на ${email}`;
-          setupOtpBoxes();
-          startResendTimer();
-        }, 1000);
-      }
-    }
-
-    function setupOtpBoxes() {
-      const boxes = document.querySelectorAll('.otp-box');
-      boxes.forEach((box, i) => {
-        box.value = '';
-        box.style.borderColor = '#1e2f45';
-        const fresh = box.cloneNode(true);
-        box.parentNode.replaceChild(fresh, box);
-        boxes[i] = fresh;
-      });
-      document.querySelectorAll('.otp-box').forEach((box, i, all) => {
-        box.addEventListener('input', () => {
-          box.value = box.value.replace(/\D/g, '');
-          if (box.value && i < all.length - 1) all[i + 1].focus();
-        });
-        box.addEventListener('keydown', (e) => {
-          if (e.key === 'Backspace' && !box.value && i > 0) all[i - 1].focus();
-        });
-        box.addEventListener('focus', () => box.style.borderColor = '#00aaff');
-        box.addEventListener('blur',  () => box.style.borderColor = box.value ? '#00aaff' : '#1e2f45');
-      });
-      document.querySelectorAll('.otp-box')[0].focus();
-    }
-
-    function startResendTimer() {
-      const link = document.getElementById('resendLink');
-      let seconds = 60;
-      link.style.pointerEvents = 'none';
-      link.classList.remove('active');
-      if (resendTimer) clearInterval(resendTimer);
-      resendTimer = setInterval(() => {
-        seconds--;
-        link.textContent = `Отправить повторно (${seconds}s)`;
-        if (seconds <= 0) {
-          clearInterval(resendTimer);
-          link.textContent = 'Отправить код повторно';
-          link.style.pointerEvents = 'auto';
-          link.classList.add('active');
-        }
-      }, 1000);
-    }
-
-    async function resendCode(e) {
-      e.preventDefault();
-      await supabaseClient.auth.signInWithOtp({ email: otpEmail, options: { shouldCreateUser: false } });
-      startResendTimer();
-    }
-
-    async function verifyOtpAndReset() {
-      const boxes   = document.querySelectorAll('.otp-box');
-      const code    = Array.from(boxes).map(b => b.value).join('');
-      const newPass = document.getElementById('new-pass').value;
-      const msg     = document.getElementById('step2-msg');
-      const btn     = document.getElementById('verifyBtn');
-
-      if (code.length < 6) {
-        msg.style.color = '#f87171';
-        msg.textContent = '❌ Введите все 6 цифр кода';
-        return;
-      }
-      if (newPass.length < 6) {
-        msg.style.color = '#f87171';
-        msg.textContent = '❌ Пароль должен быть не менее 6 символов';
-        return;
-      }
-
-      btn.disabled    = true;
-      btn.textContent = 'Проверка...';
-
-      const { error: otpError } = await supabaseClient.auth.verifyOtp({
-        email: otpEmail, token: code, type: 'email'
-      });
-
-      if (otpError) {
-        msg.style.color = '#f87171';
-        msg.textContent = '❌ Неверный или устаревший код';
-        btn.disabled    = false;
-        btn.textContent = 'Подтвердить и сменить пароль';
-        document.querySelectorAll('.otp-box').forEach(b => b.style.borderColor = '#f87171');
-        return;
-      }
-
-      const { error: passError } = await supabaseClient.auth.updateUser({ password: newPass });
-
-      if (passError) {
-        msg.style.color = '#f87171';
-        msg.textContent = '❌ ' + passError.message;
-        btn.disabled    = false;
-        btn.textContent = 'Подтвердить и сменить пароль';
-        return;
-      }
-
-      msg.style.color = '#4ade80';
-      msg.textContent = '✅ Пароль изменён! Входим...';
-      if (resendTimer) clearInterval(resendTimer);
-      setTimeout(() => {
-        closeForgotModal();
-        window.location.href = 'home.html';
-      }, 1500);
-    }
-
-    function toggleNewPass() {
-      const input = document.getElementById('new-pass');
-      const btn   = document.getElementById('newPassEye');
-      const hide  = input.type === 'password';
-      input.type  = hide ? 'text' : 'password';
-      btn.style.color = hide ? '#00aaff' : '#8899aa';
-      btn.innerHTML = hide
-        ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`
-        : `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
-    }
-
-    // Close modal on backdrop click (not on swipe up)
-    document.getElementById('forgotModal').addEventListener('click', function(e) {
-      if (e.target === this) closeForgotModal();
-    });
-  </script>
+<script>
+  function toggleFaq(btn) {
+    const item = btn.closest('.faq-item');
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(el => el.classList.remove('open'));
+    if (!isOpen) item.classList.add('open');
+  }
+</script>
 </body>
 </html>
