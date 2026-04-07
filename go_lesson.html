@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Go (Golang) с нуля • Быстрый и Мощный • 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .code-block {
+            background: #0f172a;
+            border-radius: 12px;
+            padding: 1.5rem;
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            border: 1px solid #334155;
+        }
+        .highlight { color: #06b6d4; font-weight: bold; }
+        .tip { border-left: 4px solid #06b6d4; padding-left: 1rem; }
+
+        .flashcard-container {
+            perspective: 1000px;
+            height: 220px;
+        }
+        .flashcard-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+        .flashcard-inner.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .flashcard-front, .flashcard-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            border-radius: 1rem;
+            text-align: center;
+        }
+        .flashcard-front {
+            background: linear-gradient(135deg, #164e63, #0891b2);
+            border: 2px solid #06b6d4;
+            color: white;
+        }
+        .flashcard-back {
+            background: #1e293b;
+            color: #f1f5f9;
+            transform: rotateY(180deg);
+            border: 2px solid #06b6d4;
+            flex-direction: column;
+        }
+        .scroll-cards {
+            max-height: 650px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        .scroll-cards::-webkit-scrollbar { width: 6px; }
+        .scroll-cards::-webkit-scrollbar-thumb { background: #06b6d4; border-radius: 10px; }
+        
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            border-radius: 1rem;
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .quiz-question {
+            background: rgba(30, 41, 59, 0.6);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            border: 1px solid #475569;
+        }
+        input[type="radio"] {
+            accent-color: #06b6d4;
+        }
+        .correct {
+            background-color: rgba(34, 197, 94, 0.25) !important;
+            border-color: #22c55e !important;
+            color: #bbf7d0;
+        }
+        .incorrect {
+            background-color: rgba(239, 68, 68, 0.25) !important;
+            border-color: #ef4444 !important;
+            color: #fecaca;
+        }
+        .missed {
+            background-color: rgba(249, 115, 22, 0.2) !important;
+            border-color: #f97316 !important;
+            color: #fed7aa;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-b from-slate-950 to-slate-900 text-slate-100 min-h-screen font-sans">
+
+    <nav class="p-6 max-w-6xl mx-auto flex justify-between items-center border-b border-slate-800">
+        <a href="stage2.html" class="text-cyan-400 hover:text-cyan-300 font-medium flex items-center">
+            ← Назад к курсам
+        </a>
+        <div class="px-4 py-1 bg-slate-800 rounded-full text-sm text-cyan-300 border border-cyan-900/50">
+            Go (Golang) — Язык от Google
+        </div>
+    </nav>
+
+    <main class="max-w-5xl mx-auto p-6 pt-10">
+
+        <header class="text-center mb-12">
+            <h1 class="text-5xl md:text-6xl font-black mb-6 bg-gradient-to-r from-cyan-400 via-sky-400 to-blue-500 bg-clip-text text-transparent">
+                Go — Скорость и Простота
+            </h1>
+            <p class="text-xl md:text-2xl text-slate-300 max-w-4xl mx-auto leading-relaxed">
+                Учимся писать быстрые серверы, утилиты и микросервисы на языке от Google
+            </p>
+        </header>
+
+        <section class="mb-16 bg-slate-800/70 border border-cyan-900/50 rounded-3xl p-8 md:p-12">
+            <h2 class="text-4xl font-bold mb-6 text-cyan-400 text-center">Go за несколько часов</h2>
+            <p class="text-lg text-slate-300 mb-6 text-center">
+                Быстрое погружение в один из самых популярных языков для backend-разработки.<br>
+                Разбираем синтаксис, горутины и создание HTTP-серверов.
+            </p>
+
+            <div class="video-container shadow-2xl">
+                <iframe 
+                    src="https://www.youtube.com/embed/yyUHQIec83I" 
+                    title="Go (Golang) за несколько часов" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                    allowfullscreen>
+                </iframe>
+            </div>
+        </section>
+
+        <section class="mb-20 bg-slate-800/70 border border-cyan-900/50 rounded-3xl p-8 md:p-12">
+            <h2 class="text-4xl font-bold mb-10 text-cyan-400 text-center">Основы Go</h2>
+            
+            <div class="grid md:grid-cols-2 gap-12 items-start">
+                <div class="space-y-6">
+                    <h3 class="text-2xl font-bold text-cyan-300 mb-4 text-center">Go Флешкарты</h3>
+                    <div class="scroll-cards space-y-8" id="go-cards-container"></div>
+                </div>
+
+                <div class="space-y-6 text-lg text-slate-200 leading-relaxed">
+                    <div class="tip">
+                        <p><strong>Go</strong> — это как C, но без головной боли. Простой синтаксис, молниеносная компиляция и встроенная поддержка многопоточности.</p>
+                    </div>
+
+                    <p>Классический Hello World на Go:</p>
+                    <div class="bg-slate-900 p-6 rounded-2xl border border-cyan-800/40 font-mono text-sm">
+                        <span class="text-cyan-400">package</span> main<br><br>
+                        <span class="text-cyan-400">import</span> <span class="text-sky-300">"fmt"</span><br><br>
+                        <span class="text-cyan-400">func</span> <span class="text-yellow-300">main</span>() {<br>
+                        &nbsp;&nbsp;fmt.<span class="text-yellow-300">Println</span>(<span class="text-sky-300">"Hello, Go!"</span>)<br>
+                        }
+                    </div>
+
+                    <h4 class="text-xl font-bold text-cyan-300 mt-6">Где используют Go:</h4>
+                    <ul class="list-disc pl-8 space-y-3 text-base">
+                        <li><strong>Серверы и API:</strong> Gin, Echo, Fiber</li>
+                        <li><strong>Микросервисы:</strong> Docker, Kubernetes написаны на Go</li>
+                        <li><strong>CLI-утилиты:</strong> быстрые консольные приложения</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-20">
+            <h2 class="text-4xl font-bold mb-10 text-center text-sky-400">Примеры кода</h2>
+            <div class="code-block text-base">
+/* 1. Переменные и типы */
+name := "Golang"          // краткое объявление
+var age int = 10          // явный тип
+const pi float64 = 3.14  // константа
+
+/* 2. Функция с возвратом двух значений */
+func divide(a, b float64) (float64, error) {
+    if b == 0 {
+        return 0, errors.New("деление на ноль")
+    }
+    return a / b, nil
+}
+
+/* 3. Горутина — лёгкий поток */
+go func() {
+    fmt.Println("Работаю параллельно!")
+}()
+
+/* 4. HTTP-сервер за 5 строк */
+http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprintf(w, "Привет от Go-сервера!")
+})
+http.ListenAndServe(":8080", nil)
+            </div>
+        </section>
+
+        <section class="mb-20 bg-slate-800/50 border-2 border-dashed border-cyan-500/30 rounded-3xl p-8 md:p-12">
+            <h2 class="text-3xl font-bold mb-6 text-cyan-400 text-center">💎 Творческое задание: Напиши функцию!</h2>
+            
+            <div class="max-w-3xl mx-auto space-y-8">
+                <div class="bg-slate-900 p-6 rounded-2xl border border-slate-700">
+                    <p class="text-slate-300 mb-4">Напиши функцию на Go, которая принимает имя пользователя и возвращает приветствие:</p>
+                    <ul class="list-disc list-inside text-sm text-slate-400 space-y-1 mb-6">
+                        <li>Функция называется <code class="text-cyan-300">greet</code></li>
+                        <li>Принимает параметр <code class="text-cyan-300">name string</code></li>
+                        <li>Возвращает строку вида <code class="text-cyan-300">"Привет, Name!"</code></li>
+                    </ul>
+
+                    <textarea id="go-task-input" 
+                        class="w-full h-32 bg-slate-950 text-cyan-100 p-4 font-mono rounded-xl border border-slate-800 focus:border-cyan-500 outline-none placeholder:text-slate-600"
+                        placeholder='func greet(name string) string { ... }'></textarea>
+                    
+                    <button onclick="applyGoTask()" 
+                        class="mt-4 w-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black py-4 rounded-xl transition-all">
+                        ПРОВЕРИТЬ КОД
+                    </button>
+                </div>
+
+                <div id="go-solution-section" class="hidden">
+                    <div class="p-6 bg-cyan-900/20 border border-cyan-500/50 rounded-2xl">
+                        <h4 class="text-cyan-400 font-bold mb-2 text-center">Эталонное решение:</h4>
+                        <pre class="text-slate-300 font-mono text-sm">
+func greet(name string) string {
+    return "Привет, " + name + "!"
+}
+
+func main() {
+    fmt.Println(greet("Алексей"))
+    // Выведет: Привет, Алексей!
+}</pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-20 bg-slate-800/70 border border-cyan-500/30 rounded-3xl p-8 md:p-12">
+            <h2 class="text-4xl font-bold mb-10 text-center text-cyan-400">🧠 Мини-тест по Go</h2>
+            
+            <form id="go-quiz-form" class="space-y-10">
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-cyan-300 mb-4">1. Кто создал язык Go?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q1" value="A" class="mr-3"> A) Microsoft
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q1" value="B" class="mr-3"> B) Google
+                    </label>
+                    <label class="block p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q1" value="C" class="mr-3"> C) Meta
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-cyan-300 mb-4">2. Что такое горутина (goroutine)?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q2" value="A" class="mr-3"> A) Тип переменной
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q2" value="B" class="mr-3"> B) Лёгкий поток выполнения
+                    </label>
+                    <label class="block p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q2" value="C" class="mr-3"> C) Метод для работы с файлами
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-cyan-300 mb-4">3. Как объявить переменную кратко в Go?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q3" value="A" class="mr-3"> A) x := 10
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q3" value="B" class="mr-3"> B) let x = 10
+                    </label>
+                    <label class="block p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q3" value="C" class="mr-3"> C) int x = 10
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-cyan-300 mb-4">4. Какой пакет используется для вывода в консоль?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q4" value="A" class="mr-3"> A) console
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q4" value="B" class="mr-3"> B) fmt
+                    </label>
+                    <label class="block p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q4" value="C" class="mr-3"> C) print
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-cyan-300 mb-4">5. Что такое канал (channel) в Go?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q5" value="A" class="mr-3"> A) Тип для хранения чисел
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q5" value="B" class="mr-3"> B) Средство передачи данных между горутинами
+                    </label>
+                    <label class="block p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q5" value="C" class="mr-3"> C) Функция для шифрования
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-cyan-300 mb-4">6. Какое ключевое слово запускает горутину?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q6" value="A" class="mr-3"> A) go
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q6" value="B" class="mr-3"> B) async
+                    </label>
+                    <label class="block p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q6" value="C" class="mr-3"> C) thread
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-cyan-300 mb-4">7. Как называется файл конфигурации модулей в Go?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q7" value="A" class="mr-3"> A) package.json
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q7" value="B" class="mr-3"> B) go.mod
+                    </label>
+                    <label class="block p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q7" value="C" class="mr-3"> C) Makefile
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-cyan-300 mb-4">8. Сколько значений может возвращать функция в Go?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q8" value="A" class="mr-3"> A) Только одно
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q8" value="B" class="mr-3"> B) Несколько (multiple return values)
+                    </label>
+                    <label class="block p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q8" value="C" class="mr-3"> C) Не более двух
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-cyan-300 mb-4">9. Какой пакет нужен для HTTP-сервера?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q9" value="A" class="mr-3"> A) net/http
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q9" value="B" class="mr-3"> B) server/http
+                    </label>
+                    <label class="block p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q9" value="C" class="mr-3"> C) web/server
+                    </label>
+                </div>
+
+                <div class="quiz-question">
+                    <p class="font-bold text-xl text-cyan-300 mb-4">10. Что означает := в Go?</p>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q10" value="A" class="mr-3"> A) Краткое объявление и присвоение переменной
+                    </label>
+                    <label class="block mb-2 p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q10" value="B" class="mr-3"> B) Сравнение двух значений
+                    </label>
+                    <label class="block p-3 rounded-lg border border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q10" value="C" class="mr-3"> C) Вызов функции
+                    </label>
+                </div>
+
+                <div class="text-center mt-12">
+                    <button type="button" onclick="checkGoQuiz()"
+                        class="bg-cyan-600 hover:bg-cyan-500 text-white font-black py-5 px-16 rounded-xl text-xl transition-all active:scale-95 shadow-lg shadow-cyan-500/30">
+                        ПРОВЕРИТЬ ОТВЕТЫ
+                    </button>
+                </div>
+            </form>
+
+            <div id="go-quiz-result" class="hidden mt-10 p-8 bg-slate-900/80 rounded-2xl border border-cyan-700/50 text-center">
+                <h3 class="text-3xl font-bold text-cyan-400 mb-6">Результат теста</h3>
+                <p id="go-score-text" class="text-4xl font-black mb-4"></p>
+                <p class="text-slate-400 text-sm mt-2">
+                    Правильные — зелёный, твои ошибки — красный, пропущенные правильные — оранжевый
+                </p>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // Флешкарты Go (15 штук)
+        const goCards = [
+            { q: "Что такое Go?", a: "Компилируемый язык от Google для серверов и утилит." },
+            { q: "Что такое горутина?", a: "Лёгкий поток выполнения, управляемый Go-рантаймом." },
+            { q: "Что такое канал (chan)?", a: "Труба для безопасной передачи данных между горутинами." },
+            { q: "Что такое интерфейс в Go?", a: "Набор методов, которые должен реализовать тип." },
+            { q: "Что возвращает функция с ошибкой?", a: "Два значения: результат и error (если nil — всё ок)." },
+            { q: "Что делает defer?", a: "Откладывает выполнение функции до конца текущей." },
+            { q: "Что такое slice?", a: "Динамический массив с изменяемым размером." },
+            { q: "Что такое map в Go?", a: "Структура данных 'ключ-значение', аналог словаря." },
+            { q: "Что такое struct?", a: "Пользовательский тип для группировки полей." },
+            { q: "Что делает go build?", a: "Компилирует код в исполняемый бинарный файл." },
+            { q: "Что такое pointer?", a: "Переменная, хранящая адрес другой переменной в памяти." },
+            { q: "Что такое panic?", a: "Критическая ошибка, останавливающая выполнение программы." },
+            { q: "Зачем нужен recover?", a: "Перехватывает panic и позволяет программе продолжить." },
+            { q: "Что такое go.mod?", a: "Файл управления зависимостями и версией модуля." },
+            { q: "Что такое Goroutine leak?", a: "Утечка горутин, которые никогда не завершаются." }
+        ];
+
+        const container = document.getElementById('go-cards-container');
+
+        goCards.forEach((data, index) => {
+            const card = document.createElement('div');
+            card.className = 'flashcard-container';
+            card.innerHTML = `
+                <div class="flashcard-inner" onclick="this.classList.toggle('is-flipped')">
+                    <div class="flashcard-front font-bold text-lg">
+                        Go №${index + 1}: ${data.q}
+                    </div>
+                    <div class="flashcard-back">
+                        <p class="font-bold text-cyan-400 mb-2">Ответ:</p>
+                        <p class="text-lg font-mono">${data.a}</p>
+                        <p class="mt-4 text-xs text-slate-400">Нажми, чтобы вернуть</p>
+                    </div>
+                </div>
+                <div class="text-center mt-2 text-cyan-500 font-bold">➡️</div>
+            `;
+            container.appendChild(card);
+        });
+
+        // Задание
+        function applyGoTask() {
+            const input = document.getElementById('go-task-input').value;
+            if (input.trim().length < 5) {
+                alert("Сначала напиши функцию greet!");
+                return;
+            }
+            const solution = document.getElementById('go-solution-section');
+            solution.classList.remove('hidden');
+            solution.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // Проверка теста
+        function checkGoQuiz() {
+            const form = document.getElementById('go-quiz-form');
+            const resultDiv = document.getElementById('go-quiz-result');
+            const scoreText = document.getElementById('go-score-text');
+
+            const correctAnswers = {
+                q1: 'B', q2: 'B', q3: 'A', q4: 'B', q5: 'B',
+                q6: 'A', q7: 'B', q8: 'B', q9: 'A', q10: 'A'
+            };
+
+            let score = 0;
+
+            for (let i = 1; i <= 10; i++) {
+                const name = `q${i}`;
+                const radios = form.querySelectorAll(`input[name="${name}"]`);
+                let selectedValue = null;
+
+                radios.forEach(r => r.parentElement.classList.remove('correct', 'incorrect', 'missed'));
+                radios.forEach(r => { if (r.checked) selectedValue = r.value; });
+
+                const correctVal = correctAnswers[name];
+                const correctLabel = Array.from(radios).find(r => r.value === correctVal)?.parentElement;
+                const selectedLabel = selectedValue ? Array.from(radios).find(r => r.value === selectedValue)?.parentElement : null;
+
+                if (selectedValue === correctVal) {
+                    score++;
+                    if (correctLabel) correctLabel.classList.add('correct');
+                } else {
+                    if (correctLabel) correctLabel.classList.add('correct');
+                    if (selectedLabel) selectedLabel.classList.add('incorrect');
+                }
+
+                if (!selectedValue && correctLabel) {
+                    correctLabel.classList.add('missed');
+                }
+            }
+
+            scoreText.innerHTML = `Ты набрал <span class="text-cyan-400 font-black">${score}/10</span>`;
+            resultDiv.classList.remove('hidden');
+            resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            const btn = form.querySelector('button[type="button"]');
+            if (btn) btn.disabled = true;
+        }
+    </script>
+</body>
+</html>
