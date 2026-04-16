@@ -1,284 +1,381 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Upzone — Регистрация</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    
-    html, body {
-      height: 100%;
-    }
+    html, body { min-height: 100%; height: 100%; }
 
     body {
-      min-height: 100%;
-      background: #0a0e17;
-      background: linear-gradient(to bottom, #0a0e17 0%, #00040f 100%);
-      font-family: 'Roboto', sans-serif;
-      color: #d0d8e0;
-      padding: 20px 16px;
-      overflow-x: hidden;
-    }
-
-    body::before {
-      content: '';
-      position: fixed; 
-      inset: 0;
-      background: radial-gradient(circle at 50% 20%, rgba(0, 170, 255, 0.10) 0%, transparent 70%);
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    
-    .container {
-      position: relative;
-      width: 100%;
-      max-width: 800px;
-      margin: 0 auto; 
+      background: #0d0d0d;
+      font-family: 'DM Sans', sans-serif;
+      color: #f5f5f0;
       display: flex;
-      flex-direction: row;
-      background: rgba(12, 18, 28, 0.92);
-      border-radius: 20px;
-      border: 1px solid rgba(0, 170, 255, 0.18);
-      box-shadow: 
-        0 15px 50px rgba(0,0,0,0.75),
-        inset 0 0 25px rgba(0,170,255,0.06);
-      backdrop-filter: blur(10px);
-      overflow: hidden;
-      z-index: 2;
+      align-items: stretch;
+      overflow-x: hidden;
+      overflow-y: auto;
+      cursor: crosshair;
     }
 
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9998;
+      opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 200px 200px;
+    }
+
+    .container {
+      display: flex;
+      width: 100%;
+      min-height: 100vh;
+    }
+
+    /* brand side */
+    .brand-side {
+      width: 420px;
+      flex-shrink: 0;
+      background: #0d0d0d;
+      border-right: 1px solid #2a2a2a;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 48px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .brand-side::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: #e8ff00;
+      clip-path: polygon(0 60%, 100% 40%, 100% 100%, 0 100%);
+    }
+
+    .brand-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 32px;
+      letter-spacing: 4px;
+      color: #f5f5f0;
+      text-decoration: none;
+      position: relative;
+      z-index: 1;
+    }
+
+    .brand-tagline {
+      position: relative;
+      z-index: 1;
+    }
+
+    .brand-tagline h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 72px;
+      line-height: 0.9;
+      letter-spacing: -1px;
+      color: #f5f5f0;
+      margin-bottom: 16px;
+    }
+
+    .brand-tagline p {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
+    }
+
+    /* stats strip */
+    .brand-stats {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding-top: 32px;
+      border-top: 1px solid rgba(255,255,255,0.15);
+    }
+
+    .bstat {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+    }
+
+    .bstat-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 32px;
+      color: #e8ff00;
+      line-height: 1;
+    }
+
+    .bstat-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.45);
+    }
+
+    /* form side */
     .form-side {
       flex: 1;
-      padding: 50px 40px;
+      background: #0d0d0d;
       display: flex;
       flex-direction: column;
       justify-content: center;
+      padding: 64px 72px;
     }
 
-    .logo-side {
-      flex: 1;
-      background: rgba(0, 170, 255, 0.05);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-
-    .logo {
-      max-width: 80%;
-      max-height: 80%;
-      object-fit: contain;
-      filter: drop-shadow(0 0 18px rgba(80, 180, 255, 0.55));
+    .form-eyebrow {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #888880;
+      margin-bottom: 16px;
     }
 
     h1 {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 32px;
-      text-align: center;
-      color: #ffffff;
-      letter-spacing: 2.5px;
-      text-shadow: 0 0 12px rgba(0, 170, 255, 0.45);
-      margin-bottom: 10px;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 56px;
+      letter-spacing: 1px;
+      color: #f5f5f0;
+      margin-bottom: 40px;
+      line-height: 1;
     }
 
-    .subtitle {
-      text-align: center;
-      font-size: 15px;
-      color: #8899aa;
-      margin-bottom: 35px;
-    }
+    h1 span { color: #e8ff00; }
 
-    .form-group {
-      margin-bottom: 20px;
-    }
+    .form-group { margin-bottom: 20px; }
 
     label {
       display: block;
       margin-bottom: 8px;
-      font-size: 14px;
-      color: #c0d0e0;
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #888880;
     }
 
-    input {
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
       width: 100%;
       padding: 14px 16px;
-      background: #0e1622;
-      border: 1px solid #1e2f45;
-      border-radius: 10px;
-      color: #f0f4f8;
-      font-size: 16px; 
-      transition: all 0.3s ease;
-    }
-
-    input:focus {
-      outline: none;
-      border-color: #00aaff;
-      box-shadow: 0 0 0 4px rgba(0,170,255,0.20);
-    }
-
-    button {
-      width: 100%;
-      padding: 15px;
-      background: linear-gradient(90deg, #0077cc, #00aaff);
-      border: none;
-      border-radius: 10px;
-      color: white;
+      background: #141414;
+      border: 1px solid #2a2a2a;
+      border-radius: 0;
+      color: #f5f5f0;
       font-size: 16px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.35s ease;
-      box-shadow: 0 6px 18px rgba(0,170,255,0.35);
+      font-family: 'DM Sans', sans-serif;
+      transition: border-color 0.2s;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="password"]:focus {
+      outline: none;
+      border-color: #e8ff00;
+    }
+
+    button[type="submit"] {
+      width: 100%;
+      padding: 16px;
+      background: #e8ff00;
+      border: none;
+      border-radius: 0;
+      color: #0d0d0d;
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: crosshair;
+      transition: background 0.15s, transform 0.1s, box-shadow 0.1s;
+      min-height: 52px;
+      -webkit-appearance: none;
       margin-top: 8px;
     }
-
-    button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 30px rgba(0,170,255,0.5);
-      background: linear-gradient(90deg, #00aaff, #40c0ff);
+    button[type="submit"]:hover {
+      background: #c8f000;
+      transform: translate(-2px, -2px);
+      box-shadow: 2px 2px 0 #e8ff00;
     }
+    button[type="submit"]:active { transform: translate(0,0); box-shadow: none; }
 
     .toggle-auth {
-      text-align: center;
       margin-top: 28px;
-      font-size: 14px;
-      color: #8899aa;
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #888880;
     }
 
     .toggle-auth a {
-      color: #00aaff;
+      color: #e8ff00;
       text-decoration: none;
-      font-weight: 500;
+      border-bottom: 1px solid rgba(232,255,0,0.3);
+      transition: border-color 0.15s;
+    }
+    .toggle-auth a:hover { border-color: #e8ff00; }
+
+    /* agree line */
+    .agree-line {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-top: 8px;
+      margin-bottom: 4px;
     }
 
-    .toggle-auth a:hover {
-      text-decoration: underline;
+    .agree-line input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      min-width: 16px;
+      accent-color: #e8ff00;
+      cursor: crosshair;
+      margin-top: 2px;
     }
 
-    @media (max-width: 768px) {
-      body {
-        padding: 16px;
-      }
+    .agree-line span {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.5px;
+      color: #888880;
+      line-height: 1.7;
+    }
 
-      .container {
-        flex-direction: column;
-        max-width: 100%;
-        width: 100%;
-      }
+    .agree-line a {
+      color: #e8ff00;
+      text-decoration: none;
+      border-bottom: 1px solid rgba(232,255,0,0.3);
+    }
 
-      .logo-side {
-        order: -1;
-        padding: 20px 20px 10px;
-        background: transparent;
-      }
+    /* responsive */
+    @media (max-width: 900px) {
+      .brand-side { display: none; }
+      .form-side { padding: 48px 28px; }
+    }
 
-      .logo {
-        max-height: 120px;
-      }
-
-      .form-side {
-        padding: 20px 20px 30px;
-      }
-
-      h1 {
-        font-size: 22px;
-      }
+    @media (max-width: 480px) {
+      .form-side { padding: 40px 20px 48px; justify-content: flex-start; padding-top: 60px; }
+      h1 { font-size: 44px; }
     }
   </style>
 </head>
 <body>
 
-  <div class="container">
+<div class="container">
 
-    <div class="form-side">
-      <h1>CREATE ACCOUNT</h1>
-      <p class="subtitle">Upzone — от идеи до первых заработков</p>
+  <!-- Brand side -->
+  <div class="brand-side">
+    <a href="landing.html" class="brand-logo">UPZONE</a>
 
-      <form id="signupForm">
-        <div class="form-group">
-          <label>Username</label>
-          <input type="text" placeholder="yourname" required>
-        </div>
+    <div class="brand-tagline">
+      <h2>СОЗДАЙ<br>АККАУНТ</h2>
+      <p>— Начни зарабатывать сегодня</p>
+    </div>
 
-        <div class="form-group">
-          <label>Email</label>
-          <input type="email" placeholder="example@gmail.com" required>
-        </div>
-
-        <div class="form-group">
-          <label>Пароль</label>
-          <input type="password" placeholder="••••••••" required>
-        </div>
-
-        <button type="submit">Sign Up</button>
-      </form>
-
-      <div class="toggle-auth">
-        <span>Уже есть аккаунт? </span>
-        <a href="index.html">Sign in</a>
+    <div class="brand-stats">
+      <div class="bstat">
+        <span class="bstat-num">2.4К+</span>
+        <span class="bstat-label">Активных пользователей</span>
+      </div>
+      <div class="bstat">
+        <span class="bstat-num">840+</span>
+        <span class="bstat-label">Проектов запущено</span>
+      </div>
+      <div class="bstat">
+        <span class="bstat-num">92%</span>
+        <span class="bstat-label">Довольных участников</span>
       </div>
     </div>
-
-    <div class="logo-side">
-      <img src="logo.jpg" alt="Upzone Logo" class="logo">
-    </div>
-
   </div>
 
+  <!-- Form side -->
+  <div class="form-side">
+    <div class="form-eyebrow">— Регистрация</div>
+    <h1>НОВЫЙ <span>АККАУНТ</span></h1>
+
+    <form id="signupForm">
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" placeholder="yourname" required>
+      </div>
+
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" placeholder="example@gmail.com" required>
+      </div>
+
+      <div class="form-group">
+        <label>Пароль</label>
+        <input type="password" placeholder="••••••••" required>
+      </div>
+
+      <div class="agree-line">
+        <input type="checkbox" required>
+        <span>Я принимаю <a href="#">условия использования</a> и <a href="#">политику конфиденциальности</a></span>
+      </div>
+
+      <button type="submit">Создать аккаунт →</button>
+    </form>
+
+    <div class="toggle-auth">
+      Уже есть аккаунт? &nbsp;<a href="signin.html">Войти</a>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script>
-    const supabaseUrl = 'https://dvwegmdyhjyihrxqvoiw.supabase.co';
-    const supabaseKey = 'sb_publishable_hDqX9KkG5m38yourV2K43w_PYB7ktXI'; 
-    const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+  const supabaseUrl = 'https://dvwegmdyhjyihrxqvoiw.supabase.co';
+  const supabaseKey = 'sb_publishable_hDqX9KkG5m38yourV2K43w_PYB7ktXI';
+  const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
-    document.getElementById('signupForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
+  document.getElementById('signupForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-        const usernameValue = e.target.querySelector('input[placeholder="yourname"]').value;
-        const emailValue = e.target.querySelector('input[type="email"]').value;
-        const passwordValue = e.target.querySelector('input[type="password"]').value;
+    const usernameValue = e.target.querySelector('input[placeholder="yourname"]').value;
+    const emailValue    = e.target.querySelector('input[type="email"]').value;
+    const passwordValue = e.target.querySelector('input[type="password"]').value;
 
-        const { data, error: authError } = await supabaseClient.auth.signUp({
-            email: emailValue,
-            password: passwordValue,
-            options: {
-                data: { username: usernameValue }
-            }
-        });
-
-        if (authError) {
-            return alert('Ошибка регистрации: ' + authError.message);
-        }
-
-        if (data.user) {
-            const { error: profileError } = await supabaseClient
-                .from('profiles')
-                .upsert([{ 
-                    id: data.user.id, 
-                    username: usernameValue, 
-                    email: emailValue 
-                }]);
-
-            if (profileError) {
-                console.error("Ошибка записи в таблицу profiles:", profileError.message);
-                alert("Аккаунт создан, но данные профиля не сохранились. Проверьте RLS!");
-            } else {
-                alert('Регистрация успешна!');
-                window.location.href = 'index.html';
-            }
-        }
+    const { data, error: authError } = await supabaseClient.auth.signUp({
+      email: emailValue,
+      password: passwordValue,
+      options: { data: { username: usernameValue } }
     });
+
+    if (authError) { return alert('Ошибка регистрации: ' + authError.message); }
+
+    if (data.user) {
+      const { error: profileError } = await supabaseClient
+        .from('profiles')
+        .upsert([{ id: data.user.id, username: usernameValue, email: emailValue }]);
+
+      if (profileError) {
+        console.error("Ошибка записи в таблицу profiles:", profileError.message);
+        alert("Аккаунт создан, но данные профиля не сохранились. Проверьте RLS!");
+      } else {
+        alert('Регистрация успешна!');
+        window.location.href = 'index.html';
+      }
+    }
+  });
 </script>
 
 </body>
