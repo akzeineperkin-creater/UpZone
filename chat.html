@@ -6,80 +6,9 @@
     <title>Pro Media | Ultimate Chat</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        #chat-widget-button {
-            position: fixed;
-            bottom: 30px;
-            left: 30px; 
-            width: 70px;
-            height: 70px;
-            background: var(--accent-blue);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            z-index: 1000;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
-        }
-        .chat-badge {
-            position: absolute;
-            top: -2px;
-            right: -2px;
-            min-width: 22px;
-            height: 22px;
-            border-radius: 11px;
-            background: #ef4444; 
-            color: #fff;
-            font-size: 12px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 5px;
-            border: 2px solid var(--bg-main); 
-        }
-        .chat-badge.hidden {
-            transform: scale(0);
-            opacity: 0;
-        }
-        .sdot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            border: 2px solid var(--bg-sidebar); 
-            display: inline-block;
-            flex-shrink: 0;
-        }
-        .sdot.online { 
-            background: #43b581; 
-            position: relative; 
-        }
-        .sdot.offline { 
-            background: #747f8d; 
-        }
-        .sdot.online::after {
-            content: '';
-            position: absolute;
-            inset: -2px;
-            border-radius: 50%;
-            border: 1.5px solid #43b581;
-            opacity: 0;
-            animation: pulse-ring 2.5s ease-out infinite;
-        }
-
-@keyframes pulse-ring {
-    0% { transform: scale(1); opacity: 0.5; }
-    70% { transform: scale(2); opacity: 0; }
-    100% { opacity: 0; }
-}
-
-        .header-status-text {
-            font-size: 13px;
-            color: #b9bbbe;
-            font-weight: normal;
-            margin-left: 8px;
-        }
-
+        /* =============================================
+           CSS DESIGN TOKENS
+        ============================================= */
         :root {
             --bg-main: #2c2f33;
             --bg-sidebar: #23272a;
@@ -89,132 +18,307 @@
             --msg-in: #4f545c;
             --msg-out: #007bff;
             --border-color: #202225;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: transparent; height: 100vh; overflow: hidden; }
 
+            /* Safe-area insets for iPhone notch / home bar */
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+            --safe-top:    env(safe-area-inset-top, 0px);
+            --safe-left:   env(safe-area-inset-left, 0px);
+            --safe-right:  env(safe-area-inset-right, 0px);
+        }
+
+        /* =============================================
+           RESET & BASE
+        ============================================= */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: transparent;
+            /* dvh: accounts for browser chrome appearing/disappearing on mobile */
+            height: 100dvh;
+            overflow: hidden;
+            /* Prevent elastic overscroll on iOS */
+            overscroll-behavior: none;
+        }
+
+        /* =============================================
+           STATUS INDICATORS
+        ============================================= */
+        .sdot {
+            width: 12px; height: 12px;
+            border-radius: 50%;
+            border: 2px solid var(--bg-sidebar);
+            display: inline-block; flex-shrink: 0;
+        }
+        .sdot.online  { background: #43b581; position: relative; }
+        .sdot.offline { background: #747f8d; }
+        .sdot.online::after {
+            content: '';
+            position: absolute; inset: -2px;
+            border-radius: 50%;
+            border: 1.5px solid #43b581;
+            opacity: 0;
+            animation: pulse-ring 2.5s ease-out infinite;
+        }
+        @keyframes pulse-ring {
+            0%   { transform: scale(1); opacity: 0.5; }
+            70%  { transform: scale(2); opacity: 0; }
+            100% { opacity: 0; }
+        }
+        .header-status-text {
+            font-size: 13px; color: #b9bbbe;
+            font-weight: normal; margin-left: 8px;
+        }
+
+        /* =============================================
+           CHAT WIDGET BUTTON (FAB)
+        ============================================= */
         #chat-widget-button {
-            position: fixed; bottom: 30px; left: 30px;
-            width: 70px; height: 70px; background: var(--accent-blue);
-            border-radius: 50%; display: flex; align-items: center;
-            justify-content: center; cursor: pointer; z-index: 1000;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.4); transition: 0.3s;
+            position: fixed;
+            /* Push up above the home bar on iPhone */
+            bottom: calc(30px + var(--safe-bottom));
+            left: calc(30px + var(--safe-left));
+            width: 70px; height: 70px;
+            background: var(--accent-blue);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; z-index: 1000;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+            transition: transform 0.2s;
         }
         #chat-widget-button:hover { transform: scale(1.1); }
 
-        .chat-header h2 {
-            color: white;
-            font-size: 20px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: calc(100% - 160px);
+        .chat-badge {
+            position: absolute; top: -2px; right: -2px;
+            min-width: 22px; height: 22px;
+            border-radius: 11px; background: #ef4444; color: #fff;
+            font-size: 12px; font-weight: bold;
+            display: flex; align-items: center; justify-content: center;
+            padding: 0 5px; border: 2px solid var(--bg-main);
+            transition: transform 0.2s, opacity 0.2s;
         }
+        .chat-badge.hidden { transform: scale(0); opacity: 0; }
 
+        /* =============================================
+           MAIN LAYOUT
+        ============================================= */
         #chat-window {
             position: fixed;
-            top: 0;
-            left: 0;
+            top: 0; left: 0;
             width: 100vw;
-            height: 100vh;
+            /* dvh keeps panel full-height even when mobile browser UI changes */
+            height: 100dvh;
             background: var(--bg-main);
             display: flex;
-            z-index: 2000;
             flex-direction: row;
+            z-index: 2000;
         }
 
+        /* =============================================
+           SIDEBAR
+        ============================================= */
         .sidebar {
-            width: 320px; background: var(--bg-sidebar);
+            width: clamp(240px, 28vw, 320px);
+            background: var(--bg-sidebar);
             border-right: 1px solid var(--border-color);
             display: flex; flex-direction: column;
             flex-shrink: 0;
         }
-        .sidebar-header { padding: 25px; font-size: 22px; font-weight: bold; color: white; border-bottom: 1px solid var(--border-color); }
-        .sidebar-content { flex: 1; overflow-y: auto; padding-top: 10px; }
+        .sidebar-header {
+            padding: 22px 24px;
+            font-size: clamp(18px, 2vw, 22px);
+            font-weight: bold; color: white;
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+        .sidebar-content { flex: 1; overflow-y: auto; padding-top: 8px; }
 
         .section-title {
-            padding: 15px 20px 5px 20px; font-size: 12px; text-transform: uppercase;
-            color: #8e9297; font-weight: bold; display: flex; justify-content: space-between; align-items: center;
+            padding: 14px 20px 5px;
+            font-size: 11px; text-transform: uppercase;
+            color: #8e9297; font-weight: 700;
+            display: flex; justify-content: space-between; align-items: center;
+            letter-spacing: 0.04em;
         }
         .item {
-            padding: 12px 20px; cursor: pointer; display: flex; align-items: center; gap: 12px; color: #b9bbbe; transition: 0.2s;
+            padding: 11px 20px;
+            cursor: pointer; display: flex; align-items: center; gap: 12px;
+            color: #b9bbbe; transition: background 0.15s, color 0.15s;
+            /* Comfortable touch target */
+            min-height: 44px;
         }
-        .item:hover { background: #36393f; color: white; }
+        .item:hover  { background: #36393f; color: white; }
         .item.active { background: #40444b; color: white; border-left: 4px solid var(--accent-blue); }
 
         .avatar {
-            width: 35px; height: 35px; border-radius: 50%; background: #5865f2;
-            display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; flex-shrink: 0;
+            width: 36px; height: 36px; border-radius: 50%;
+            background: #5865f2;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: bold; flex-shrink: 0;
         }
+
+        /* =============================================
+           MAIN CHAT COLUMN
+        ============================================= */
         .main-chat {
             flex: 1;
-            display: flex;
-            flex-direction: column;
+            display: flex; flex-direction: column;
             background: var(--bg-main);
-            min-width: 0; 
+            min-width: 0;
+            /* Let children control their own scroll */
             overflow: hidden;
         }
 
+        /* =============================================
+           CHAT HEADER
+        ============================================= */
         .chat-header {
-            padding: 20px 30px; background: var(--bg-sidebar);
+            padding: 16px 24px;
+            background: var(--bg-sidebar);
             display: flex; justify-content: space-between; align-items: center;
             border-bottom: 1px solid var(--border-color);
-            flex-shrink: 0; 
+            /* Never shrink — always visible above messages */
+            flex-shrink: 0;
+            /* Extend under the status bar on phones */
+            padding-top: max(16px, var(--safe-top));
+        }
+        .chat-header h2 {
+            color: white;
+            font-size: clamp(15px, 2.5vw, 20px);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            max-width: calc(100% - 160px);
+        }
+
+        /* =============================================
+           MESSAGES AREA
+        ============================================= */
+        .chat-body {
+            flex: 1;
+            display: flex; flex-direction: row;
+            min-height: 0; overflow: hidden;
         }
         .messages-container {
             flex: 1;
-            padding: 30px;
+            padding: clamp(12px, 3vw, 30px);
             overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+            /* Smooth momentum scroll on iOS */
+            -webkit-overflow-scrolling: touch;
+            display: flex; flex-direction: column;
+            gap: clamp(8px, 1.5vw, 15px);
             min-height: 0;
+            /* Prevent content jumping when keyboard appears */
+            overscroll-behavior-y: contain;
         }
 
-        .message { max-width: 65%; padding: 12px 18px; border-radius: 18px; color: white; word-wrap: break-word; line-height: 1.4; }
-        .incoming { background: var(--msg-in); align-self: flex-start; border-bottom-left-radius: 4px; }
-        .my-message { background: var(--msg-out); align-self: flex-end; border-bottom-right-radius: 4px; }
+        .message {
+            max-width: min(65%, 480px);
+            padding: 11px 16px;
+            border-radius: 18px;
+            color: white; word-wrap: break-word; word-break: break-word;
+            line-height: 1.5;
+            /* Subtle shadow for depth */
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        .incoming   { background: var(--msg-in);  align-self: flex-start; border-bottom-left-radius: 4px; }
+        .my-message { background: var(--msg-out); align-self: flex-end;   border-bottom-right-radius: 4px; }
         .chat-media { max-width: 100%; border-radius: 10px; margin-top: 8px; display: block; cursor: pointer; }
 
+        /* =============================================
+           INPUT PANEL
+        ============================================= */
         .input-panel {
-            padding: 25px 30px; background: var(--bg-sidebar);
-            display: flex; gap: 15px; align-items: center;
-            flex-shrink: 0; 
-            position: relative; 
+            padding: 14px 20px;
+            /* Push content above the iPhone home bar */
+            padding-bottom: calc(14px + var(--safe-bottom));
+            background: var(--bg-sidebar);
+            border-top: 1px solid var(--border-color);
+            display: flex; gap: 10px; align-items: center;
+            /* Must never shrink — stays glued to the bottom */
+            flex-shrink: 0;
+            position: relative;
         }
         #msgInput {
-            flex: 1; padding: 14px 25px; border-radius: 30px; border: none;
-            background: var(--bg-input-area); color: white; outline: none; font-size: 16px;
+            flex: 1;
+            padding: 12px 20px;
+            border-radius: 24px; border: none;
+            background: var(--bg-input-area);
+            color: white; outline: none;
+            /* 16px prevents iOS auto-zoom on focus */
+            font-size: 16px;
+            font-family: inherit;
+            line-height: 1.4;
+            /* Smooth resize if textarea is used */
+            resize: none;
+            min-height: 44px;
         }
-        .btn-icon { background: #4f545c; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; border: none; flex-shrink: 0; }
-        .btn-icon:hover { transform: scale(1.1); background: #72767d; }
-        .btn-send { background: var(--accent-blue); color: white; border-radius: 30px; padding: 12px 25px; border: none; cursor: pointer; font-weight: bold; font-size: 15px; flex-shrink: 0; }
-        .btn-send:disabled { opacity: 0.5; cursor: not-allowed; }
+        #msgInput::placeholder { color: #72767d; }
 
-        .search-box { padding: 10px 20px; }
-        .search-box input {
-            width: 100%; padding: 8px 15px; border-radius: 5px; border: none;
-            background: var(--bg-input-area); color: white; outline: none; font-size: 14px;
+        .btn-icon {
+            background: #4f545c;
+            width: 42px; height: 42px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: background 0.15s, transform 0.15s;
+            border: none; flex-shrink: 0;
+            /* Minimum touch target */
+            min-width: 42px;
         }
+        .btn-icon:hover  { transform: scale(1.08); background: #72767d; }
+        .btn-send {
+            background: var(--accent-blue); color: white;
+            border-radius: 22px; padding: 11px 22px;
+            border: none; cursor: pointer;
+            font-weight: 700; font-size: 15px;
+            flex-shrink: 0;
+            /* Comfortable touch target on mobile */
+            min-height: 42px;
+            transition: filter 0.15s;
+        }
+        .btn-send:hover    { filter: brightness(1.15); }
+        .btn-send:disabled { opacity: 0.45; cursor: not-allowed; }
+
+        /* =============================================
+           SIDEBAR SEARCH
+        ============================================= */
+        .search-box { padding: 10px 16px; }
+        .search-box input {
+            width: 100%; padding: 9px 14px;
+            border-radius: 8px; border: none;
+            background: var(--bg-input-area);
+            color: white; outline: none; font-size: 14px;
+        }
+
+        /* =============================================
+           TOAST
+        ============================================= */
         .toast {
-            position: fixed; bottom: 110px; left: 30px;
-            background: #43b581; color: white; padding: 10px 20px;
-            border-radius: 10px; font-size: 14px; z-index: 9999;
+            position: fixed;
+            bottom: calc(110px + var(--safe-bottom));
+            left: 30px;
+            background: #43b581; color: white;
+            padding: 10px 20px; border-radius: 10px;
+            font-size: 14px; z-index: 9999;
             opacity: 0; transition: opacity 0.3s;
-            pointer-events: none; 
+            pointer-events: none;
         }
         .toast.show { opacity: 1; }
 
+        /* =============================================
+           ORDER BUTTON
+        ============================================= */
         .order-btn {
             background: linear-gradient(135deg, #eab308, #f59e0b);
             color: black; border: none; border-radius: 20px;
             padding: 8px 18px; cursor: pointer; font-size: 13px;
             font-weight: bold; margin-right: 10px;
             box-shadow: 0 2px 10px rgba(234,179,8,0.4);
-            transition: 0.2s;
+            transition: transform 0.15s;
         }
         .order-btn:hover { transform: scale(1.05); }
 
+        /* =============================================
+           ROOM ITEMS & ACTIONS
+        ============================================= */
         .room-item { position: relative; }
         .room-item .room-actions {
             position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
@@ -224,79 +328,77 @@
         .room-action-btn {
             background: #40444b; border: none; border-radius: 6px;
             color: #b9bbbe; cursor: pointer; font-size: 13px;
-            padding: 3px 7px; transition: 0.15s; line-height: 1;
+            padding: 3px 7px; transition: background 0.15s; line-height: 1;
         }
-        .room-action-btn:hover { background: #f04747; color: white; }
-        .room-action-btn.leave:hover { background: #f0a500; color: white; }
+        .room-action-btn:hover        { background: #f04747; color: white; }
+        .room-action-btn.leave:hover  { background: #f0a500; color: white; }
 
+        /* =============================================
+           ROOM MODAL
+        ============================================= */
         .room-modal-overlay {
             position: fixed; inset: 0; background: rgba(0,0,0,0.65);
             z-index: 9999; display: flex; align-items: center; justify-content: center;
             animation: fadeIn 0.15s ease;
         }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeIn  { from { opacity: 0; }               to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity:0; } to { transform: translateY(0); opacity:1; } }
+
         .room-modal {
             background: #2c2f33; border-radius: 16px; width: 380px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.5); border: 1px solid #40444b;
             overflow: hidden; animation: slideUp 0.2s ease;
         }
-        @keyframes slideUp { from { transform: translateY(20px); opacity:0; } to { transform: translateY(0); opacity:1; } }
         .room-modal-header {
             padding: 20px 24px; background: #23272a;
             border-bottom: 1px solid #40444b;
             display: flex; justify-content: space-between; align-items: center;
         }
-        .room-modal-body { padding: 20px 24px; display: flex; flex-direction: column; gap: 10px; }
+        .room-modal-body  { padding: 20px 24px; display: flex; flex-direction: column; gap: 10px; }
         .room-modal-btn {
             width: 100%; padding: 13px 18px; border-radius: 10px; border: none;
-            font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.2s;
+            font-size: 14px; font-weight: bold; cursor: pointer; transition: filter 0.15s, transform 0.15s;
             display: flex; align-items: center; gap: 10px;
         }
         .room-modal-btn:hover { filter: brightness(1.1); transform: translateX(3px); }
 
+        /* =============================================
+           MEMBERS PANEL
+        ============================================= */
         #membersPanel {
-            width: 0;
-            overflow: hidden;
+            width: 0; overflow: hidden;
             background: #23272a;
             border-left: 1px solid #202225;
-            display: flex;
-            flex-direction: column;
+            display: flex; flex-direction: column;
             transition: width 0.3s ease;
-            position: relative;
-            flex-shrink: 0;
+            position: relative; flex-shrink: 0;
         }
-        .chat-body {
-            flex: 1;
-            display: flex;
-            flex-direction: row;
-            min-height: 0;
-            overflow: hidden;
-        }
+
+        /* =============================================
+           EMOJI PICKER
+        ============================================= */
         #emojiPicker {
             display: none;
             position: absolute;
-            bottom: 80px;
-            left: 80px;
+            bottom: 80px; left: 80px;
             z-index: 9999;
         }
 
-        /* ========== ПОИСК ПО СООБЩЕНИЯМ ========== */
+        /* =============================================
+           MESSAGE SEARCH OVERLAY
+        ============================================= */
         #msgSearchOverlay {
             display: none;
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: var(--bg-main);
-            z-index: 100;
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--bg-main); z-index: 100;
             flex-direction: column;
         }
         #msgSearchOverlay.open { display: flex; }
 
         .msearch-header {
-            padding: 16px 20px;
-            background: var(--bg-sidebar);
+            padding: 14px 18px; background: var(--bg-sidebar);
             border-bottom: 1px solid var(--border-color);
-            display: flex; align-items: center; gap: 12px;
-            flex-shrink: 0;
+            display: flex; align-items: center; gap: 12px; flex-shrink: 0;
         }
         .msearch-bar {
             flex: 1; display: flex; align-items: center; gap: 10px;
@@ -307,8 +409,7 @@
         .msearch-bar:focus-within { border-color: #4f545c; }
         .msearch-bar input {
             flex: 1; border: none; outline: none;
-            background: transparent; color: white; font-size: 15px;
-            font-family: inherit;
+            background: transparent; color: white; font-size: 15px; font-family: inherit;
         }
         .msearch-bar input::placeholder { color: #72767d; }
         .msearch-clear {
@@ -319,16 +420,14 @@
         .msearch-clear:hover { color: #b9bbbe; }
         .msearch-close {
             background: none; border: none; color: #72767d;
-            cursor: pointer; font-size: 24px; line-height: 1;
-            transition: color 0.15s;
+            cursor: pointer; font-size: 24px; line-height: 1; transition: color 0.15s;
         }
         .msearch-close:hover { color: white; }
 
         .msearch-filters {
-            display: flex; gap: 8px; padding: 12px 20px;
+            display: flex; gap: 8px; padding: 10px 18px;
             background: var(--bg-sidebar);
-            border-bottom: 1px solid var(--border-color);
-            flex-shrink: 0;
+            border-bottom: 1px solid var(--border-color); flex-shrink: 0;
         }
         .msearch-chip {
             padding: 5px 14px; border-radius: 20px; font-size: 13px;
@@ -336,15 +435,11 @@
             background: transparent; color: #8e9297;
             transition: all 0.15s; user-select: none;
         }
-        .msearch-chip:hover { border-color: #72767d; color: #b9bbbe; }
-        .msearch-chip.active {
-            border-color: var(--accent-blue);
-            background: rgba(0,123,255,0.15);
-            color: #7ab8ff;
-        }
+        .msearch-chip:hover  { border-color: #72767d; color: #b9bbbe; }
+        .msearch-chip.active { border-color: var(--accent-blue); background: rgba(0,123,255,0.15); color: #7ab8ff; }
 
         .msearch-info {
-            padding: 8px 20px; font-size: 12px; color: #72767d;
+            padding: 8px 18px; font-size: 12px; color: #72767d;
             background: var(--bg-sidebar);
             border-bottom: 1px solid var(--border-color);
             flex-shrink: 0; min-height: 34px;
@@ -352,36 +447,27 @@
         }
         .msearch-info mark { background: rgba(234,179,8,0.25); color: #eab308; border-radius: 3px; padding: 0 3px; }
 
-        .msearch-list {
-            flex: 1; overflow-y: auto;
-            padding: 8px 0;
-        }
+        .msearch-list { flex: 1; overflow-y: auto; padding: 8px 0; }
         .msearch-item {
             display: flex; align-items: flex-start; gap: 12px;
-            padding: 12px 20px; cursor: default;
+            padding: 12px 18px; cursor: default;
             border-left: 3px solid transparent;
             transition: background 0.1s, border-color 0.1s;
         }
-        .msearch-item:hover { background: #36393f; }
-        .msearch-item.match {
-            border-left-color: #eab308;
-            background: rgba(234,179,8,0.05);
-        }
-        .msearch-item.match:hover { background: rgba(234,179,8,0.1); }
+        .msearch-item:hover        { background: #36393f; }
+        .msearch-item.match        { border-left-color: #eab308; background: rgba(234,179,8,0.05); }
+        .msearch-item.match:hover  { background: rgba(234,179,8,0.1); }
 
         .msearch-av {
             width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
             display: flex; align-items: center; justify-content: center;
             font-size: 13px; font-weight: bold; margin-top: 1px;
         }
-        .msearch-av.mine { background: #007bff; color: white; }
+        .msearch-av.mine  { background: #007bff; color: white; }
         .msearch-av.other { background: #5865f2; color: white; }
 
         .msearch-body { flex: 1; min-width: 0; }
-        .msearch-row {
-            display: flex; align-items: center; gap: 8px;
-            margin-bottom: 4px; flex-wrap: wrap;
-        }
+        .msearch-row  { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
         .msearch-name { font-size: 13px; font-weight: 600; color: #dcddde; }
         .msearch-time { font-size: 11px; color: #72767d; }
         .msearch-text { font-size: 14px; color: #96989d; line-height: 1.5; word-break: break-word; }
@@ -393,165 +479,163 @@
             color: #4f545c; padding: 60px 20px; text-align: center;
         }
         .msearch-empty svg { opacity: 0.4; }
-        .msearch-empty p { font-size: 14px; color: #72767d; }
-        /* ========================================= */
+        .msearch-empty p   { font-size: 14px; color: #72767d; }
 
-        /* ========== МОБИЛЬНАЯ АДАПТАЦИЯ ========== */
+        /* =============================================
+           MOBILE BACK BUTTON (hidden on desktop)
+        ============================================= */
         #mobile-back-btn {
             display: none;
-            background: none;
-            border: none;
-            color: #b9bbbe;
-            cursor: pointer;
+            background: none; border: none;
+            color: #b9bbbe; cursor: pointer;
             padding: 4px 8px 4px 0;
-            font-size: 22px;
-            line-height: 1;
+            font-size: 22px; line-height: 1;
             flex-shrink: 0;
+            /* Comfortable touch target */
+            min-width: 36px; min-height: 36px;
+            align-items: center; justify-content: center;
         }
 
+        /* =============================================
+           MOBILE — ≤768px
+        ============================================= */
         @media (max-width: 768px) {
-            /* Отключаем fixed-кнопку виджета на мобиле если она мешает */
-            #chat-widget-button { bottom: 20px; left: 15px; width: 56px; height: 56px; }
 
-            /* Основное окно чата — полный экран */
-            #chat-window {
-                position: fixed;
-                top: 0; left: 0;
-                width: 100vw;
-                height: 100dvh; /* dynamic viewport height — учитывает адресную строку браузера */
+            /* FAB — smaller and safe-area aware */
+            #chat-widget-button {
+                bottom: calc(16px + var(--safe-bottom));
+                left: calc(12px + var(--safe-left));
+                width: 54px; height: 54px;
             }
 
-            /* Лэйаут: сайдбар и чат друг за другом горизонтально, но переключаемся через JS */
+            /* Full-screen panel using dvh */
             #chat-window {
+                position: fixed; top: 0; left: 0;
+                width: 100vw;
+                height: 100dvh;
                 flex-direction: column;
                 overflow: hidden;
             }
 
-            /* Сайдбар — полный экран, скрывается при открытом чате */
+            /* --- Sidebar: full-screen slide-in panel --- */
             .sidebar {
                 width: 100% !important;
                 height: 100%;
                 border-right: none;
-                position: absolute;
-                top: 0; left: 0;
+                position: absolute; top: 0; left: 0;
                 z-index: 10;
-                transition: transform 0.3s ease;
+                transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
             }
             .sidebar.hidden-mobile {
                 transform: translateX(-100%);
                 pointer-events: none;
             }
 
-            /* Основной чат — тоже полный экран */
+            /* --- Main chat: full-screen, slides in from right --- */
             .main-chat {
-                position: absolute;
-                top: 0; left: 0;
-                width: 100%;
-                height: 100%;
+                position: absolute; top: 0; left: 0;
+                width: 100%; height: 100%;
                 z-index: 5;
                 transform: translateX(100%);
-                transition: transform 0.3s ease;
+                transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
             }
-            .main-chat.visible-mobile {
-                transform: translateX(0);
-            }
+            .main-chat.visible-mobile { transform: translateX(0); }
 
-            /* Показываем кнопку "Назад" */
-            #mobile-back-btn { display: flex; align-items: center; }
+            /* Show back button */
+            #mobile-back-btn { display: flex; }
 
-            /* Хедер чата — компактнее */
+            /* --- Compact header --- */
             .chat-header {
-                padding: 12px 15px;
+                padding: 10px 14px;
+                padding-top: max(10px, var(--safe-top));
             }
             .chat-header h2 {
-                font-size: 16px;
-                max-width: calc(100% - 130px);
+                font-size: 15px;
+                max-width: calc(100% - 120px);
             }
 
-            /* Сайдбар хедер */
-            .sidebar-header {
-                padding: 18px 20px;
-                font-size: 18px;
-            }
+            .sidebar-header { padding: 16px 18px; font-size: 17px; }
 
-            /* Сообщения */
+            /* --- Messages: comfortable mobile spacing --- */
             .messages-container {
-                padding: 15px;
-                gap: 10px;
+                padding: 12px 10px;
+                gap: 8px;
             }
             .message {
-                max-width: 80%;
-                padding: 10px 14px;
+                max-width: 82%;
+                padding: 9px 13px;
                 font-size: 15px;
+                border-radius: 16px;
             }
 
-            /* Панель ввода */
+            /* --- Input panel: pinned above keyboard ---
+               The visualViewport JS below handles the actual keyboard offset.
+               padding-bottom uses safe-area so content clears the home bar. */
             .input-panel {
-                padding: 10px 12px;
+                padding: 10px 10px;
+                padding-bottom: calc(10px + var(--safe-bottom));
                 gap: 8px;
-                /* Фиксируем над клавиатурой */
+                /* Stays at the true bottom of the visible area */
                 position: sticky;
                 bottom: 0;
+                /* Lift above virtual keyboard via JS */
+                transition: transform 0.2s ease, padding-bottom 0.2s ease;
             }
             #msgInput {
-                padding: 11px 18px;
-                font-size: 16px; /* минимум 16px — не зумит браузер */
-                border-radius: 24px;
+                padding: 10px 16px;
+                font-size: 16px; /* 16px prevents iOS zoom-on-focus */
+                border-radius: 22px;
+                min-height: 42px;
             }
-            .btn-icon { width: 40px; height: 40px; }
-            .btn-send { padding: 10px 18px; font-size: 14px; }
+            .btn-icon  { width: 40px; height: 40px; min-width: 40px; }
+            .btn-send  { padding: 10px 16px; font-size: 14px; min-height: 40px; }
 
-            /* Панель участников — поверх, как drawer */
+            /* --- Members panel: slide-in drawer --- */
             #membersPanel {
                 position: absolute !important;
                 top: 0; right: 0;
                 height: 100%;
                 width: 0 !important;
                 z-index: 20;
-                box-shadow: -5px 0 20px rgba(0,0,0,0.5);
+                box-shadow: -6px 0 24px rgba(0,0,0,0.5);
+                transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             }
-            #membersPanel.open {
-                width: 280px !important;
-            }
+            #membersPanel.open { width: min(280px, 85vw) !important; }
 
-            /* Поиск по сообщениям */
+            /* --- Search overlay fills the chat pane --- */
             #msgSearchOverlay {
-                position: absolute;
-                top: 0; left: 0;
-                width: 100%;
-                height: 100%;
-                z-index: 50;
+                position: absolute; top: 0; left: 0;
+                width: 100%; height: 100%; z-index: 50;
             }
 
-            /* Модальные окна — на всю ширину */
-            .room-modal { width: calc(100vw - 32px); max-width: 380px; }
+            /* --- Modal: full-width with safe margins --- */
+            .room-modal {
+                width: calc(100vw - 28px);
+                max-width: 380px;
+            }
 
-            /* Toast — снизу по центру */
+            /* --- Toast: centered at bottom --- */
             .toast {
-                left: 50%;
-                transform: translateX(-50%);
-                bottom: 80px;
+                left: 50%; transform: translateX(-50%);
+                bottom: calc(80px + var(--safe-bottom));
                 white-space: nowrap;
             }
 
-            /* Emoji picker — снизу */
-            #emojiPicker {
-                bottom: 70px;
-                left: 5px;
-                right: 5px;
-            }
+            /* --- Emoji picker: anchored to bottom of screen --- */
+            #emojiPicker { bottom: 68px; left: 4px; right: 4px; }
 
-            /* Поиск в сайдбаре */
-            .search-box { padding: 10px 15px; }
+            /* --- Sidebar search --- */
+            .search-box { padding: 8px 14px; }
         }
 
-        /* Очень маленькие экраны */
+        /* =============================================
+           VERY SMALL SCREENS (≤380px)
+        ============================================= */
         @media (max-width: 380px) {
-            .chat-header h2 { font-size: 14px; }
-            .message { max-width: 90%; font-size: 14px; }
-            .btn-send { padding: 9px 12px; font-size: 13px; }
+            .chat-header h2 { font-size: 13px; }
+            .message        { max-width: 90%; font-size: 14px; }
+            .btn-send       { padding: 9px 12px; font-size: 13px; }
         }
-        /* ========================================= */
     </style>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/emoji-mart@5.5.2/css/emoji-mart.css">
     <script src="https://cdn.jsdelivr.net/npm/emoji-mart@5.5.2/dist/browser.js"></script>
@@ -1948,13 +2032,37 @@
         }
     });
 
-    // Фикс высоты при появлении клавиатуры (iOS/Android)
+    // =============================================
+    // iOS KEYBOARD FIX — visualViewport API
+    // Keeps input panel above the software keyboard
+    // without distorting the rest of the layout.
+    // =============================================
     function fixMobileHeight() {
-        const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-        document.getElementById('chat-window').style.height = vh + 'px';
+        const vv = window.visualViewport;
+        const chatWin = document.getElementById('chat-window');
+        if (!chatWin) return;
+
+        const visibleHeight = vv ? vv.height : window.innerHeight;
+        const keyboardOffset = vv ? (window.innerHeight - vv.height - (vv.offsetTop || 0)) : 0;
+
+        chatWin.style.height = visibleHeight + 'px';
+
+        const inputPanel = document.querySelector('.input-panel');
+        if (inputPanel && window.innerWidth <= 768) {
+            // Push panel above keyboard; fall back to CSS safe-area when closed
+            inputPanel.style.paddingBottom = keyboardOffset > 10
+                ? (keyboardOffset + 10) + 'px'
+                : '';
+        }
+
+        // Keep messages scrolled to bottom when keyboard opens
+        const chatBox = document.getElementById('chatBox');
+        if (chatBox) chatBox.scrollTop = chatBox.scrollHeight;
     }
+
     if (window.visualViewport) {
         window.visualViewport.addEventListener('resize', fixMobileHeight);
+        window.visualViewport.addEventListener('scroll', fixMobileHeight);
     }
     window.addEventListener('resize', fixMobileHeight);
     fixMobileHeight();
