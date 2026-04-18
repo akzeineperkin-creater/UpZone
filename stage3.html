@@ -3,104 +3,444 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Этап 3: Как это работает</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Upzone — Этап 3: Взаимодействие</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #0f172a; color: #f8fafc; }
-        .step-card { background: #1e293b; border: 1px solid #334155; transition: transform 0.3s ease; }
-        .step-card:hover { transform: translateY(-5px); border-color: #38bdf8; }
-        .gradient-text { background: linear-gradient(90deg, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #0d0d0d;
+            --bg2: #141414;
+            --bg3: #1a1a1a;
+            --border: #2a2a2a;
+            --acid: #e8ff00;
+            --acid2: #c8f000;
+            --text: #f5f5f0;
+            --muted: #888880;
+        }
+
+        html, body { min-height: 100%; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            overflow-x: hidden;
+            cursor: crosshair;
+        }
+
+        body::after {
+            content: '';
+            position: fixed; inset: 0;
+            pointer-events: none; z-index: 9998;
+            opacity: 0.025;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-size: 200px 200px;
+        }
+
+        /* ── NAV ── */
+        nav {
+            height: 56px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 48px;
+            position: sticky;
+            top: 0;
+            background: var(--bg);
+            z-index: 50;
+        }
+
+        .nav-back {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--muted);
+            text-decoration: none;
+            transition: color 0.15s;
+        }
+        .nav-back:hover { color: var(--acid); }
+
+        /* ── HERO ── */
+        .hero {
+            padding: 52px 48px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .hero-eyebrow {
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .hero-eyebrow::before {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 1px;
+            background: var(--acid);
+        }
+
+        .hero h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(52px, 8vw, 100px);
+            letter-spacing: -1px;
+            line-height: 0.92;
+            margin-bottom: 40px;
+        }
+
+        .hero h1 span { color: var(--acid); }
+
+        .hero-sub {
+            padding: 20px 0 28px;
+            border-top: 1px solid var(--border);
+            font-size: 15px;
+            color: var(--muted);
+            max-width: 560px;
+            line-height: 1.7;
+            font-weight: 300;
+        }
+
+        /* ── MAIN ── */
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 48px 80px;
+        }
+
+        /* ── SECTION HEADER ── */
+        .section-header {
+            display: flex;
+            align-items: baseline;
+            gap: 20px;
+            padding: 48px 0 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-num {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--acid);
+            flex-shrink: 0;
+        }
+
+        .section-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(30px, 4vw, 48px);
+            letter-spacing: 0.5px;
+            line-height: 1;
+        }
+
+        /* ── STEPS GRID ── */
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            border: 1px solid var(--border);
+            border-top: none;
+            position: relative;
+        }
+
+        /* connector line */
+        .steps-grid::before {
+            content: '';
+            position: absolute;
+            top: 52px;
+            left: calc(33.33% / 2);
+            right: calc(33.33% / 2);
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border), var(--border), transparent);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .step-card {
+            padding: 36px 28px 40px;
+            border-right: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+            transition: background 0.15s;
+        }
+
+        .step-card:last-child { border-right: none; }
+        .step-card:hover { background: var(--bg2); }
+        .step-card:hover .step-bg-num { color: #2e2e2e; }
+
+        /* big bg number */
+        .step-bg-num {
+            position: absolute;
+            top: 8px;
+            right: 16px;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 120px;
+            line-height: 1;
+            color: var(--border);
+            user-select: none;
+            pointer-events: none;
+            transition: color 0.15s;
+        }
+
+        .step-icon-wrap {
+            width: 48px; height: 48px;
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            margin-bottom: 24px;
+            position: relative;
+            z-index: 1;
+            transition: background 0.15s, border-color 0.15s;
+        }
+
+        .step-card:hover .step-icon-wrap {
+            background: var(--acid);
+            border-color: var(--acid);
+        }
+
+        .step-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 22px;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .step-desc {
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.7;
+            font-weight: 300;
+            position: relative;
+            z-index: 1;
+        }
+
+        .step-desc em {
+            color: var(--text);
+            font-style: normal;
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            padding: 1px 6px;
+        }
+
+        /* ── ROLES BLOCK ── */
+        .roles-block {
+            margin-top: 0;
+            border: 1px solid var(--border);
+            border-top: none;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .role-item {
+            padding: 32px 28px;
+            border-right: 1px solid var(--border);
+            transition: background 0.15s;
+        }
+
+        .role-item:last-child { border-right: none; }
+        .role-item:hover { background: var(--bg2); }
+
+        .role-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--acid);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .role-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .role-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 24px;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .role-desc {
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.7;
+            font-weight: 300;
+        }
+
+        /* ── CTA BLOCK ── */
+        .cta-block {
+            margin-top: 0;
+            border: 1px solid var(--border);
+            border-top: none;
+            background: var(--acid);
+            padding: 0;
+        }
+
+        .cta-inner {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            padding: 52px 48px;
+            gap: 40px;
+        }
+
+        .cta-block h2 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(40px, 6vw, 72px);
+            letter-spacing: -0.5px;
+            line-height: 0.95;
+            color: #0d0d0d;
+        }
+
+        .cta-block p {
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 1px;
+            color: rgba(0,0,0,0.5);
+            margin-top: 10px;
+            text-transform: uppercase;
+        }
+
+        .cta-btn {
+            padding: 18px 36px;
+            background: #0d0d0d;
+            color: var(--acid);
+            text-decoration: none;
+            font-family: 'Space Mono', monospace;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border: none;
+            cursor: crosshair;
+            white-space: nowrap;
+            display: inline-block;
+            transition: background 0.15s, transform 0.1s, box-shadow 0.1s;
+        }
+
+        .cta-btn:hover {
+            background: #1a1a1a;
+            transform: translate(-2px, -2px);
+            box-shadow: 2px 2px 0 rgba(0,0,0,0.3);
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 900px) {
+            nav { padding: 0 20px; }
+            .hero { padding: 40px 20px 0; }
+            main { padding: 0 20px 80px; }
+            .steps-grid { grid-template-columns: 1fr; }
+            .step-card { border-right: none; border-bottom: 1px solid var(--border); }
+            .step-card:last-child { border-bottom: none; }
+            .steps-grid::before { display: none; }
+            .roles-block { grid-template-columns: 1fr; }
+            .role-item { border-right: none; border-bottom: 1px solid var(--border); }
+            .role-item:last-child { border-bottom: none; }
+            .cta-inner { grid-template-columns: 1fr; padding: 40px 24px; }
+        }
+
+        @media (max-width: 540px) {
+            .hero h1 { font-size: 54px; }
+        }
     </style>
 </head>
-<body class="font-sans antialiased">
- <nav class="p-6 max-w-6xl mx-auto flex justify-between items-center">
-    <a href="home.html" class="text-blue-400 hover:text-blue-300 font-medium flex items-center">
-            <span class="mr-2">←</span> В кабинет
-        </a>
- </nav>
-    <header class="py-16 px-6 text-center">
-        <h1 class="text-4xl md:text-6xl font-extrabold mb-4">Этап 3: <span class="gradient-text">Взаимодействие</span></h1>
-        <p class="text-slate-400 text-lg max-w-2xl mx-auto">
-            Объясняем, как происходит процесс работы над проектом внутри системы.
-        </p>
-    </header>
+<body>
 
-    <main class="max-w-6xl mx-auto px-6 pb-20">
-        
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-            <div class="hidden md:block absolute top-1/2 left-0 w-full h-0.5 bg-slate-700 -z-10"></div>
+<!-- NAV -->
+<nav>
+    <a href="home.html" class="nav-back">← В кабинет</a>
+</nav>
 
-            <div class="step-card p-8 rounded-2xl text-center">
-                <div class="w-16 h-16 bg-blue-500/20 text-blue-400 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <i class="fas fa-comment-dots text-2xl"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-3">1. Пост-заявка</h3>
-                <p class="text-slate-400 text-sm leading-relaxed">
-                    Вы пишете в общую сеть: <span class="text-blue-300 font-mono italic">"Я делаю проект"</span>. Это ваш сигнал О готовности к работе.
-                </p>
-            </div>
+<!-- HERO -->
+<div class="hero">
+    <div class="hero-eyebrow">Этап 3 / Взаимодействие</div>
+    <h1>КАК ЭТО<br><span>РАБОТАЕТ</span></h1>
+    <p class="hero-sub">Объясняем, как происходит процесс работы над проектом внутри системы.</p>
+</div>
 
-            <div class="step-card p-8 rounded-2xl text-center">
-                <div class="w-16 h-16 bg-indigo-500/20 text-indigo-400 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <i class="fas fa-list-check text-2xl"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-3">2. Получение требований</h3>
-                <p class="text-slate-400 text-sm leading-relaxed">
-                    Другой человек видит ваш пост и выдвигает свои требования. Проект начинает обретать конкретную форму под нужды заказчика.
-                </p>
-            </div>
+<main>
 
-            <div class="step-card p-8 rounded-2xl text-center">
-                <div class="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <i class="fas fa-rocket text-2xl"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-3">3. Реализация</h3>
-                <p class="text-slate-400 text-sm leading-relaxed">
-                    Вы создаете финальный проект, полностью соответствующий полученным требованиям. Этап завершен!
-                </p>
-            </div>
-        </div>
-
-        <div class="mt-16 p-10 bg-slate-800/50 border border-slate-700 rounded-3xl">
-            <h2 class="text-2xl font-bold mb-6 text-center text-white">Как это работает для всех?</h2>
-            <div class="grid md:grid-cols-2 gap-10">
-                <div>
-                    <h4 class="text-blue-400 font-bold mb-2">Для Исполнителя</h4>
-                    <p class="text-slate-400">Вам не нужно ничего публиковать заранее. Просто заявите о себе, получите ТЗ от другого участника и сделайте проект по его запросу.</p>
-                </div>
-                <div>
-                    <h4 class="text-indigo-400 font-bold mb-2">Для Заказчика</h4>
-                    <p class="text-slate-400">Вы выступаете в роли куратора: видите активного человека и направляете его работу своими требованиями и идеями.</p>
-                </div>
-            </div>
-        </div>
-
-    </main>
-<section class="max-w-6xl mx-auto px-6 pb-20 text-center">
-    <div id="market-container" class="hidden w-full h-[800px] rounded-3xl overflow-hidden border-4 border-slate-700 shadow-2xl bg-white">
-        <iframe 
-            src="https://star-market--janyanurlan.replit.app" 
-            class="w-full h-full border-none"
-            title="Stars Market">
-        </iframe>
+    <!-- STEPS -->
+    <div class="section-header">
+        <span class="section-num">01 / Процесс</span>
+        <span class="section-title">Три шага к результату</span>
     </div>
 
-    <div id="action-block">
-        <h2 class="text-3xl font-bold mb-6 text-white">Готовы начать?</h2>
-        <button onclick="launchMarket()" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-4 px-12 rounded-full text-xl transition-all transform hover:scale-105 shadow-lg shadow-blue-500/25">
-            Запустить Маркетплейс <i class="fas fa-rocket ml-2"></i>
-        </button>
-        <p class="mt-4 text-slate-500 text-sm">Нажимая кнопку, вы переходите в систему безопасных сделок</p>
+    <div class="steps-grid">
+        <div class="step-card">
+            <span class="step-bg-num">1</span>
+            <div class="step-icon-wrap">💬</div>
+            <div class="step-title">Пост-заявка</div>
+            <p class="step-desc">Вы пишете в общую сеть: <em>"Я делаю проект"</em>. Это ваш сигнал о готовности к работе.</p>
+        </div>
+        <div class="step-card">
+            <span class="step-bg-num">2</span>
+            <div class="step-icon-wrap">📋</div>
+            <div class="step-title">Получение требований</div>
+            <p class="step-desc">Другой человек видит ваш пост и выдвигает свои требования. Проект обретает конкретную форму.</p>
+        </div>
+        <div class="step-card">
+            <span class="step-bg-num">3</span>
+            <div class="step-icon-wrap">🚀</div>
+            <div class="step-title">Реализация</div>
+            <p class="step-desc">Вы создаёте финальный проект, полностью соответствующий полученным требованиям. Этап завершён!</p>
+        </div>
     </div>
-</section>
 
-<script>
-    function launchMarket() {
-        
-        window.location.href = 'market.html';
-    }
-</script>
-    
+    <!-- ROLES -->
+    <div class="section-header" style="padding-top: 56px;">
+        <span class="section-num">02 / Роли</span>
+        <span class="section-title">Как это работает для всех?</span>
+    </div>
+
+    <div class="roles-block">
+        <div class="role-item">
+            <div class="role-label">Исполнитель</div>
+            <div class="role-title">Берёшь и делаешь</div>
+            <p class="role-desc">Вам не нужно ничего публиковать заранее. Просто заявите о себе, получите ТЗ от другого участника и сделайте проект по его запросу.</p>
+        </div>
+        <div class="role-item">
+            <div class="role-label">Заказчик</div>
+            <div class="role-title">Направляешь работу</div>
+            <p class="role-desc">Вы выступаете в роли куратора: видите активного человека и направляете его работу своими требованиями и идеями.</p>
+        </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-block">
+        <div class="cta-inner">
+            <div>
+                <h2>ГОТОВЫ<br>НАЧАТЬ?</h2>
+                <p>Переходите в систему безопасных сделок</p>
+            </div>
+            <button onclick="window.location.href='market.html'" class="cta-btn">
+                Запустить маркетплейс →
+            </button>
+        </div>
+    </div>
+
+</main>
 </body>
 </html>
