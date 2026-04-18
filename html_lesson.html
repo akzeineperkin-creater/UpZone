@@ -675,12 +675,16 @@
             callAI();
         }
 
- async function callAI(messages) {
+async function callAI(messages) {
+    if (isLoading) return;
+
     isLoading = true;
     document.getElementById('chat-send').disabled = true;
     addTyping();
 
     try {
+        console.log("🚀 Отправляем запрос в Supabase...");
+
         const response = await fetch('https://dvwegmdyhjyihrxqvoiw.supabase.co/functions/v1/ai-mentor', {
             method: 'POST',
             headers: {
@@ -693,21 +697,29 @@
             })
         });
 
+        console.log("📡 Статус ответа:", response.status);
+
         if (!response.ok) {
-            throw new Error('Supabase error: ' + response.status);
+            const errorText = await response.text();
+            console.error("❌ Ошибка Supabase:", errorText);
+            throw new Error(`Supabase error: ${response.status}`);
         }
 
         const data = await response.json();
-        const reply = data.content?.[0]?.text || data.answer || 'Не смог ответить, попробуй ещё раз 😕';
+        console.log("✅ Ответ от Grok получен");
+
+        const reply = data.content?.[0]?.text || 
+                     data.answer || 
+                     'Не смог ответить, попробуй ещё раз 😕';
 
         removeTyping();
         addMessage('ai', reply);
         chatHistory.push({ role: 'assistant', content: reply });
 
     } catch (err) {
-        console.error(err);
+        console.error("🚨 Полная ошибка:", err);
         removeTyping();
-        addMessage('ai', '⚠️ Ошибка соединения. Попробуй ещё раз через 5–10 секунд.');
+        addMessage('ai', '⚠️ Ошибка соединения с Grok. Попробуй ещё раз через 5–10 секунд.');
     } finally {
         isLoading = false;
         document.getElementById('chat-send').disabled = false;
