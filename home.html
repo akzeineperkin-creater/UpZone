@@ -3,245 +3,913 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UpZone.ai</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>UpZone — Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #0d0d0d;
+            --bg2: #141414;
+            --bg3: #1a1a1a;
+            --border: #2a2a2a;
+            --acid: #e8ff00;
+            --acid2: #c8f000;
+            --text: #f5f5f0;
+            --muted: #888880;
+            --red: #ff3c3c;
+            --sidebar-w: 240px;
+        }
+
+        html, body { height: 100%; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            display: flex;
+            min-height: 100vh;
+            cursor: crosshair;
+        }
+
+        /* noise */
+        body::after {
+            content: '';
+            position: fixed; inset: 0;
+            pointer-events: none; z-index: 9999;
+            opacity: 0.025;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-size: 200px 200px;
+        }
+
+        /* ── SIDEBAR ── */
+        aside {
+            width: var(--sidebar-w);
+            background: var(--bg);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100%;
+            top: 0; left: 0;
+            z-index: 100;
+        }
+
+        .sidebar-logo {
+            padding: 24px 20px;
+            border-bottom: 1px solid var(--border);
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 24px;
+            letter-spacing: 4px;
+            color: var(--text);
+            text-decoration: none;
+            display: block;
+        }
+
+        .sidebar-logo span { color: var(--acid); }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .nav-btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 14px;
+            background: none;
+            border: 1px solid transparent;
+            color: var(--muted);
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            cursor: crosshair;
+            text-align: left;
+            text-decoration: none;
+            transition: color 0.15s, border-color 0.15s, background 0.15s;
+        }
+
+        .nav-btn:hover {
+            color: var(--text);
+            border-color: var(--border);
+            background: var(--bg2);
+        }
+
+        .nav-btn.active {
+            color: var(--acid);
+            border-color: var(--acid);
+            background: rgba(232,255,0,0.04);
+        }
+
+        .nav-btn .nav-icon {
+            font-size: 14px;
+            flex-shrink: 0;
+            width: 18px;
+            text-align: center;
+        }
+
+        .nav-btn.admin-btn {
+            color: var(--acid);
+            border-color: rgba(232,255,0,0.25);
+        }
+
+        .nav-btn.disputes-btn {
+            color: var(--red);
+            border-color: rgba(255,60,60,0.25);
+        }
+
+        /* sidebar bottom */
+        .sidebar-bottom {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .sidebar-bottom-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 9px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 10px;
+        }
+
+        .sidebar-socials {
+            display: flex;
+            gap: 8px;
+        }
+
+        .social-pill {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 0.5px;
+            color: var(--muted);
+            text-decoration: none;
+            padding: 5px 8px;
+            border: 1px solid var(--border);
+            transition: color 0.15s, border-color 0.15s;
+        }
+
+        .social-pill:hover { color: var(--acid); border-color: var(--acid); }
+
+        .status-line {
+            margin-top: 10px;
+            font-family: 'Space Mono', monospace;
+            font-size: 9px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-dot {
+            width: 6px; height: 6px;
+            background: var(--acid);
+            border-radius: 50%;
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* ── MAIN ── */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-w);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* top bar */
+        .topbar {
+            height: 60px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            position: sticky;
+            top: 0;
+            background: var(--bg);
+            z-index: 50;
+        }
+
+        .topbar-left {
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        .topbar-left span { color: var(--acid); }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .progress-chip {
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 1px;
+            color: var(--muted);
+            border: 1px solid var(--border);
+            padding: 6px 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .progress-chip span { color: var(--acid); }
+
+        /* ── SECTION WRAPPER ── */
+        .section-content {
+            padding: 40px;
+            flex: 1;
+        }
+
+        .hidden { display: none !important; }
+
+        /* section header */
+        .dash-header {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 20px;
+            margin-bottom: 40px;
+        }
+
+        .dash-header h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 48px;
+            letter-spacing: 1px;
+            line-height: 1;
+        }
+
+        .section-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        /* ── CARDS (Learning) ── */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            border: 1px solid var(--border);
+        }
+
+        .stage-card {
+            padding: 32px 28px 36px;
+            border-right: 1px solid var(--border);
+            position: relative;
+            transition: background 0.15s;
+        }
+
+        .stage-card:last-child { border-right: none; }
+        .stage-card:hover { background: var(--bg2); }
+
+        .card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .stage-badge {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--acid);
+            border: 1px solid rgba(232,255,0,0.3);
+            padding: 4px 10px;
+        }
+
+        .stage-status {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        .stage-status.open { color: var(--acid); }
+
+        .stage-num {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 100px;
+            line-height: 1;
+            color: var(--border);
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            user-select: none;
+            transition: color 0.15s;
+        }
+
+        .stage-card:hover .stage-num { color: #3a3a3a; }
+
+        .stage-card h2 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 24px;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stage-card p {
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.7;
+            margin-bottom: 28px;
+            font-weight: 300;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stage-link {
+            display: inline-block;
+            padding: 11px 24px;
+            background: var(--acid);
+            color: #0d0d0d;
+            text-decoration: none;
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            transition: background 0.15s, transform 0.1s, box-shadow 0.1s;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stage-link:hover {
+            background: var(--acid2);
+            transform: translate(-2px, -2px);
+            box-shadow: 2px 2px 0 var(--acid);
+        }
+
+        /* footer */
+        .page-footer {
+            margin-top: 60px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 1px;
+            color: var(--muted);
+        }
+
+        .page-footer a {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--muted);
+            text-decoration: none;
+            transition: color 0.15s;
+        }
+
+        .page-footer a:hover { color: var(--acid); }
+
+        /* ── PROFILE ── */
+        .profile-wrap {
+            max-width: 640px;
+        }
+
+        .profile-card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            padding: 0;
+        }
+
+        .profile-card-header {
+            padding: 24px 28px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .profile-card-header h2 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 28px;
+            letter-spacing: 1px;
+        }
+
+        .profile-btn-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .pbtn {
+            padding: 8px 16px;
+            border: 1px solid var(--border);
+            background: none;
+            color: var(--muted);
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            cursor: crosshair;
+            transition: all 0.15s;
+        }
+
+        .pbtn:hover { color: var(--acid); border-color: var(--acid); }
+        .pbtn.danger:hover { color: var(--red); border-color: var(--red); }
+
+        /* avatar block */
+        .avatar-block {
+            padding: 32px 28px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .avatar-wrap { position: relative; flex-shrink: 0; }
+
+        #imagePreview {
+            width: 80px; height: 80px;
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            background-size: cover;
+            background-position: center;
+            overflow: hidden;
+        }
+
+        #plusLabel {
+            position: absolute;
+            bottom: -4px; right: -4px;
+            width: 24px; height: 24px;
+            background: var(--acid);
+            color: #0d0d0d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: crosshair;
+            border: 1px solid var(--bg2);
+            line-height: 1;
+        }
+
+        #plusLabel:hover { background: var(--acid2); }
+
+        .avatar-info {}
+
+        #view-username {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 28px;
+            letter-spacing: 1px;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        #view-direction {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        /* balance block */
+        .balance-block {
+            padding: 24px 28px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .balance-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 4px;
+        }
+
+        .balance-val {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 40px;
+            letter-spacing: 1px;
+            color: var(--acid);
+            line-height: 1;
+        }
+
+        .topup-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 11px 20px;
+            background: var(--acid);
+            color: #0d0d0d;
+            text-decoration: none;
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            white-space: nowrap;
+            transition: background 0.15s, transform 0.1s, box-shadow 0.1s;
+            flex-shrink: 0;
+        }
+
+        .topup-btn:hover {
+            background: var(--acid2);
+            transform: translate(-2px, -2px);
+            box-shadow: 2px 2px 0 var(--acid);
+        }
+
+        /* fields */
+        .profile-fields {
+            padding: 8px 0;
+        }
+
+        .field-row {
+            display: flex;
+            align-items: flex-start;
+            padding: 16px 28px;
+            border-bottom: 1px solid var(--border);
+            gap: 20px;
+        }
+
+        .field-row:last-child { border-bottom: none; }
+
+        .field-key {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--muted);
+            min-width: 100px;
+            padding-top: 1px;
+        }
+
+        .field-val {
+            font-size: 14px;
+            color: var(--text);
+        }
+
+        /* edit form */
+        #profile-edit-form {
+            padding: 24px 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .edit-group label {
+            display: block;
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        .edit-group input,
+        .edit-group select,
+        .edit-group textarea {
+            width: 100%;
+            padding: 12px 14px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            outline: none;
+            border-radius: 0;
+            -webkit-appearance: none;
+            transition: border-color 0.15s;
+        }
+
+        .edit-group input:focus,
+        .edit-group select:focus,
+        .edit-group textarea:focus {
+            border-color: var(--acid);
+        }
+
+        .edit-group select option {
+            background: #1a1a1a;
+        }
+
+        .save-btn {
+            padding: 14px;
+            background: var(--acid);
+            border: none;
+            color: #0d0d0d;
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            cursor: crosshair;
+            transition: background 0.15s;
+        }
+
+        .save-btn:hover { background: var(--acid2); }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 900px) {
+            :root { --sidebar-w: 0px; }
+
+            aside {
+                width: 100%;
+                height: auto;
+                position: relative;
+                flex-direction: row;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .sidebar-logo { padding: 16px 20px; border-bottom: none; border-right: 1px solid var(--border); }
+            .sidebar-nav { flex-direction: row; padding: 8px; flex: 1; overflow-x: auto; gap: 4px; }
+            .nav-btn { white-space: nowrap; flex: 0; }
+            .sidebar-bottom { display: none; }
+
+            .main-content { margin-left: 0; }
+            .topbar { display: none; }
+            .section-content { padding: 24px 16px; }
+            .cards-grid { grid-template-columns: 1fr; }
+            .stage-card { border-right: none; border-bottom: 1px solid var(--border); }
+            .stage-card:last-child { border-bottom: none; }
+        }
+
+        @media (max-width: 600px) {
+            .dash-header h1 { font-size: 36px; }
+            .balance-block { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
 </head>
-<body class="bg-gray-100 font-sans flex min-h-screen">
+<body>
 
-    <aside class="w-64 bg-slate-900 text-white flex flex-col fixed h-full">
-        <div class="p-6 text-2xl font-bold border-b border-slate-700">
-            🚀 Upzone <span class="text-blue-400">Hub</span>
+<!-- SIDEBAR -->
+<aside>
+    <a href="#" class="sidebar-logo">UP<span>ZONE</span></a>
+
+    <nav class="sidebar-nav">
+        <button onclick="showSection('learning')" id="nav-learning" class="nav-btn active">
+            <span class="nav-icon">📚</span> Обучение
+        </button>
+        <button onclick="showSection('profile')" id="nav-profile" class="nav-btn">
+            <span class="nav-icon">👤</span> Профиль
+        </button>
+        <button onclick="window.location.href='chat.html'" class="nav-btn">
+            <span class="nav-icon">💬</span> Сообщество
+        </button>
+        <button id="admin-btn" onclick="window.location.href='admin.html'" class="nav-btn admin-btn hidden">
+            <span class="nav-icon">⚙️</span> Админ
+        </button>
+        <button id="disputes-btn" onclick="window.location.href='spori.html'" class="nav-btn disputes-btn hidden">
+            <span class="nav-icon">⚖️</span> Споры
+        </button>
+    </nav>
+
+    <div class="sidebar-bottom">
+        <div class="sidebar-bottom-label">Мы в соцсетях</div>
+        <div class="sidebar-socials">
+            <a href="https://www.instagram.com/upzone.ai?igsh=MWYxMzN1MnBzYmw4cA==" target="_blank" class="social-pill">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+                IG
+            </a>
+            <a href="https://t.me/upzoneai" target="_blank" class="social-pill">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 5L2 12.5l7 1M21 5l-2.5 14L9 13.5M21 5L9 13.5m0 0v5l3.5-3"/></svg>
+                TG
+            </a>
         </div>
-        <nav class="flex-1 p-4 space-y-2">
-            <button onclick="showSection('learning')" id="nav-learning" class="w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-slate-800 transition bg-slate-800">
-                <span>📚</span><span>Обучение</span>
-            </button>
-            <button onclick="showSection('profile')" id="nav-profile" class="w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-slate-800 transition">
-                <span>👤</span><span>Профиль</span>
-            </button>
-            <button onclick="window.location.href='chat.html'" class="w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-slate-800 transition">
-                <span>💬</span><span>Сообщество</span>
-            </button>
-            <button id="admin-btn" onclick="window.location.href='admin.html'" class="hidden w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-yellow-500/20 transition text-yellow-400 border border-yellow-500/30">
-                <span>⚙️</span><span>Админ</span>
-            </button>
-            <button id="disputes-btn" onclick="window.location.href='spori.html'" class="hidden w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-red-500/20 transition text-red-400 border border-red-500/30">
-                <span>⚖️</span><span>Споры</span>
-            </button>
-        </nav>
+        <div class="status-line">
+            <span class="status-dot"></span> Активен
+        </div>
+    </div>
+</aside>
 
-        <!-- Соцсети + статус внизу сайдбара -->
-        <div class="p-4 border-t border-slate-700">
-            <p class="text-xs text-slate-500 mb-2">Мы в соцсетях</p>
-            <div class="flex gap-2">
-                <a href="https://www.instagram.com/upzone.ai?igsh=MWYxMzN1MnBzYmw4cA==" target="_blank"
-                   class="flex items-center gap-1.5 text-xs text-slate-400 hover:text-pink-400 transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                    </svg>
-                    Instagram
-                </a>
-                <span class="text-slate-700">|</span>
-                <a href="https://t.me/upzoneai" target="_blank"
-                   class="flex items-center gap-1.5 text-xs text-slate-400 hover:text-blue-400 transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
-                    </svg>
-                    Telegram
-                </a>
+<!-- MAIN -->
+<div class="main-content">
+
+    <!-- Top bar -->
+    <div class="topbar">
+        <div class="topbar-left">
+            Привет, <span id="userGreeting">Студент</span>
+        </div>
+        <div class="topbar-right">
+            <div class="progress-chip">
+                Прогресс: <span id="progressPercent">0%</span>
             </div>
-            <p class="text-xs text-slate-500 mt-3">Статус: Активен</p>
         </div>
-    </aside>
+    </div>
 
-    <div class="flex-1 ml-64 p-8">
+    <!-- ── LEARNING SECTION ── -->
+    <div id="learning-section" class="section-content">
 
-        <!-- Обучение -->
-        <section id="learning-section">
-            <header class="max-w-6xl mx-auto mb-10 flex justify-between items-center">
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-800">Привет, <span id="userGreeting">Студент</span>!</h1>
-                    <p class="text-gray-500">Путь от идеи до первых продаж</p>
-                </div>
-                <div class="bg-white px-4 py-2 rounded-full shadow-sm border border-gray-200">
-                    <span class="text-sm font-medium text-gray-600">Прогресс: <span id="progressPercent" class="text-blue-600">0%</span></span>
-                </div>
-            </header>
-            <main class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-white p-6 rounded-2xl shadow-lg border-t-4 border-blue-500 hover:-translate-y-1 transition">
-                    <div class="flex justify-between items-start mb-4">
-                        <span class="bg-blue-100 text-blue-600 text-xs font-bold px-2.5 py-1 rounded">ЭТАП 1</span>
-                        <span class="text-green-500 text-sm">🔓 Доступно</span>
-                    </div>
-                    <h2 class="text-xl font-bold mb-2 text-gray-800">Поиск и валидация идеи</h2>
-                    <p class="text-gray-600 mb-6 text-sm">Учимся находить боли клиентов и проверять их.</p>
-                    <a href="lesson.html" class="block text-center w-full bg-blue-600 text-white font-semibold py-2 rounded-xl hover:bg-blue-700 transition">Перейти к уроку</a>
-                </div>
-                <div class="bg-white p-6 rounded-2xl shadow-lg border-t-4 border-blue-500 hover:-translate-y-1 transition">
-                    <div class="flex justify-between items-start mb-4">
-                        <span class="bg-blue-100 text-blue-600 text-xs font-bold px-2.5 py-1 rounded">ЭТАП 2</span>
-                        <span class="text-green-500 text-sm">🔓 Доступно</span>
-                    </div>
-                    <h2 class="text-xl font-bold mb-2 text-gray-800">Сборка MVP на VS Code</h2>
-                    <p class="text-gray-600 mb-6 text-sm">Создаем работающий прототип продукта за 48 часов.</p>
-                    <a href="stage2.html" class="block text-center w-full bg-blue-600 text-white font-semibold py-2 rounded-xl hover:bg-blue-700 transition">Перейти к уроку</a>
-                </div>
-                <div class="bg-white p-6 rounded-2xl shadow-lg border-t-4 border-blue-500 hover:-translate-y-1 transition">
-                    <div class="flex justify-between items-start mb-4">
-                        <span class="bg-blue-100 text-blue-600 text-xs font-bold px-2.5 py-1 rounded">ЭТАП 3</span>
-                        <span class="text-green-500 text-sm">🔓 Доступно</span>
-                    </div>
-                    <h2 class="text-xl font-bold mb-2 text-gray-800">Первые продажи</h2>
-                    <p class="text-gray-600 mb-6 text-sm">Запускаем трафик и получаем первые деньги.</p>
-                    <a href="stage3.html" class="block text-center w-full bg-blue-600 text-white font-semibold py-2 rounded-xl hover:bg-blue-700 transition">Перейти к уроку</a>
-                </div>
-            </main>
+        <div class="dash-header">
+            <div>
+                <div class="section-label">01 / Обучение</div>
+                <h1>Путь от идеи до продаж</h1>
+            </div>
+        </div>
 
-            <!-- Футер внизу основного контента -->
-            <footer class="max-w-6xl mx-auto mt-16 pt-6 border-t border-gray-200 flex items-center justify-center gap-6 text-xs text-gray-400">
-                <span>© 2025 UpZone.ai</span>
-                <a href="https://www.instagram.com/upzone.ai?igsh=MWYxMzN1MnBzYmw4cA==" target="_blank"
-                   class="flex items-center gap-1 hover:text-pink-500 transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                    </svg>
-                    @upzone.ai
-                </a>
-                <a href="https://t.me/upzoneai" target="_blank"
-                   class="flex items-center gap-1 hover:text-blue-500 transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
-                    </svg>
-                    @upzoneai
-                </a>
-            </footer>
-        </section>
+        <div class="cards-grid">
+            <div class="stage-card">
+                <div class="card-top">
+                    <span class="stage-badge">Этап 1</span>
+                    <span class="stage-status open">🔓 Доступно</span>
+                </div>
+                <div class="stage-num">1</div>
+                <h2>Поиск и валидация идеи</h2>
+                <p>Учимся находить боли клиентов и проверять их.</p>
+                <a href="lesson.html" class="stage-link">Перейти →</a>
+            </div>
+            <div class="stage-card">
+                <div class="card-top">
+                    <span class="stage-badge">Этап 2</span>
+                    <span class="stage-status open">🔓 Доступно</span>
+                </div>
+                <div class="stage-num">2</div>
+                <h2>Сборка MVP на VS Code</h2>
+                <p>Создаем работающий прототип продукта за 48 часов.</p>
+                <a href="stage2.html" class="stage-link">Перейти →</a>
+            </div>
+            <div class="stage-card">
+                <div class="card-top">
+                    <span class="stage-badge">Этап 3</span>
+                    <span class="stage-status open">🔓 Доступно</span>
+                </div>
+                <div class="stage-num">3</div>
+                <h2>Первые продажи</h2>
+                <p>Запускаем трафик и получаем первые деньги.</p>
+                <a href="stage3.html" class="stage-link">Перейти →</a>
+            </div>
+        </div>
 
-        <!-- Профиль -->
-        <section id="profile-section" class="hidden max-w-2xl mx-auto">
-            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl">
+        <footer class="page-footer">
+            <span>© 2025 UpZone.ai</span>
+            <a href="https://www.instagram.com/upzone.ai?igsh=MWYxMzN1MnBzYmw4cA==" target="_blank">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+                @upzone.ai
+            </a>
+            <a href="https://t.me/upzoneai" target="_blank">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 5L2 12.5l7 1M21 5l-2.5 14L9 13.5M21 5L9 13.5m0 0v5l3.5-3"/></svg>
+                @upzoneai
+            </a>
+        </footer>
+    </div>
 
-                <div class="flex justify-between items-center mb-8">
-                    <h2 class="text-2xl font-bold text-white">Мой профиль</h2>
-                    <div class="flex gap-3">
-                        <button onclick="toggleEditMode()" id="toggleBtn"
-                            class="text-blue-400 border border-blue-600 px-4 py-2 rounded-xl hover:bg-blue-600 hover:text-white transition text-sm font-bold">
-                            Редактировать
-                        </button>
-                        <button onclick="logout()"
-                            class="text-red-400 border border-red-600/40 px-4 py-2 rounded-xl hover:bg-red-600 hover:text-white transition text-sm font-bold">
-                            Выйти
-                        </button>
+    <!-- ── PROFILE SECTION ── -->
+    <div id="profile-section" class="section-content hidden">
+
+        <div class="dash-header">
+            <div>
+                <div class="section-label">02 / Профиль</div>
+                <h1>Мой профиль</h1>
+            </div>
+        </div>
+
+        <div class="profile-wrap">
+            <div class="profile-card">
+
+                <div class="profile-card-header">
+                    <h2>АККАУНТ</h2>
+                    <div class="profile-btn-row">
+                        <button class="pbtn" onclick="toggleEditMode()" id="toggleBtn">Редактировать</button>
+                        <button class="pbtn danger" onclick="logout()">Выйти</button>
                     </div>
                 </div>
 
-                <div class="flex flex-col items-center mb-8">
-                    <div class="relative mb-4">
-                        <div id="imagePreview"
-                            class="w-28 h-28 rounded-full bg-blue-600 flex items-center justify-center text-5xl border-4 border-slate-700 overflow-hidden"
-                            style="background-size:cover;background-position:center;">👤</div>
-                        <label for="imageUpload" id="plusLabel"
-                            class="hidden absolute bottom-1 right-1 bg-blue-500 w-8 h-8 rounded-full flex items-center justify-center cursor-pointer text-white text-lg hover:bg-blue-400 transition">+</label>
+                <!-- avatar -->
+                <div class="avatar-block">
+                    <div class="avatar-wrap">
+                        <div id="imagePreview">👤</div>
+                        <label for="imageUpload" id="plusLabel" class="hidden">+</label>
                         <input type="file" id="imageUpload" accept=".png,.jpg,.jpeg" class="hidden" onchange="uploadAvatar(this)">
                     </div>
-                    <h3 id="view-username" class="text-xl font-bold text-white">@username</h3>
-                    <p id="view-direction" class="text-slate-400 text-sm mt-1">Направление</p>
-                </div>
-
-                <div class="bg-gradient-to-br from-slate-800 to-slate-900 p-5 rounded-2xl border border-slate-700">
-                    <p class="text-[10px] text-slate-500 uppercase font-bold mb-1">Баланс</p>
-                    <p class="text-3xl font-black text-yellow-400 mb-4"><span id="side-balance">0</span> ⭐</p>
-                    <a href="topup.html" class="flex items-center justify-center gap-2 w-full py-3 bg-gradient-to-r from-yellow-500 to-yellow-400 hover:from-yellow-400 hover:to-yellow-300 text-black font-black rounded-xl text-sm transition shadow-lg shadow-yellow-500/30 active:scale-95">
-                        ⭐ Пополнить баланс
-                    </a>
-                </div>
-
-                <div id="profile-view-mode" class="space-y-4 mt-4">
-                    <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
-                        <p class="text-xs text-slate-500 uppercase font-bold mb-1">Email</p>
-                        <p id="view-email" class="text-white">—</p>
-                    </div>
-                    <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
-                        <p class="text-xs text-slate-500 uppercase font-bold mb-1">Фамилия</p>
-                        <p id="view-lastName" class="text-white">—</p>
-                    </div>
-                    <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
-                        <p class="text-xs text-slate-500 uppercase font-bold mb-1">Instagram</p>
-                        <p id="view-insta" class="text-white">—</p>
-                    </div>
-                    <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
-                        <p class="text-xs text-slate-500 uppercase font-bold mb-1">О себе</p>
-                        <p id="view-bio" class="text-white">—</p>
+                    <div class="avatar-info">
+                        <span id="view-username">@username</span>
+                        <span id="view-direction">Направление</span>
                     </div>
                 </div>
 
-                <form id="profile-edit-form" class="hidden space-y-4 mt-4">
+                <!-- balance -->
+                <div class="balance-block">
                     <div>
-                        <label class="text-xs font-bold text-slate-400 uppercase">Никнейм</label>
-                        <input type="text" id="edit-username" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-white outline-none focus:border-blue-500 mt-1">
+                        <div class="balance-label">Баланс</div>
+                        <div class="balance-val"><span id="side-balance">0</span> ⭐</div>
                     </div>
-                    <div>
-                        <label class="text-xs font-bold text-slate-400 uppercase">Фамилия</label>
-                        <input type="text" id="edit-lastName" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-white outline-none focus:border-blue-500 mt-1">
+                    <a href="topup.html" class="topup-btn">⭐ Пополнить</a>
+                </div>
+
+                <!-- view mode -->
+                <div id="profile-view-mode" class="profile-fields">
+                    <div class="field-row">
+                        <span class="field-key">Email</span>
+                        <span class="field-val" id="view-email">—</span>
                     </div>
-                    <div>
-                        <label class="text-xs font-bold text-slate-400 uppercase">Instagram</label>
-                        <input type="text" id="edit-insta" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-white outline-none focus:border-blue-500 mt-1">
+                    <div class="field-row">
+                        <span class="field-key">Фамилия</span>
+                        <span class="field-val" id="view-lastName">—</span>
                     </div>
-                    <div>
-                        <label class="text-xs font-bold text-slate-400 uppercase">Направление</label>
-                        <select id="edit-direction" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-white outline-none focus:border-blue-500 mt-1">
+                    <div class="field-row">
+                        <span class="field-key">Instagram</span>
+                        <span class="field-val" id="view-insta">—</span>
+                    </div>
+                    <div class="field-row">
+                        <span class="field-key">О себе</span>
+                        <span class="field-val" id="view-bio">—</span>
+                    </div>
+                </div>
+
+                <!-- edit mode -->
+                <form id="profile-edit-form" class="hidden">
+                    <div class="edit-group">
+                        <label>Никнейм</label>
+                        <input type="text" id="edit-username">
+                    </div>
+                    <div class="edit-group">
+                        <label>Фамилия</label>
+                        <input type="text" id="edit-lastName">
+                    </div>
+                    <div class="edit-group">
+                        <label>Instagram</label>
+                        <input type="text" id="edit-insta">
+                    </div>
+                    <div class="edit-group">
+                        <label>Направление</label>
+                        <select id="edit-direction">
                             <option value="none">Выберите вариант</option>
                             <option value="hr">HRTech</option>
                             <option value="ai">AI & Data</option>
                             <option value="health">HealthTech</option>
-                            <option value="ecommerce">🛒 E-commerce</option>
-                            <option value="mobile">📱 Mobile Dev</option>
-                            <option value="design">🎨 Design & Creative</option>
-                            <option value="marketing">📈 Marketing & SMM</option>
-                            <option value="fintech">💰 FinTech</option>
-                            <option value="edtech">🎓 EdTech</option>
-                            <option value="proptech">🏗 PropTech</option>
-                            <option value="greentech">🌱 GreenTech</option>
-                            <option value="gamedev">🎮 GameDev</option>
-                            <option value="saas">🤝 B2B SaaS</option>
+                            <option value="ecommerce">E-commerce</option>
+                            <option value="mobile">Mobile Dev</option>
+                            <option value="design">Design & Creative</option>
+                            <option value="marketing">Marketing & SMM</option>
+                            <option value="fintech">FinTech</option>
+                            <option value="edtech">EdTech</option>
+                            <option value="proptech">PropTech</option>
+                            <option value="greentech">GreenTech</option>
+                            <option value="gamedev">GameDev</option>
+                            <option value="saas">B2B SaaS</option>
                             <option value="other">Другое</option>
                         </select>
                     </div>
-                    <div>
-                        <label class="text-xs font-bold text-slate-400 uppercase">О себе</label>
-                        <textarea id="edit-bio" rows="3" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-white outline-none focus:border-blue-500 mt-1"></textarea>
+                    <div class="edit-group">
+                        <label>О себе</label>
+                        <textarea id="edit-bio" rows="3"></textarea>
                     </div>
-                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-xl font-bold transition">
-                        💾 Сохранить
-                    </button>
+                    <button type="submit" class="save-btn">Сохранить →</button>
                 </form>
+
             </div>
 
-            <!-- Футер под профилем -->
-            <footer class="mt-8 flex items-center justify-center gap-6 text-xs text-gray-400">
+            <footer class="page-footer">
                 <span>© 2025 UpZone.ai</span>
-                <a href="https://www.instagram.com/upzone.ai?igsh=MWYxMzN1MnBzYmw4cA==" target="_blank"
-                   class="flex items-center gap-1 hover:text-pink-500 transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                    </svg>
+                <a href="https://www.instagram.com/upzone.ai?igsh=MWYxMzN1MnBzYmw4cA==" target="_blank">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
                     @upzone.ai
                 </a>
-                <a href="https://t.me/upzoneai" target="_blank"
-                   class="flex items-center gap-1 hover:text-blue-500 transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
-                    </svg>
+                <a href="https://t.me/upzoneai" target="_blank">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 5L2 12.5l7 1M21 5l-2.5 14L9 13.5M21 5L9 13.5m0 0v5l3.5-3"/></svg>
                     @upzoneai
                 </a>
             </footer>
-        </section>
-
+        </div>
     </div>
 
-    <script>
+</div>
+
+<script>
     const SUPABASE_URL = 'https://dvwegmdyhjyihrxqvoiw.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2d2VnbWR5aGp5aWhyeHF2b2l3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0MDYwOTAsImV4cCI6MjA4Mzk4MjA5MH0.HrG5GijHH4Lj7mO3SorbG0kKfnl5FLtSCWp6aONYxJ8';
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -249,21 +917,11 @@
     const ADMIN_ID = 'e6b5286c-7fb8-4eb3-88af-034c6387a9bf';
 
     const directionNames = {
-        'none':       'Не выбрано',
-        'hr':         'HRTech',
-        'ai':         'AI & Data',
-        'health':     'HealthTech',
-        'ecommerce':  '🛒 E-commerce',
-        'mobile':     '📱 Mobile Dev',
-        'design':     '🎨 Design & Creative',
-        'marketing':  '📈 Marketing & SMM',
-        'fintech':    '💰 FinTech',
-        'edtech':     '🎓 EdTech',
-        'proptech':   '🏗 PropTech',
-        'greentech':  '🌱 GreenTech',
-        'gamedev':    '🎮 GameDev',
-        'saas':       '🤝 B2B SaaS',
-        'other':      'Другое'
+        'none': 'Не выбрано', 'hr': 'HRTech', 'ai': 'AI & Data', 'health': 'HealthTech',
+        'ecommerce': 'E-commerce', 'mobile': 'Mobile Dev', 'design': 'Design & Creative',
+        'marketing': 'Marketing & SMM', 'fintech': 'FinTech', 'edtech': 'EdTech',
+        'proptech': 'PropTech', 'greentech': 'GreenTech', 'gamedev': 'GameDev',
+        'saas': 'B2B SaaS', 'other': 'Другое'
     };
 
     function updateDisplay(data) {
@@ -273,10 +931,9 @@
         document.getElementById('view-lastName').innerText = data.lastName || '—';
         document.getElementById('view-insta').innerText    = data.insta || '—';
         document.getElementById('view-bio').innerText      = data.bio || '—';
-        document.getElementById('side-balance').innerText = data.wallet_balance || 0;
+        document.getElementById('side-balance').innerText  = data.wallet_balance || 0;
         document.getElementById('userGreeting').innerText  = data.username || 'Студент';
-        const directionText = directionNames[data.direction] || data.direction || 'Не выбрано';
-        document.getElementById('view-direction').innerText = directionText;
+        document.getElementById('view-direction').innerText = directionNames[data.direction] || data.direction || 'Не выбрано';
         if (data.avatar_url) {
             const preview = document.getElementById('imagePreview');
             preview.style.backgroundImage = `url('${data.avatar_url}')`;
@@ -290,10 +947,7 @@
 
     async function loadUserData() {
         const { data: { user }, error: authError } = await _supabase.auth.getUser();
-        if (authError || !user) {
-            window.location.href = 'signup.html';
-            return;
-        }
+        if (authError || !user) { window.location.href = 'signup.html'; return; }
 
         if (user.id === ADMIN_ID) {
             document.getElementById('admin-btn').classList.remove('hidden');
@@ -350,11 +1004,11 @@
         if (!user) { alert("Вы не авторизованы!"); return; }
         const updatedData = {
             id: user.id,
-            username: document.getElementById('edit-username').value.trim(),
-            last_name: document.getElementById('edit-lastName').value.trim(),
-            insta: document.getElementById('edit-insta').value.trim(),
-            direction: document.getElementById('edit-direction').value,
-            bio: document.getElementById('edit-bio').value.trim(),
+            username:   document.getElementById('edit-username').value.trim(),
+            last_name:  document.getElementById('edit-lastName').value.trim(),
+            insta:      document.getElementById('edit-insta').value.trim(),
+            direction:  document.getElementById('edit-direction').value,
+            bio:        document.getElementById('edit-bio').value.trim(),
             updated_at: new Date().toISOString()
         };
         const { error } = await _supabase.from('profiles').upsert(updatedData);
@@ -369,12 +1023,12 @@
             const section = document.getElementById(s + '-section');
             const nav = document.getElementById('nav-' + s);
             if (section) section.classList.add('hidden');
-            if (nav) nav.classList.remove('bg-slate-800');
+            if (nav) nav.classList.remove('active');
         });
         const targetSection = document.getElementById(id + '-section');
         const targetNav = document.getElementById('nav-' + id);
         if (targetSection) targetSection.classList.remove('hidden');
-        if (targetNav) targetNav.classList.add('bg-slate-800');
+        if (targetNav) targetNav.classList.add('active');
     }
 
     let isEditMode = false;
@@ -385,11 +1039,11 @@
         document.getElementById('toggleBtn').innerText = isEditMode ? 'Отмена' : 'Редактировать';
         document.getElementById('plusLabel').classList.toggle('hidden', !isEditMode);
         if (isEditMode) {
-            document.getElementById('edit-username').value   = document.getElementById('view-username').innerText.replace('@', '').trim();
-            document.getElementById('edit-lastName').value   = document.getElementById('view-lastName').innerText.trim();
-            document.getElementById('edit-insta').value      = document.getElementById('view-insta').innerText.trim();
-            document.getElementById('edit-direction').value  = directionNames[document.getElementById('view-direction').innerText] || 'none';
-            document.getElementById('edit-bio').value        = document.getElementById('view-bio').innerText.trim();
+            document.getElementById('edit-username').value  = document.getElementById('view-username').innerText.replace('@', '').trim();
+            document.getElementById('edit-lastName').value  = document.getElementById('view-lastName').innerText.trim();
+            document.getElementById('edit-insta').value     = document.getElementById('view-insta').innerText.trim();
+            document.getElementById('edit-direction').value = directionNames[document.getElementById('view-direction').innerText] || 'none';
+            document.getElementById('edit-bio').value       = document.getElementById('view-bio').innerText.trim();
         }
     }
 
@@ -419,6 +1073,6 @@
     }
 
     window.addEventListener('load', loadUserData);
-    </script>
+</script>
 </body>
 </html>
