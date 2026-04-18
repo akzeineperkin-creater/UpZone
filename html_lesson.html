@@ -683,7 +683,10 @@ async function callAI(messages) {
     addTyping();
 
     try {
-        console.log("🚀 Отправляем запрос в Supabase...");
+        console.log("🚀 Отправляем запрос... | messages length:", messages?.length);
+
+        // Защита — если messages не массив, делаем его массивом
+        const safeMessages = Array.isArray(messages) ? messages : [];
 
         const response = await fetch('https://dvwegmdyhjyihrxqvoiw.supabase.co/functions/v1/ai-mentor', {
             method: 'POST',
@@ -693,11 +696,9 @@ async function callAI(messages) {
             },
             body: JSON.stringify({
                 system: SYSTEM_PROMPT,
-                messages: messages
+                messages: safeMessages
             })
         });
-
-        console.log("📡 Статус ответа:", response.status);
 
         if (!response.ok) {
             const errorText = await response.text();
@@ -706,11 +707,7 @@ async function callAI(messages) {
         }
 
         const data = await response.json();
-        console.log("✅ Ответ от Grok получен");
-
-        const reply = data.content?.[0]?.text || 
-                     data.answer || 
-                     'Не смог ответить, попробуй ещё раз 😕';
+        const reply = data.content?.[0]?.text || 'Не смог ответить 😕';
 
         removeTyping();
         addMessage('ai', reply);
@@ -719,11 +716,12 @@ async function callAI(messages) {
     } catch (err) {
         console.error("🚨 Полная ошибка:", err);
         removeTyping();
-        addMessage('ai', '⚠️ Ошибка соединения с Grok. Попробуй ещё раз через 5–10 секунд.');
+        addMessage('ai', '⚠️ Ошибка соединения с Grok. Попробуй ещё раз.');
     } finally {
         isLoading = false;
         document.getElementById('chat-send').disabled = false;
     }
+}
 }
         function addMessage(role, text) {
             const msgs = document.getElementById('chat-messages');
