@@ -675,32 +675,48 @@
             callAI();
         }
 
-        async function callAI(messages) {
+ async function callAI(messages) {
+    if (isLoading) return;
+    
+    isLoading = true;
+    document.getElementById('chat-send').disabled = true;
+    addTyping();
+
     try {
-        const response = await fetch(API_URL, {
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + ANON_KEY,
+                'x-api-key': 'твой_ключ_сюда',           // ←←← СЮДА ВСТАВЬ КЛЮЧ
+                'anthropic-version': '2023-06-01',
+                'anthropic-dangerous-direct-browser-access': 'true'
             },
-            body: JSON.stringify({ 
-                system: SYSTEM_PROMPT, 
-                messages: messages 
+            body: JSON.stringify({
+                model: 'claude-3-5-sonnet-20241022',   // или claude-3-opus-20240229 / claude-sonnet-4-20250514
+                max_tokens: 1000,
+                system: SYSTEM_PROMPT,
+                messages: messages
             })
         });
 
         if (!response.ok) {
-            console.error('Supabase error:', response.status, await response.text());
-            throw new Error(`HTTP error! Status: ${response.status}`);
+            throw new Error(`HTTP ${response.status}`);
         }
 
         const data = await response.json();
-        return data.content?.[0]?.text || data.answer || data.response || 
-               'Я получил сообщение, но не смог обработать ответ 😕';
-        
+        const reply = data.content?.[0]?.text || 'Не получилось ответить 😕';
+
+        removeTyping();
+        addMessage('ai', reply);
+        chatHistory.push({ role: 'assistant', content: reply });
+
     } catch (err) {
-        console.error('AI Request failed:', err);
-        return '⚠️ Ошибка соединения с ИИ. Попробуй ещё раз через 10 секунд.';
+        console.error('Anthropic Error:', err);
+        removeTyping();
+        addMessage('ai', '⚠️ Ошибка соединения с Anthropic. Попробуй ещё раз или напиши вручную!');
+    } finally {
+        isLoading = false;
+        document.getElementById('chat-send').disabled = false;
     }
 }
         function addMessage(role, text) {
