@@ -455,7 +455,7 @@
         .pbtn:hover { color: var(--acid); border-color: var(--acid); }
         .pbtn.danger:hover { color: var(--red); border-color: var(--red); }
 
-        /* avatar block */
+        /* ── AVATAR PREVIEW ── */
         .avatar-block {
             padding: 32px 28px;
             border-bottom: 1px solid var(--border);
@@ -466,36 +466,97 @@
 
         .avatar-wrap { position: relative; flex-shrink: 0; }
 
-        #imagePreview {
-            width: 80px; height: 80px;
+        /* The rounded-square frame */
+        #avatarFrame {
+            width: 96px;
+            height: 96px;
+            border-radius: 16px;
             background: var(--bg3);
             border: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-            background-size: cover;
-            background-position: center;
             overflow: hidden;
-        }
-
-        #plusLabel {
-            position: absolute;
-            bottom: -4px; right: -4px;
-            width: 24px; height: 24px;
-            background: var(--acid);
-            color: #0d0d0d;
+            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: crosshair;
-            border: 1px solid var(--bg2);
-            line-height: 1;
+            transition: border-color 0.2s;
         }
 
-        #plusLabel:hover { background: var(--acid2); }
+        /* Default placeholder icon */
+        #avatarPlaceholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--muted);
+            position: absolute;
+            inset: 0;
+        }
+
+        /* The actual preview image */
+        #avatarImg {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            display: block;
+            position: absolute;
+            inset: 0;
+        }
+
+        /* Loading spinner overlay */
+        #avatarSpinner {
+            position: absolute;
+            inset: 0;
+            background: rgba(13,13,13,0.75);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3;
+        }
+
+        .spinner-ring {
+            width: 28px; height: 28px;
+            border: 2px solid rgba(232,255,0,0.2);
+            border-top-color: var(--acid);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Hover/edit upload overlay */
+        #avatarOverlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(13,13,13,0.72);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            color: var(--acid);
+            font-family: 'Space Mono', monospace;
+            font-size: 9px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            cursor: pointer;
+            z-index: 2;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        /* Show overlay on hover when frame is hovered (edit mode) */
+        #avatarFrame:hover #avatarOverlay:not(.hidden) { opacity: 1; }
+
+        /* On touch devices always show a faint version so user knows it's tappable */
+        @media (hover: none) {
+            #avatarOverlay:not(.hidden) { opacity: 0.85; }
+        }
+
+        /* Acid border pulse when edit mode is on */
+        #avatarFrame.edit-active {
+            border-color: rgba(232,255,0,0.4);
+            box-shadow: 0 0 0 3px rgba(232,255,0,0.08);
+        }
 
         .avatar-info {}
 
@@ -846,6 +907,12 @@
                 gap: 16px;
             }
 
+            #avatarFrame {
+                width: 80px;
+                height: 80px;
+                border-radius: 14px;
+            }
+
             #view-username { font-size: 24px; }
 
             .balance-block {
@@ -1080,9 +1147,29 @@
                 <!-- avatar -->
                 <div class="avatar-block">
                     <div class="avatar-wrap">
-                        <div id="imagePreview">👤</div>
-                        <label for="imageUpload" id="plusLabel" class="hidden">+</label>
-                        <input type="file" id="imageUpload" accept=".png,.jpg,.jpeg" class="hidden" onchange="uploadAvatar(this)">
+                        <!-- Rounded-square frame -->
+                        <div id="avatarFrame">
+                            <!-- Default placeholder (shown when no photo) -->
+                            <div id="avatarPlaceholder">
+                                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+                                </svg>
+                            </div>
+                            <!-- Preview image (hidden until loaded) -->
+                            <img id="avatarImg" src="" alt="Avatar" style="display:none;">
+                            <!-- Loading spinner overlay -->
+                            <div id="avatarSpinner" class="hidden">
+                                <div class="spinner-ring"></div>
+                            </div>
+                            <!-- Hover/edit overlay (only in edit mode) -->
+                            <label for="imageUpload" id="avatarOverlay" class="hidden">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                                </svg>
+                                <span>Загрузить</span>
+                            </label>
+                        </div>
+                        <input type="file" id="imageUpload" accept=".png,.jpg,.jpeg,.webp" class="hidden" onchange="uploadAvatar(this)">
                     </div>
                     <div class="avatar-info">
                         <span id="view-username">@username</span>
@@ -1203,14 +1290,14 @@
         document.getElementById('side-balance').innerText  = data.wallet_balance || 0;
         document.getElementById('userGreeting').innerText  = data.username || 'Студент';
         document.getElementById('view-direction').innerText = directionNames[data.direction] || data.direction || 'Не выбрано';
+        const img         = document.getElementById('avatarImg');
+        const placeholder = document.getElementById('avatarPlaceholder');
         if (data.avatar_url) {
-            const preview = document.getElementById('imagePreview');
-            preview.style.backgroundImage = `url('${data.avatar_url}')`;
-            preview.innerHTML = '';
+            applyAvatarPreview(data.avatar_url);
         } else {
-            const preview = document.getElementById('imagePreview');
-            preview.style.backgroundImage = '';
-            preview.innerHTML = '👤';
+            img.style.display = 'none';
+            img.src = '';
+            placeholder.style.display = 'flex';
         }
     }
 
@@ -1312,7 +1399,13 @@
         document.getElementById('profile-view-mode').classList.toggle('hidden', isEditMode);
         document.getElementById('profile-edit-form').classList.toggle('hidden', !isEditMode);
         document.getElementById('toggleBtn').innerText = isEditMode ? 'Отмена' : 'Редактировать';
-        document.getElementById('plusLabel').classList.toggle('hidden', !isEditMode);
+
+        // Avatar overlay & frame state
+        const overlay = document.getElementById('avatarOverlay');
+        const frame   = document.getElementById('avatarFrame');
+        overlay.classList.toggle('hidden', !isEditMode);
+        frame.classList.toggle('edit-active', isEditMode);
+
         if (isEditMode) {
             document.getElementById('edit-username').value  = document.getElementById('view-username').innerText.replace('@', '').trim();
             document.getElementById('edit-lastName').value  = document.getElementById('view-lastName').innerText.trim();
@@ -1328,23 +1421,53 @@
         window.location.href = 'login.html';
     }
 
+    // ── Shared helper: apply a URL to the avatar preview ──
+    function applyAvatarPreview(url) {
+        const img         = document.getElementById('avatarImg');
+        const placeholder = document.getElementById('avatarPlaceholder');
+        img.onload = () => { placeholder.style.display = 'none'; };
+        img.src    = url;
+        img.style.display = 'block';
+    }
+
     async function uploadAvatar(input) {
         const file = input.files[0];
         if (!file) return;
-        const { data: { user } } = await _supabase.auth.getUser();
-        if (!user) return alert("Не удалось определить пользователя");
-        const ext = file.name.split('.').pop().toLowerCase();
-        const path = `avatars/${user.id}.${ext}`;
-        const { error: uploadError } = await _supabase.storage
-            .from('chat-media')
-            .upload(path, file, { upsert: true });
-        if (uploadError) { alert('Ошибка загрузки аватара: ' + uploadError.message); return; }
-        const { data: urlData } = _supabase.storage.from('chat-media').getPublicUrl(path);
-        const avatarUrl = urlData.publicUrl + '?t=' + Date.now();
-        await _supabase.from('profiles').update({ avatar_url: avatarUrl }).eq('id', user.id);
-        const preview = document.getElementById('imagePreview');
-        preview.style.backgroundImage = `url('${avatarUrl}')`;
-        preview.innerHTML = '';
+
+        // ── 1. Instant local preview (no network needed) ──
+        const localURL = URL.createObjectURL(file);
+        applyAvatarPreview(localURL);
+
+        // ── 2. Show spinner while uploading to backend ──
+        const spinner = document.getElementById('avatarSpinner');
+        spinner.classList.remove('hidden');
+
+        try {
+            const { data: { user } } = await _supabase.auth.getUser();
+            if (!user) { alert("Не удалось определить пользователя"); return; }
+
+            const ext  = file.name.split('.').pop().toLowerCase();
+            const path = `avatars/${user.id}.${ext}`;
+
+            const { error: uploadError } = await _supabase.storage
+                .from('chat-media')
+                .upload(path, file, { upsert: true });
+
+            if (uploadError) { alert('Ошибка загрузки аватара: ' + uploadError.message); return; }
+
+            const { data: urlData } = _supabase.storage.from('chat-media').getPublicUrl(path);
+            const avatarUrl = urlData.publicUrl + '?t=' + Date.now();
+
+            await _supabase.from('profiles').update({ avatar_url: avatarUrl }).eq('id', user.id);
+
+            // Replace blob URL with the permanent CDN URL
+            applyAvatarPreview(avatarUrl);
+        } catch (err) {
+            console.error('Avatar upload failed:', err);
+        } finally {
+            spinner.classList.add('hidden');
+            URL.revokeObjectURL(localURL); // free memory
+        }
     }
 
     window.addEventListener('load', loadUserData);
