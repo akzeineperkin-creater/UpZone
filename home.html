@@ -2,12 +2,12 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>UpZone — Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         :root {
             --bg: #0d0d0d;
@@ -43,7 +43,7 @@
             background-size: 200px 200px;
         }
 
-        /* ── SIDEBAR ── */
+        /* ── SIDEBAR (desktop) ── */
         aside {
             width: var(--sidebar-w);
             background: var(--bg);
@@ -54,6 +54,7 @@
             height: 100%;
             top: 0; left: 0;
             z-index: 100;
+            transition: transform 0.3s ease;
         }
 
         .sidebar-logo {
@@ -94,6 +95,7 @@
             text-align: left;
             text-decoration: none;
             transition: color 0.15s, border-color 0.15s, background 0.15s;
+            min-height: 44px;
         }
 
         .nav-btn:hover {
@@ -178,6 +180,7 @@
             background: var(--acid);
             border-radius: 50%;
             animation: blink 2s infinite;
+            flex-shrink: 0;
         }
 
         @keyframes blink {
@@ -192,6 +195,7 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            min-width: 0;
         }
 
         /* top bar */
@@ -293,6 +297,8 @@
             align-items: center;
             justify-content: space-between;
             margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 8px;
         }
 
         .stage-badge {
@@ -362,6 +368,9 @@
             transition: background 0.15s, transform 0.1s, box-shadow 0.1s;
             position: relative;
             z-index: 1;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
         }
 
         .stage-link:hover {
@@ -377,7 +386,8 @@
             border-top: 1px solid var(--border);
             display: flex;
             align-items: center;
-            gap: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
             font-family: 'Space Mono', monospace;
             font-size: 10px;
             letter-spacing: 1px;
@@ -412,6 +422,8 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
         }
 
         .profile-card-header h2 {
@@ -436,6 +448,8 @@
             text-transform: uppercase;
             cursor: crosshair;
             transition: all 0.15s;
+            min-height: 44px;
+            min-width: 44px;
         }
 
         .pbtn:hover { color: var(--acid); border-color: var(--acid); }
@@ -491,6 +505,7 @@
             letter-spacing: 1px;
             display: block;
             margin-bottom: 4px;
+            word-break: break-all;
         }
 
         #view-direction {
@@ -544,6 +559,7 @@
             white-space: nowrap;
             transition: background 0.15s, transform 0.1s, box-shadow 0.1s;
             flex-shrink: 0;
+            min-height: 44px;
         }
 
         .topup-btn:hover {
@@ -575,11 +591,14 @@
             color: var(--muted);
             min-width: 100px;
             padding-top: 1px;
+            flex-shrink: 0;
         }
 
         .field-val {
             font-size: 14px;
             color: var(--text);
+            word-break: break-word;
+            min-width: 0;
         }
 
         /* edit form */
@@ -609,7 +628,7 @@
             border: 1px solid var(--border);
             color: var(--text);
             font-family: 'DM Sans', sans-serif;
-            font-size: 14px;
+            font-size: 16px; /* 16px prevents iOS zoom on focus */
             outline: none;
             border-radius: 0;
             -webkit-appearance: none;
@@ -638,45 +657,256 @@
             text-transform: uppercase;
             cursor: crosshair;
             transition: background 0.15s;
+            min-height: 48px;
+            width: 100%;
         }
 
         .save-btn:hover { background: var(--acid2); }
 
-        /* ── RESPONSIVE ── */
-        @media (max-width: 900px) {
-            :root { --sidebar-w: 0px; }
-
-            aside {
-                width: 100%;
-                height: auto;
-                position: relative;
-                flex-direction: row;
-                border-right: none;
-                border-bottom: 1px solid var(--border);
-            }
-
-            .sidebar-logo { padding: 16px 20px; border-bottom: none; border-right: 1px solid var(--border); }
-            .sidebar-nav { flex-direction: row; padding: 8px; flex: 1; overflow-x: auto; gap: 4px; }
-            .nav-btn { white-space: nowrap; flex: 0; }
-            .sidebar-bottom { display: none; }
-
-            .main-content { margin-left: 0; }
-            .topbar { display: none; }
-            .section-content { padding: 24px 16px; }
-            .cards-grid { grid-template-columns: 1fr; }
-            .stage-card { border-right: none; border-bottom: 1px solid var(--border); }
-            .stage-card:last-child { border-bottom: none; }
+        /* ── MOBILE BOTTOM NAV ── */
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: var(--bg);
+            border-top: 1px solid var(--border);
+            z-index: 200;
+            padding: 0;
+            padding-bottom: env(safe-area-inset-bottom);
         }
 
-        @media (max-width: 600px) {
-            .dash-header h1 { font-size: 36px; }
-            .balance-block { flex-direction: column; align-items: flex-start; }
+        .mobile-nav-inner {
+            display: flex;
+            align-items: stretch;
+        }
+
+        .mobile-nav-btn {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            padding: 10px 4px;
+            background: none;
+            border: none;
+            border-right: 1px solid var(--border);
+            color: var(--muted);
+            font-family: 'Space Mono', monospace;
+            font-size: 8px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            text-decoration: none;
+            min-height: 56px;
+            transition: color 0.15s, background 0.15s;
+        }
+
+        .mobile-nav-btn:last-child { border-right: none; }
+
+        .mobile-nav-btn.active {
+            color: var(--acid);
+            background: rgba(232,255,0,0.04);
+        }
+
+        .mobile-nav-btn.admin { color: var(--acid); }
+        .mobile-nav-btn.disputes { color: var(--red); }
+
+        .mobile-nav-icon { font-size: 18px; line-height: 1; }
+
+        /* ── MOBILE TOPBAR ── */
+        .mobile-topbar {
+            display: none;
+            height: 56px;
+            border-bottom: 1px solid var(--border);
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            position: sticky;
+            top: 0;
+            background: var(--bg);
+            z-index: 50;
+        }
+
+        .mobile-topbar-logo {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 22px;
+            letter-spacing: 4px;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .mobile-topbar-logo span { color: var(--acid); }
+
+        .mobile-topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .mobile-progress-chip {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 1px;
+            color: var(--muted);
+            border: 1px solid var(--border);
+            padding: 5px 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .mobile-progress-chip span { color: var(--acid); }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 768px) {
+            body { cursor: auto; }
+
+            /* Hide desktop sidebar */
+            aside { display: none; }
+
+            /* Show mobile elements */
+            .mobile-topbar { display: flex; }
+            .mobile-nav { display: block; }
+
+            .main-content {
+                margin-left: 0;
+                padding-bottom: calc(56px + env(safe-area-inset-bottom));
+                width: 100%;
+            }
+
+            /* Hide desktop topbar */
+            .topbar { display: none; }
+
+            /* Section padding */
+            .section-content {
+                padding: 20px 16px;
+            }
+
+            /* Header */
+            .dash-header {
+                margin-bottom: 24px;
+                padding-bottom: 16px;
+            }
+
+            .dash-header h1 {
+                font-size: 36px;
+            }
+
+            .section-label {
+                font-size: 9px;
+            }
+
+            /* Cards: single column */
+            .cards-grid {
+                grid-template-columns: 1fr;
+                border: 1px solid var(--border);
+            }
+
+            .stage-card {
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                padding: 24px 20px 28px;
+            }
+
+            .stage-card:last-child { border-bottom: none; }
+
+            .stage-num {
+                font-size: 72px;
+                top: 8px;
+                right: 12px;
+            }
+
+            .stage-card h2 { font-size: 22px; }
+
+            .stage-link {
+                width: 100%;
+                justify-content: center;
+                padding: 14px 20px;
+            }
+
+            /* Profile */
+            .profile-wrap {
+                max-width: 100%;
+            }
+
+            .profile-card-header {
+                padding: 16px 16px;
+            }
+
+            .profile-card-header h2 { font-size: 24px; }
+
+            .pbtn {
+                padding: 10px 14px;
+                font-size: 9px;
+            }
+
+            .avatar-block {
+                padding: 20px 16px;
+                gap: 16px;
+            }
+
+            #view-username { font-size: 24px; }
+
+            .balance-block {
+                padding: 20px 16px;
+                flex-direction: row;
+                align-items: center;
+            }
+
+            .balance-val { font-size: 36px; }
+
+            .topup-btn {
+                padding: 10px 14px;
+                font-size: 9px;
+            }
+
+            .field-row {
+                padding: 14px 16px;
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .field-key { min-width: unset; padding-top: 0; }
+
+            .field-val { font-size: 15px; }
+
+            #profile-edit-form {
+                padding: 16px;
+                gap: 14px;
+            }
+
+            .edit-group input,
+            .edit-group select,
+            .edit-group textarea {
+                font-size: 16px;
+                padding: 14px;
+            }
+
+            .save-btn {
+                font-size: 11px;
+                min-height: 52px;
+            }
+
+            /* Footer */
+            .page-footer {
+                margin-top: 40px;
+                font-size: 9px;
+                gap: 12px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .dash-header h1 { font-size: 30px; }
+            .stage-card h2 { font-size: 20px; }
+            .balance-block { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .topup-btn { width: 100%; justify-content: center; }
         }
     </style>
 </head>
 <body>
 
-<!-- SIDEBAR -->
+<!-- DESKTOP SIDEBAR -->
 <aside>
     <a href="#" class="sidebar-logo">UP<span>ZONE</span></a>
 
@@ -716,10 +946,49 @@
     </div>
 </aside>
 
+<!-- MOBILE TOPBAR -->
+<div class="mobile-topbar">
+    <a href="#" class="mobile-topbar-logo">UP<span>ZONE</span></a>
+    <div class="mobile-topbar-right">
+        <div class="mobile-progress-chip">
+            <span id="mobileProgressPercent">0%</span>
+        </div>
+        <div class="status-line" style="margin-top:0;">
+            <span class="status-dot"></span>
+        </div>
+    </div>
+</div>
+
+<!-- MOBILE BOTTOM NAV -->
+<div class="mobile-nav">
+    <div class="mobile-nav-inner">
+        <button onclick="showSection('learning')" id="mob-nav-learning" class="mobile-nav-btn active">
+            <span class="mobile-nav-icon">📚</span>
+            <span>Обучение</span>
+        </button>
+        <button onclick="showSection('profile')" id="mob-nav-profile" class="mobile-nav-btn">
+            <span class="mobile-nav-icon">👤</span>
+            <span>Профиль</span>
+        </button>
+        <a href="chat.html" class="mobile-nav-btn">
+            <span class="mobile-nav-icon">💬</span>
+            <span>Чат</span>
+        </a>
+        <a href="admin.html" id="mob-admin-btn" class="mobile-nav-btn admin hidden">
+            <span class="mobile-nav-icon">⚙️</span>
+            <span>Админ</span>
+        </a>
+        <a href="spori.html" id="mob-disputes-btn" class="mobile-nav-btn disputes hidden">
+            <span class="mobile-nav-icon">⚖️</span>
+            <span>Споры</span>
+        </a>
+    </div>
+</div>
+
 <!-- MAIN -->
 <div class="main-content">
 
-    <!-- Top bar -->
+    <!-- Desktop Top bar -->
     <div class="topbar">
         <div class="topbar-left">
             Привет, <span id="userGreeting">Студент</span>
@@ -854,11 +1123,11 @@
                 <form id="profile-edit-form" class="hidden">
                     <div class="edit-group">
                         <label>Никнейм</label>
-                        <input type="text" id="edit-username">
+                        <input type="text" id="edit-username" autocomplete="username">
                     </div>
                     <div class="edit-group">
                         <label>Фамилия</label>
-                        <input type="text" id="edit-lastName">
+                        <input type="text" id="edit-lastName" autocomplete="family-name">
                     </div>
                     <div class="edit-group">
                         <label>Instagram</label>
@@ -951,6 +1220,7 @@
 
         if (user.id === ADMIN_ID) {
             document.getElementById('admin-btn').classList.remove('hidden');
+            document.getElementById('mob-admin-btn').classList.remove('hidden');
         }
 
         const MODERATOR_IDS = [
@@ -960,6 +1230,7 @@
 
         if (MODERATOR_IDS.includes(user.id)) {
             document.getElementById('disputes-btn').classList.remove('hidden');
+            document.getElementById('mob-disputes-btn').classList.remove('hidden');
         }
 
         const { data: profile, error: profileError } = await _supabase
@@ -1022,13 +1293,17 @@
         ['learning', 'profile'].forEach(s => {
             const section = document.getElementById(s + '-section');
             const nav = document.getElementById('nav-' + s);
+            const mobNav = document.getElementById('mob-nav-' + s);
             if (section) section.classList.add('hidden');
             if (nav) nav.classList.remove('active');
+            if (mobNav) mobNav.classList.remove('active');
         });
         const targetSection = document.getElementById(id + '-section');
         const targetNav = document.getElementById('nav-' + id);
+        const targetMobNav = document.getElementById('mob-nav-' + id);
         if (targetSection) targetSection.classList.remove('hidden');
         if (targetNav) targetNav.classList.add('active');
+        if (targetMobNav) targetMobNav.classList.add('active');
     }
 
     let isEditMode = false;
