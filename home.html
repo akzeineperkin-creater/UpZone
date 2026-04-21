@@ -1418,7 +1418,7 @@
     async function logout() {
         if (!confirm('Выйти из аккаунта?')) return;
         await _supabase.auth.signOut();
-        window.location.href = 'login.html';
+        window.location.href = 'index.html';
     }
 
     // ── Shared helper: apply a URL to the avatar preview ──
