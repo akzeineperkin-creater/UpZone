@@ -16,27 +16,27 @@
 
     <main class="max-w-2xl mx-auto p-6 space-y-6">
         <div class="bg-slate-800/50 border border-slate-700 rounded-2xl p-6">
-            <h2 class="text-lg font-bold mb-1">🤖 Что знает ваш ИИ-ассистент</h2>
+            <h2 class="text-lg font-bold mb-1"> Что знает ваш ИИ-ассистент</h2>
             <p class="text-slate-400 text-sm mb-6">Заполните — ИИ будет отвечать клиентам на основе этих данных.</p>
 
             <div class="space-y-4">
                 <div>
-                    <label class="text-xs text-slate-400 uppercase font-bold mb-2 block">📦 Услуги</label>
+                    <label class="text-xs text-slate-400 uppercase font-bold mb-2 block"> Услуги</label>
                     <textarea id="services" rows="3" placeholder="SMM-продвижение, создание контента, таргетированная реклама..."
                         class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-blue-500 resize-none text-sm"></textarea>
                 </div>
                 <div>
-                    <label class="text-xs text-slate-400 uppercase font-bold mb-2 block">💰 Цены</label>
+                    <label class="text-xs text-slate-400 uppercase font-bold mb-2 block"> Цены</label>
                     <textarea id="prices" rows="3" placeholder="SMM от 15000 ⭐/мес, Дизайн поста от 500 ⭐..."
                         class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-blue-500 resize-none text-sm"></textarea>
                 </div>
                 <div>
-                    <label class="text-xs text-slate-400 uppercase font-bold mb-2 block">🖼 Портфолио</label>
+                    <label class="text-xs text-slate-400 uppercase font-bold mb-2 block"> Портфолио</label>
                     <textarea id="portfolio" rows="3" placeholder="Вёл 20+ аккаунтов, +500% подписчиков за 3 месяца..."
                         class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-blue-500 resize-none text-sm"></textarea>
                 </div>
                 <div>
-                    <label class="text-xs text-slate-400 uppercase font-bold mb-2 block">⏱ Время ответа</label>
+                    <label class="text-xs text-slate-400 uppercase font-bold mb-2 block"> Время ответа</label>
                     <select id="response_time" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-blue-500 text-sm">
                         <option value="в течение 30 минут">в течение 30 минут</option>
                         <option value="1-2 часа" selected>1-2 часа</option>
@@ -45,7 +45,7 @@
                     </select>
                 </div>
                 <div>
-                    <label class="text-xs text-slate-400 uppercase font-bold mb-2 block">💬 Приветствие ИИ</label>
+                    <label class="text-xs text-slate-400 uppercase font-bold mb-2 block"> Приветствие ИИ</label>
                     <textarea id="welcome_message" rows="2" placeholder="Привет! Я ИИ-ассистент продавца. Готов ответить на ваши вопросы!"
                         class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-blue-500 resize-none text-sm"></textarea>
                 </div>
@@ -59,10 +59,10 @@
 
         <!-- Превью -->
         <div class="bg-slate-800/30 border border-slate-700 rounded-2xl p-6">
-            <h2 class="text-lg font-bold mb-4">👁 Как видит клиент</h2>
+            <h2 class="text-lg font-bold mb-4"> Как видит клиент</h2>
             <div style="background:#2c2f33;border-radius:12px;padding:20px;">
                 <div style="background:#23272a;border-radius:8px;padding:12px 16px;margin-bottom:12px;">
-                    <div style="color:white;font-weight:bold;">🤖 ИИ-Ассистент</div>
+                    <div style="color:white;font-weight:bold;"> ИИ-Ассистент</div>
                     <div style="color:#72767d;font-size:12px;">Спрашивайте об услугах продавца</div>
                 </div>
                 <div id="preview-msg" style="background:#40444b;border-radius:15px 15px 15px 4px;padding:12px 16px;color:white;font-size:14px;line-height:1.5;white-space:pre-wrap;max-width:85%;">
@@ -95,9 +95,9 @@
             const welcome = document.getElementById('welcome_message').value;
 
             let preview = welcome || 'Привет! Я ИИ-ассистент продавца.';
-            if (services) preview += `\n\n📦 Услуги: ${services}`;
-            if (prices) preview += `\n💰 Цены: ${prices}`;
-            if (responseTime) preview += `\n⏱ Отвечу за: ${responseTime}`;
+            if (services) preview += `\n\n Услуги: ${services}`;
+            if (prices) preview += `\n Цены: ${prices}`;
+            if (responseTime) preview += `\n Отвечу за: ${responseTime}`;
             document.getElementById('preview-msg').textContent = preview;
         }
 
@@ -138,7 +138,7 @@
                 updated_at: new Date().toISOString()
             });
 
-            btn.textContent = '💾 Сохранить';
+            btn.textContent = ' Сохранить';
             btn.disabled = false;
 
             if (error) showToast('Ошибка: ' + error.message, '#f04747');
